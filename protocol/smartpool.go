@@ -7,6 +7,7 @@ import (
 	"../"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
+	"time"
 )
 
 // SmartPool represent smartpool protocol which interacts smartpool high level
@@ -22,12 +23,16 @@ import (
 // 5. Then Submit the claim to the contract
 // 6. Then If successful, submit the claim proof to the contract.
 type SmartPool struct {
-	ShareReceiver smartpool.ShareReceiver
-	NetworkClient smartpool.NetworkClient
-	Contract      smartpool.Contract
-	Output        smartpool.UserOutput
-	ClaimRepo     ClaimRepo
-	LatestCounter *big.Int
+	ShareReceiver  smartpool.ShareReceiver
+	NetworkClient  smartpool.NetworkClient
+	Contract       smartpool.Contract
+	Output         smartpool.UserOutput
+	ClaimRepo      ClaimRepo
+	LatestCounter  *big.Int
+	SubmitInterval time.Duration
+	ShareThreshold int
+	loopStarted    bool
+	ticker         <-chan time.Time
 }
 
 // Register registers miner address to the contract.
@@ -78,8 +83,8 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 
 // GetCurrentClaim returns new claim containing unsubmitted shares. If there
 // is no new shares, it returns nil.
-func (sp *SmartPool) GetCurrentClaim() smartpool.Claim {
-	return sp.ClaimRepo.GetCurrentClaim()
+func (sp *SmartPool) GetCurrentClaim(threshold int) smartpool.Claim {
+	return sp.ClaimRepo.GetCurrentClaim(threshold)
 }
 
 func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
@@ -91,18 +96,55 @@ func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
 // It returns true when the claim is fully verified and accepted by the
 // contract. It returns false otherwise.
 func (sp *SmartPool) Submit() bool {
-	claim := sp.GetCurrentClaim()
+	claim := sp.GetCurrentClaim(sp.ShareThreshold)
+	if claim == nil {
+		return false
+	}
+	sp.Output.Printf("Submitting the claim.\n")
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
 		sp.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		return false
 	}
+	sp.Output.Printf("The claim is successfully submitted.\n")
+	sp.Output.Printf("Waiting for verification index.\n")
 	index := sp.GetVerificationIndex(claim)
+	sp.Output.Printf("Verification index has been requested. Submitting verification for the claim.\n")
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		sp.Output.Printf("Got error verifing claim: %s\n", verErr)
 		return false
 	}
+	sp.Output.Printf("Verified the claim.\n")
+	return true
+}
+
+func (sp *SmartPool) actOnTick() {
+	var ok bool
+	for t := range sp.ticker {
+		sp.Output.Printf("It's time (%s) to collect submitted shares to construct augmented merkle tree and submit to contract\n", t)
+		ok = sp.Submit()
+		if ok {
+			sp.Output.Printf("Successfully submitted and verified claim.\n")
+		} else {
+			sp.Output.Printf("Failed to submitted and verified claim. All shares from the claim are dropped.\n")
+		}
+	}
+}
+
+// Run can be called at most once to start a loop to submit and verify claims
+// after an interval.
+// If the loop has not been started, it starts the loop and return true, it
+// return false otherwise.
+func (sp *SmartPool) Run() bool {
+	// TODO: we need to have some lock here in case of concurrent invokes
+	if sp.loopStarted {
+		sp.Output.Printf("Warning: calling Run() multiple times\n")
+		return false
+	}
+	sp.ticker = time.Tick(sp.SubmitInterval)
+	go sp.actOnTick()
+	sp.loopStarted = true
 	return true
 }
 
@@ -110,11 +152,14 @@ func NewSmartPool(
 	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
 	cr ClaimRepo, uo smartpool.UserOutput, co smartpool.Contract) *SmartPool {
 	return &SmartPool{
-		ShareReceiver: sr,
-		NetworkClient: nc,
-		Output:        uo,
-		ClaimRepo:     cr,
-		Contract:      co,
+		ShareReceiver:  sr,
+		NetworkClient:  nc,
+		Output:         uo,
+		ClaimRepo:      cr,
+		Contract:       co,
+		SubmitInterval: 6 * time.Hour,
+		ShareThreshold: 100000,
+		loopStarted:    false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
 		LatestCounter: big.NewInt(0),
 	}

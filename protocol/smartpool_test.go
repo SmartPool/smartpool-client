@@ -4,6 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"testing"
+	"time"
 )
 
 func newTestSmartPool() *SmartPool {
@@ -69,7 +70,7 @@ func TestSmartPoolNotAcceptSolution(t *testing.T) {
 func TestSmartPoolPackageAllCurrentShares(t *testing.T) {
 	sp := newTestSmartPool()
 	sp.LatestCounter = big.NewInt(5)
-	claim := sp.GetCurrentClaim()
+	claim := sp.GetCurrentClaim(1)
 	if claim != nil {
 		t.Fail()
 	}
@@ -77,7 +78,7 @@ func TestSmartPoolPackageAllCurrentShares(t *testing.T) {
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(8)})
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(10)})
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(5)})
-	claim = sp.GetCurrentClaim()
+	claim = sp.GetCurrentClaim(1)
 	if claim.NumShares().Cmp(big.NewInt(3)) != 0 {
 		t.Fail()
 	}
@@ -85,6 +86,7 @@ func TestSmartPoolPackageAllCurrentShares(t *testing.T) {
 
 func TestSmartPoolSubmitCorrectClaim(t *testing.T) {
 	sp := newTestSmartPool()
+	sp.ShareThreshold = 1
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(8)})
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(10)})
@@ -94,6 +96,71 @@ func TestSmartPoolSubmitCorrectClaim(t *testing.T) {
 	testContract := sp.Contract.(*testContract)
 	claim := testContract.GetLastSubmittedClaim()
 	if claim.NumShares().Cmp(big.NewInt(4)) != 0 {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolReturnFalseIfNoClaim(t *testing.T) {
+	sp := newTestSmartPool()
+	if sp.Submit() {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolSuccessfullySubmitAndVerifyClaim(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.ShareThreshold = 1
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	if !sp.Submit() {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolSubmitReturnFalseWhenUnableToSubmit(t *testing.T) {
+	sp := newTestSmartPool()
+	c := sp.Contract.(*testContract)
+	c.SubmitFailed = true
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	if sp.Submit() {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolSubmitReturnFalseWhenUnableToVerify(t *testing.T) {
+	sp := newTestSmartPool()
+	c := sp.Contract.(*testContract)
+	c.VerifyFailed = true
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	if sp.Submit() {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolOnlySubmitPeriodly(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	c := sp.Contract.(*testContract)
+	sp.SubmitInterval = 40 * time.Millisecond
+	sp.ShareThreshold = 1
+	sp.Run()
+	if c.GetLastSubmittedClaim() != nil {
+		t.Fail()
+	}
+	time.Sleep(60 * time.Millisecond)
+	if c.GetLastSubmittedClaim() == nil {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolOnlySubmitWhenMeetShareThreshold(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	c := sp.Contract.(*testContract)
+	sp.SubmitInterval = 40 * time.Millisecond
+	sp.ShareThreshold = 3
+	sp.Run()
+	time.Sleep(60 * time.Millisecond)
+	if c.GetLastSubmittedClaim() != nil {
 		t.Fail()
 	}
 }

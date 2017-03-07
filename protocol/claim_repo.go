@@ -12,5 +12,7 @@ type ClaimRepo interface {
 	// GetCurrentClaim returns the active claim, seal it as closed claim and
 	// initialize a new active claim to store coming shares. In the mean time
 	// the sealed claim should be used by SmartPool to do the protocol.
-	GetCurrentClaim() smartpool.Claim
+	// GetCurrentClaim returns nil when there are not enough shares in the claim
+	// as compared to the threshold.
+	GetCurrentClaim(threshold int) smartpool.Claim
 }

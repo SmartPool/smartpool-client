@@ -12,8 +12,8 @@ func newClaimRepo() *testClaimRepo {
 	return &testClaimRepo{[]smartpool.Share{}}
 }
 
-func (cr *testClaimRepo) GetCurrentClaim() smartpool.Claim {
-	if len(cr.c) == 0 {
+func (cr *testClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
+	if len(cr.c) < threshold {
 		return nil
 	}
 	claim := &testClaim{cr.c}
