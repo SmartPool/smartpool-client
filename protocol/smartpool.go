@@ -6,6 +6,7 @@ package protocol
 import (
 	"../"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 )
 
 // SmartPool represent smartpool protocol which interacts smartpool high level
@@ -25,6 +26,8 @@ type SmartPool struct {
 	NetworkClient smartpool.NetworkClient
 	Contract      smartpool.Contract
 	Output        smartpool.UserOutput
+	ClaimRepo     ClaimRepo
+	LatestCounter *big.Int
 }
 
 // Register registers miner address to the contract.
@@ -59,8 +62,60 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 	return sp.NetworkClient.GetWork()
 }
 
-// AcceptSolution takes Solution to
+// AcceptSolution accepts solutions from miners and construct corresponding
+// shares to add into current active claim. It returns true when the share is
+// successfully added, false otherwise.
+// A share can only be added when it's counter is greater than the maximum
+// counter of the last verified claim
 func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
-	sp.ShareReceiver.AcceptSolution(s)
+	share := sp.ShareReceiver.AcceptSolution(s)
+	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
+		return false
+	}
+	sp.ClaimRepo.AddShare(share)
 	return true
+}
+
+// GetCurrentClaim returns new claim containing unsubmitted shares. If there
+// is no new shares, it returns nil.
+func (sp *SmartPool) GetCurrentClaim() smartpool.Claim {
+	return sp.ClaimRepo.GetCurrentClaim()
+}
+
+func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
+	return big.NewInt(0)
+}
+
+// Submit does all the protocol that communicates with the contract to submit
+// the claim then verify it.
+// It returns true when the claim is fully verified and accepted by the
+// contract. It returns false otherwise.
+func (sp *SmartPool) Submit() bool {
+	claim := sp.GetCurrentClaim()
+	subErr := sp.Contract.SubmitClaim(claim)
+	if subErr != nil {
+		sp.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
+		return false
+	}
+	index := sp.GetVerificationIndex(claim)
+	verErr := sp.Contract.VerifyClaim(index, claim)
+	if verErr != nil {
+		sp.Output.Printf("Got error verifing claim: %s\n", verErr)
+		return false
+	}
+	return true
+}
+
+func NewSmartPool(
+	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
+	cr ClaimRepo, uo smartpool.UserOutput, co smartpool.Contract) *SmartPool {
+	return &SmartPool{
+		ShareReceiver: sr,
+		NetworkClient: nc,
+		Output:        uo,
+		ClaimRepo:     cr,
+		Contract:      co,
+		// TODO: should be persist between startups instead of having 0 hardcoded
+		LatestCounter: big.NewInt(0),
+	}
 }

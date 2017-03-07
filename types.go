@@ -26,6 +26,8 @@ type Share interface {
 	// which contains many shares. This counter must be increasing as shares
 	// share coming. In other words, later share must have bigger counter.
 	Counter() *big.Int
+	// Difficulty returns the difficulty of the share that miner has solved.
+	Difficulty() *big.Int
 	// Hash return the hash of the share to be used as leaf hash of the augmented
 	// merkle tree.
 	Hash() []byte

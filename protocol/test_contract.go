@@ -9,10 +9,11 @@ import (
 type testContract struct {
 	Registered   bool
 	Registerable bool
+	claim        *testClaim
 }
 
 func newTestContract() *testContract {
-	return &testContract{false, false}
+	return &testContract{false, false, nil}
 }
 
 func (c *testContract) Version() string {
@@ -29,8 +30,12 @@ func (c *testContract) Register(paymentAddress common.Address) error {
 	return nil
 }
 func (c *testContract) SubmitClaim(claim smartpool.Claim) error {
+	c.claim = claim.(*testClaim)
 	return nil
 }
-func (c *testContract) VerifyClaim(shareIndex *big.Int, share smartpool.Share) error {
+func (c *testContract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error {
 	return nil
+}
+func (c *testContract) GetLastSubmittedClaim() *testClaim {
+	return c.claim
 }

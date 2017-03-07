@@ -77,9 +77,10 @@ type Contract interface {
 	// unlocked first.
 	SubmitClaim(claim Claim) error
 	// VerifyClaim takes some necessary parameters that provides complete proof
-	// of a share and submit to contract side in order to prove that the claim
-	// is valid so the miner can take credit of it.
-	VerifyClaim(shareIndex *big.Int, share Share) error
+	// of a share with index shareIndex in the cliam and submit to contract side
+	// in order to prove that the claim is valid so the miner can take credit
+	// of it.
+	VerifyClaim(shareIndex *big.Int, claim Claim) error
 
 	// // SubmitClaim takes some necessary parameters that represent a claim and
 	// // submit to the contract using miner's address. The address should be
@@ -144,7 +145,5 @@ type NetworkClient interface {
 // ShareReceiver represents SmartPool itself which accepts solutions from
 // miners.
 type ShareReceiver interface {
-	// AddShare adds a share into current active claim. It returns true when the
-	// share is successfully added, false otherwise.
 	AcceptSolution(s Solution) Share
 }

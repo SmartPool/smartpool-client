@@ -1,0 +1,16 @@
+package protocol
+
+import (
+	"../"
+)
+
+// ClaimRepo holds many claims but only 1 active clam at a time which is
+// storing coming shares.
+type ClaimRepo interface {
+	// AddShare stores share to current active claim
+	AddShare(s smartpool.Share)
+	// GetCurrentClaim returns the active claim, seal it as closed claim and
+	// initialize a new active claim to store coming shares. In the mean time
+	// the sealed claim should be used by SmartPool to do the protocol.
+	GetCurrentClaim() smartpool.Claim
+}

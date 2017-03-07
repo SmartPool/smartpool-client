@@ -8,5 +8,6 @@ type testShareReceiver struct {
 }
 
 func (spc *testShareReceiver) AcceptSolution(s smartpool.Solution) smartpool.Share {
-	return &testShare{}
+	sol := s.(*testSolution)
+	return &testShare{c: sol.Counter}
 }
