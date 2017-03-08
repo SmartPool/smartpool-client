@@ -63,6 +63,7 @@ func (sp *SmartPool) Register(addr common.Address) bool {
 	return true
 }
 
+// GetWork returns miner work
 func (sp *SmartPool) GetWork() smartpool.Work {
 	return sp.NetworkClient.GetWork()
 }
@@ -87,6 +88,9 @@ func (sp *SmartPool) GetCurrentClaim(threshold int) smartpool.Claim {
 	return sp.ClaimRepo.GetCurrentClaim(threshold)
 }
 
+// TODO: implement the actual strategy to get verification index.
+// It should wait for some blocks to get the index from the new block hash
+// which is unpredictable and consistent between client and contract.
 func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
 	return big.NewInt(0)
 }
@@ -116,6 +120,8 @@ func (sp *SmartPool) Submit() bool {
 		return false
 	}
 	sp.Output.Printf("Verified the claim.\n")
+	sp.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
+	sp.LatestCounter = claim.Max()
 	return true
 }
 
@@ -136,8 +142,8 @@ func (sp *SmartPool) actOnTick() {
 // after an interval.
 // If the loop has not been started, it starts the loop and return true, it
 // return false otherwise.
+// TODO: we need to have some lock here in case of concurrent invokes
 func (sp *SmartPool) Run() bool {
-	// TODO: we need to have some lock here in case of concurrent invokes
 	if sp.loopStarted {
 		sp.Output.Printf("Warning: calling Run() multiple times\n")
 		return false

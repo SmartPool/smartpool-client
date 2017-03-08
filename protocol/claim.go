@@ -2,7 +2,9 @@ package protocol
 
 import (
 	"../"
+	"../mtree"
 	"math/big"
+	"sort"
 )
 
 type Shares []smartpool.Share
@@ -42,7 +44,7 @@ func (c *Claim) Difficulty() *big.Int {
 	return m
 }
 
-func (c Claim) Min() *big.Int {
+func (c *Claim) Min() *big.Int {
 	var m *big.Int
 	if len(c.shares) > 0 {
 		m = c.shares[0].Counter()
@@ -55,7 +57,7 @@ func (c Claim) Min() *big.Int {
 	return m
 }
 
-func (c Claim) Max() *big.Int {
+func (c *Claim) Max() *big.Int {
 	var m *big.Int
 	if len(c.shares) > 0 {
 		m = c.shares[0].Counter()
@@ -68,6 +70,12 @@ func (c Claim) Max() *big.Int {
 	return m
 }
 
-func (c Claim) AugMerkle() []byte {
-	return []byte{}
+func (c *Claim) AugMerkle() smartpool.SPHash {
+	sort.Sort(c.shares)
+	amt := mtree.NewAugTree()
+	for i, s := range c.shares {
+		amt.Insert(s, uint32(i))
+	}
+	amt.Finalize()
+	return amt.RootHash()
 }

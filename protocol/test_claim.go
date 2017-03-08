@@ -25,6 +25,6 @@ func (c *testClaim) Max() *big.Int {
 	return big.NewInt(100)
 }
 
-func (c *testClaim) AugMerkle() []byte {
-	return []byte{}
+func (c *testClaim) AugMerkle() smartpool.SPHash {
+	return smartpool.SPHash{}
 }

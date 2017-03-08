@@ -2,9 +2,13 @@ package protocol
 
 import (
 	"../"
-	"math/big"
 )
 
+// InMemClaimRepo implements ClaimRepo interface. It stores claims in one start
+// up. However this claim repo doesn't persist verified claims and even the
+// active claim. So if the client is shutdown, all past claims and current
+// shares information will be lost.
+// This shouldn't be used in production.
 type InMemClaimRepo struct {
 	claims       map[int]*Claim
 	cClaimNumber uint64
@@ -26,9 +30,9 @@ func (cr *InMemClaimRepo) GetClaim(number uint64) *Claim {
 }
 
 // TODO: This needs lock to prevent concurrent writes
-func (cr *InMemClaimRepo) GetCurrentClaim() *Claim {
+func (cr *InMemClaimRepo) GetCurrentClaim(threshold int) *Claim {
 	c := cr.GetClaim(cr.cClaimNumber)
-	if c.NumShares().Cmp(big.NewInt(0)) == 0 {
+	if c.NumShares().Int64() < int64(threshold) {
 		return nil
 	}
 	cr.cClaimNumber++
