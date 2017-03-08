@@ -5,18 +5,21 @@ import (
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
+	"time"
 )
 
 type testContract struct {
-	Registered   bool
-	Registerable bool
-	SubmitFailed bool
-	VerifyFailed bool
-	claim        *testClaim
+	Registered         bool
+	Registerable       bool
+	SubmitFailed       bool
+	VerifyFailed       bool
+	SubmitTime         *time.Time
+	IndexRequestedTime *time.Time
+	claim              *testClaim
 }
 
 func newTestContract() *testContract {
-	return &testContract{false, false, false, false, nil}
+	return &testContract{false, false, false, false, nil, nil, nil}
 }
 
 func (c *testContract) Version() string {
@@ -37,7 +40,14 @@ func (c *testContract) SubmitClaim(claim smartpool.Claim) error {
 	if c.SubmitFailed {
 		return errors.New("fail")
 	}
+	t := time.Now()
+	c.SubmitTime = &t
 	return nil
+}
+func (c *testContract) GetShareIndex() *big.Int {
+	t := time.Now()
+	c.IndexRequestedTime = &t
+	return big.NewInt(100)
 }
 func (c *testContract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error {
 	if c.VerifyFailed {

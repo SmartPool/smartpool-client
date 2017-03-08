@@ -76,6 +76,12 @@ type Contract interface {
 	// submit to the contract using miner's address. The address should be
 	// unlocked first.
 	SubmitClaim(claim Claim) error
+	// GetShareIndex returns index of the share that is requested to submit
+	// proof to the contract to represent correctness of the submitted claim.
+	// GetShareIndex must be called after SubmitClaim to get shareIndex which
+	// is used to pass to VerifyClaim. If GetShareIndex is called before
+	// SubmitClaim, the index will have no meaning to contract.
+	GetShareIndex() *big.Int
 	// VerifyClaim takes some necessary parameters that provides complete proof
 	// of a share with index shareIndex in the cliam and submit to contract side
 	// in order to prove that the claim is valid so the miner can take credit

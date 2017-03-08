@@ -88,11 +88,11 @@ func (sp *SmartPool) GetCurrentClaim(threshold int) smartpool.Claim {
 	return sp.ClaimRepo.GetCurrentClaim(threshold)
 }
 
-// TODO: implement the actual strategy to get verification index.
-// It should wait for some blocks to get the index from the new block hash
-// which is unpredictable and consistent between client and contract.
 func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
-	return big.NewInt(0)
+	seed := sp.Contract.GetShareIndex()
+	index := big.NewInt(0)
+	index.Mod(seed, claim.NumShares())
+	return index
 }
 
 // Submit does all the protocol that communicates with the contract to submit

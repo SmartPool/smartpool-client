@@ -116,6 +116,28 @@ func TestSmartPoolSuccessfullySubmitAndVerifyClaim(t *testing.T) {
 	}
 }
 
+func TestSmartPoolGetCorrectShareIndex(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.ShareThreshold = 1
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	sp.Submit()
+	c := sp.Contract.(*testContract)
+	if c.IndexRequestedTime == nil {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolGetCorrectShareIndexAfterSubmitClaim(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.ShareThreshold = 1
+	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
+	sp.Submit()
+	c := sp.Contract.(*testContract)
+	if (*c.SubmitTime).After(*c.IndexRequestedTime) {
+		t.Fail()
+	}
+}
+
 func TestSmartPoolSubmitReturnFalseWhenUnableToSubmit(t *testing.T) {
 	sp := newTestSmartPool()
 	c := sp.Contract.(*testContract)
