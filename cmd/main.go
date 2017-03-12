@@ -28,9 +28,9 @@ func Initialize() *smartpool.Input {
 	ipcPath := "/Users/victor/Dropbox/Project/BlockChain/SmartPool/spclient_exp/.privatedata/geth.ipc"
 	rpcEndPoint := "http://localhost:8545"
 	keystorePath := "/Users/victor/Dropbox/Project/BlockChain/SmartPool/spclient_exp/.privatedata/keystore"
-	shareThreshold := 20
+	shareThreshold := 1
 	shareDifficulty := big.NewInt(100000)
-	submitInterval := 1 * time.Minute
+	submitInterval := 10 * time.Second
 	contractAddr := "0xeb69b29551f5830581a29858d1aca0e39ec14d57"
 	minerAddr := "0xad42beeb07db31149f5d2c4bd33d01c6d7c34116"
 	extraData := buildExtraData(
@@ -80,7 +80,7 @@ func main() {
 		passphrase, _ := promptUserPassPhrase(
 			input.MinerAddress(),
 		)
-		gethContractClient, err := geth.NewGethContractClient(
+		gethContractClient, err = geth.NewGethContractClient(
 			common.HexToAddress(input.ContractAddress()), gethRPC,
 			input.IPCPath(), input.KeystorePath(), passphrase,
 		)

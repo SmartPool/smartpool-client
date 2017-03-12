@@ -2,6 +2,7 @@ package geth
 
 import (
 	"../"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -64,6 +65,8 @@ func (cc *GethContractClient) SubmitClaim(
 	min *big.Int,
 	max *big.Int,
 	augMerkle *big.Int) error {
+	fmt.Printf("test: %v\n", cc)
+	fmt.Printf("pool: %v, transactor: %v\n", cc.pool, cc.transactor)
 	tx, err := cc.pool.SubmitClaim(cc.transactor,
 		numShares, difficulty, min, max, augMerkle)
 	if err != nil {

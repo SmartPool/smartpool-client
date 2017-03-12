@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"../"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"time"
@@ -28,6 +29,7 @@ func (c *Contract) Register(paymentAddress common.Address) error {
 }
 
 func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
+	fmt.Printf("contract client: %v\n", c.client)
 	return c.client.SubmitClaim(
 		claim.NumShares(), claim.Difficulty(),
 		claim.Min(), claim.Max(), claim.AugMerkle().Big())
@@ -39,7 +41,7 @@ func (c *Contract) GetShareIndex(claim smartpool.Claim) *big.Int {
 	for {
 		seed = c.client.GetClaimSeed()
 		if seed.Cmp(zero) != 0 {
-			return seed
+			break
 		}
 		time.Sleep(14 * time.Second)
 	}

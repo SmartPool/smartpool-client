@@ -79,6 +79,7 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 		return false
 	}
 	sp.ClaimRepo.AddShare(share)
+	sp.Output.Printf(".")
 	return true
 }
 
@@ -101,7 +102,7 @@ func (sp *SmartPool) Submit() bool {
 	if claim == nil {
 		return false
 	}
-	sp.Output.Printf("Submitting the claim.\n")
+	sp.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
 		sp.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
@@ -110,7 +111,7 @@ func (sp *SmartPool) Submit() bool {
 	sp.Output.Printf("The claim is successfully submitted.\n")
 	sp.Output.Printf("Waiting for verification index.\n")
 	index := sp.GetVerificationIndex(claim)
-	sp.Output.Printf("Verification index has been requested. Submitting verification for the claim.\n")
+	sp.Output.Printf("Verification index of %d has been requested. Submitting verification for the claim.\n", index.Int64())
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		sp.Output.Printf("Got error verifing claim: %s\n", verErr)
@@ -123,15 +124,8 @@ func (sp *SmartPool) Submit() bool {
 }
 
 func (sp *SmartPool) actOnTick() {
-	var ok bool
-	for t := range sp.ticker {
-		sp.Output.Printf("It's time (%s) to collect submitted shares to construct augmented merkle tree and submit to contract\n", t)
-		ok = sp.Submit()
-		if ok {
-			sp.Output.Printf("Successfully submitted and verified claim.\n")
-		} else {
-			sp.Output.Printf("Failed to submitted and verified claim. All shares from the claim are dropped.\n")
-		}
+	for _ = range sp.ticker {
+		sp.Submit()
 	}
 }
 
@@ -148,6 +142,7 @@ func (sp *SmartPool) Run() bool {
 	sp.ticker = time.Tick(sp.SubmitInterval)
 	go sp.actOnTick()
 	sp.loopStarted = true
+	sp.Output.Printf("Share collector is running...\n")
 	return true
 }
 
