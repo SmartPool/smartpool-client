@@ -138,6 +138,7 @@ type Share interface {
 type Claim interface {
 	// NumShares returns number of shares that the claim is holding
 	NumShares() *big.Int
+	GetShare(index int) Share
 	// Difficulty returns the min difficulty across all of its shares
 	Difficulty() *big.Int
 	// Min returns the min counter of the augmented merkle root
@@ -146,4 +147,10 @@ type Claim interface {
 	Max() *big.Int
 	// AugMerkle returns the hash of the augmented merkle root
 	AugMerkle() SPHash
+	// SetEvidence sets the share index to be used to prove the claim
+	SetEvidence(shareIndex *big.Int)
+	// CounterBranch returns array of counters in proof branch of the share
+	CounterBranch() []*big.Int
+	// HashBranch returns array of hashes in proof branch of the share
+	HashBranch() []*big.Int
 }

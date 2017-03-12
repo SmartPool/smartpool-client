@@ -44,7 +44,7 @@ func (c *testContract) SubmitClaim(claim smartpool.Claim) error {
 	c.SubmitTime = &t
 	return nil
 }
-func (c *testContract) GetShareIndex() *big.Int {
+func (c *testContract) GetShareIndex(claim smartpool.Claim) *big.Int {
 	t := time.Now()
 	c.IndexRequestedTime = &t
 	return big.NewInt(100)

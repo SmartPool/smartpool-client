@@ -89,22 +89,6 @@ func _augHash(a, b NodeData) NodeData {
 		append([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, right.Hash[:]...),
 	)
 	copy(h[:smartpool.HashLength], keccak[smartpool.HashLength:])
-	// fmt.Printf("Prepare to construct node: \n")
-	// fmt.Printf("--> left_counter: 0x%s\n", hex.EncodeToString(left.CounterBytes()))
-	// fmt.Printf("--> left_hash: 0x%s\n", hex.EncodeToString(append([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, left.Hash[:]...)))
-	// fmt.Printf("--> right_counter: 0x%s\n", hex.EncodeToString(right.CounterBytes()))
-	// fmt.Printf("--> right_hash: 0x%s\n", hex.EncodeToString(append([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, right.Hash[:]...)))
-	// fmt.Printf("Constructing node:\n")
-	// fmt.Printf("	Left: %s\n", left.Hash.Hex())
-	// fmt.Printf("	Left Min: 0x%s\n", left.Min.(*big.Int).Text(16))
-	// fmt.Printf("	Left Max: 0x%s\n", left.Max.(*big.Int).Text(16))
-	// fmt.Printf("	Right: %s\n", right.Hash.Hex())
-	// fmt.Printf("	Right Min: 0x%s\n", right.Min.(*big.Int).Text(16))
-	// fmt.Printf("	Right Max: 0x%s\n", right.Max.(*big.Int).Text(16))
-	// fmt.Printf("	Min: 0x%v\n", _min(left.Min, right.Min).(*big.Int).Text(16))
-	// fmt.Printf("	Max: 0x%v\n", _max(left.Max, right.Max).(*big.Int).Text(16))
-	// fmt.Printf("	Hash: %s\n", h.Hex())
-	// fmt.Printf("	Keccak: 0x%s\n", hex.EncodeToString(keccak))
 	return AugData{
 		Min:  _min(left.Min, right.Min),
 		Max:  _max(left.Max, right.Max),
@@ -145,13 +129,9 @@ func (amt AugTree) CounterBranchArray() []*big.Int {
 		branches := amt.Branches()
 		var node AugData
 		for _, k := range amt.Indices() {
-			// p := branches[k]
-			// fmt.Printf("Index: %d\nRawData: %s\nHashedData: %s\n", k, hex.EncodeToString(p.RawData[:]), proofs[k].HashedData.Hex())
 			nodes := branches[k].ToNodeArray()[1:]
-			// fmt.Printf("Len proofs: %s\n", len(pfs))
 			for _, n := range nodes {
 				node = n.(AugData)
-				// fmt.Printf("node %v\n", node)
 				be := smartpool.BranchElement{}
 				copy(be[:], node.CounterBytes())
 				result = append(result, be.Big())
@@ -168,10 +148,7 @@ func (amt AugTree) HashBranchArray() []*big.Int {
 		branches := amt.Branches()
 		var node AugData
 		for _, k := range amt.Indices() {
-			// p := branches[k]
-			// fmt.Printf("Index: %d\nRawData: %s\nHashedData: %s\n", k, hex.EncodeToString(p.RawData[:]), proofs[k].HashedData.Hex())
 			nodes := branches[k].ToNodeArray()[1:]
-			// fmt.Printf("Len proofs: %s\n", len(pfs))
 			for _, n := range nodes {
 				node = n.(AugData)
 				be := smartpool.BranchElement{}

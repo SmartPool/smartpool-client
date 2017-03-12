@@ -14,6 +14,8 @@ func newTestSmartPool() *SmartPool {
 		&testClaimRepo{},
 		&testUserOutput{},
 		&testContract{},
+		time.Minute,
+		100,
 	)
 }
 

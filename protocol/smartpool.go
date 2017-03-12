@@ -89,10 +89,7 @@ func (sp *SmartPool) GetCurrentClaim(threshold int) smartpool.Claim {
 }
 
 func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
-	seed := sp.Contract.GetShareIndex()
-	index := big.NewInt(0)
-	index.Mod(seed, claim.NumShares())
-	return index
+	return sp.Contract.GetShareIndex(claim)
 }
 
 // Submit does all the protocol that communicates with the contract to submit
@@ -156,15 +153,16 @@ func (sp *SmartPool) Run() bool {
 
 func NewSmartPool(
 	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
-	cr ClaimRepo, uo smartpool.UserOutput, co smartpool.Contract) *SmartPool {
+	cr ClaimRepo, uo smartpool.UserOutput, co smartpool.Contract,
+	interval time.Duration, threshold int) *SmartPool {
 	return &SmartPool{
 		ShareReceiver:  sr,
 		NetworkClient:  nc,
 		Output:         uo,
 		ClaimRepo:      cr,
 		Contract:       co,
-		SubmitInterval: 6 * time.Hour,
-		ShareThreshold: 100000,
+		SubmitInterval: interval,
+		ShareThreshold: threshold,
 		loopStarted:    false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
 		LatestCounter: big.NewInt(0),

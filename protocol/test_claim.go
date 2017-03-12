@@ -25,6 +25,21 @@ func (c *testClaim) Max() *big.Int {
 	return big.NewInt(100)
 }
 
+func (c *testClaim) GetShare(index int) smartpool.Share {
+	return c.c[index]
+}
+
+func (c *testClaim) SetEvidence(shareIndex *big.Int) {
+}
+
 func (c *testClaim) AugMerkle() smartpool.SPHash {
 	return smartpool.SPHash{}
+}
+
+func (c *testClaim) CounterBranch() []*big.Int {
+	return []*big.Int{}
+}
+
+func (c *testClaim) HashBranch() []*big.Int {
+	return []*big.Int{}
 }

@@ -25,12 +25,12 @@ func (cr *InMemClaimRepo) AddShare(s smartpool.Share) {
 	cr.claims[int(cr.cClaimNumber)].AddShare(s)
 }
 
-func (cr *InMemClaimRepo) GetClaim(number uint64) *Claim {
+func (cr *InMemClaimRepo) GetClaim(number uint64) smartpool.Claim {
 	return cr.claims[int(number)]
 }
 
 // TODO: This needs lock to prevent concurrent writes
-func (cr *InMemClaimRepo) GetCurrentClaim(threshold int) *Claim {
+func (cr *InMemClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	c := cr.GetClaim(cr.cClaimNumber)
 	if c.NumShares().Int64() < int64(threshold) {
 		return nil

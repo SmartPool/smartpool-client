@@ -16,15 +16,21 @@ func (s Shares) Less(i, j int) bool {
 }
 
 type Claim struct {
-	shares Shares
+	shares     Shares
+	shareIndex *big.Int
+	amt        *mtree.AugTree
 }
 
 func NewClaim() *Claim {
-	return &Claim{Shares{}}
+	return &Claim{Shares{}, nil, nil}
 }
 
 func (c *Claim) AddShare(s smartpool.Share) {
 	c.shares = append(c.shares[:], s)
+}
+
+func (c *Claim) GetShare(index int) smartpool.Share {
+	return c.shares[index]
 }
 
 func (c *Claim) NumShares() *big.Int {
@@ -78,4 +84,32 @@ func (c *Claim) AugMerkle() smartpool.SPHash {
 	}
 	amt.Finalize()
 	return amt.RootHash()
+}
+
+func (c *Claim) SetEvidence(shareIndex *big.Int) {
+	c.shareIndex = shareIndex
+}
+
+func (c *Claim) CounterBranch() []*big.Int {
+	if c.amt == nil {
+		c.buildAugTree()
+	}
+	return c.amt.CounterBranchArray()
+}
+
+func (c *Claim) HashBranch() []*big.Int {
+	if c.amt == nil {
+		c.buildAugTree()
+	}
+	return c.amt.HashBranchArray()
+}
+
+func (c *Claim) buildAugTree() {
+	sort.Sort(c.shares)
+	c.amt = mtree.NewAugTree()
+	c.amt.RegisterIndex(uint32(c.shareIndex.Int64()))
+	for i, s := range c.shares {
+		c.amt.Insert(s, uint32(i))
+	}
+	c.amt.Finalize()
 }

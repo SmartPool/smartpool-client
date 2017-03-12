@@ -29,8 +29,10 @@ func TestSharesSortSharesAscendingCounter(t *testing.T) {
 
 func TestClaimNumSharesReturnsNumberOfShare(t *testing.T) {
 	s := &Claim{Shares{
-		&testShare{big.NewInt(10), big.NewInt(10), 0},
-	}}
+		&testShare{big.NewInt(10), big.NewInt(10), 0}},
+		nil,
+		nil,
+	}
 	if s.NumShares().Int64() != 1 {
 		t.Fail()
 	}
@@ -45,28 +47,28 @@ func TestClaimAddShare(t *testing.T) {
 }
 
 func TestClaimDifficultyReturnMinDifficultyOfItsShares(t *testing.T) {
-	s := &Claim{newTestShares()}
+	s := &Claim{newTestShares(), nil, nil}
 	if s.Difficulty().Cmp(big.NewInt(4)) != 0 {
 		t.Fail()
 	}
 }
 
 func TestClaimMinReturnMinCounterOfItsShares(t *testing.T) {
-	s := &Claim{newTestShares()}
+	s := &Claim{newTestShares(), nil, nil}
 	if s.Min().Cmp(big.NewInt(1)) != 0 {
 		t.Fail()
 	}
 }
 
 func TestClaimMinReturnMaxCounterOfItsShares(t *testing.T) {
-	s := &Claim{newTestShares()}
+	s := &Claim{newTestShares(), nil, nil}
 	if s.Max().Cmp(big.NewInt(10)) != 0 {
 		t.Fail()
 	}
 }
 
 func TestClaimAugMerkle(t *testing.T) {
-	s := &Claim{newTestShares()}
+	s := &Claim{newTestShares(), nil, nil}
 	result := smartpool.SPHash{151, 170, 188, 143, 116, 177, 57, 134, 27, 7, 73, 156, 173, 26, 237, 226}
 	if !reflect.DeepEqual(s.AugMerkle(), result) {
 		t.Fail()

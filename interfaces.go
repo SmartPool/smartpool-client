@@ -17,14 +17,14 @@ import (
 // implementing the interface.
 type UserInput interface {
 	IPCPath() string
+	RPCEndpoint() string
 	KeystorePath() string
-	NoSharePerClaim() uint32
+	ShareThreshold() int
 	ShareDifficulty() *big.Int
 	SubmitInterval() time.Duration
 	ContractAddress() string
 	MinerAddress() string
 	ExtraData() string
-	Passphrase() string
 }
 
 // UserOutput accepts all the information that SmartPool wants to tell the user.
@@ -45,14 +45,6 @@ type UserOutput interface {
 // Smartpool should only persist something via this interface.
 type PersistentStorage interface {
 	// TODO: Add necessary methods
-}
-
-// DAGReader provides a way for smartpool to retrieve DAG dataset. How the DAG
-// is retrieve is upto structs implementing the interface.
-type DAGReader interface {
-	// NextWord return next data chunk of the DAG dataset. First 8 bytes must
-	// be ignored.
-	NextWord() ([]byte, error)
 }
 
 // Contract is the interface for smartpool to interact with contract side of
@@ -81,7 +73,7 @@ type Contract interface {
 	// GetShareIndex must be called after SubmitClaim to get shareIndex which
 	// is used to pass to VerifyClaim. If GetShareIndex is called before
 	// SubmitClaim, the index will have no meaning to contract.
-	GetShareIndex() *big.Int
+	GetShareIndex(claim Claim) *big.Int
 	// VerifyClaim takes some necessary parameters that provides complete proof
 	// of a share with index shareIndex in the cliam and submit to contract side
 	// in order to prove that the claim is valid so the miner can take credit
