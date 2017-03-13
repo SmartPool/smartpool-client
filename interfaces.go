@@ -16,7 +16,6 @@ import (
 // client. Some of them can have default values depend on the actual structs
 // implementing the interface.
 type UserInput interface {
-	IPCPath() string
 	RPCEndpoint() string
 	KeystorePath() string
 	ShareThreshold() int

@@ -34,6 +34,12 @@ type GethRPC struct {
 	ExtraData    []byte
 }
 
+func (g GethRPC) Client() (string, error) {
+	result := ""
+	err := g.client.Call(&result, "web3_clientVersion")
+	return result, err
+}
+
 func (g GethRPC) GetPendingBlockHeader() *types.Header {
 	header := jsonHeader{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", "pending", false)
@@ -121,7 +127,7 @@ func (g GethRPC) IsVerified(h common.Hash) bool {
 }
 
 func NewGethRPC(endpoint, contractAddr, extraData string) (*GethRPC, error) {
-	client, err := rpc.Dial(endpoint)
+	client, err := rpc.DialHTTP(endpoint)
 	if err != nil {
 		return nil, err
 	}

@@ -25,4 +25,9 @@ type ContractClient interface {
 		witnessForLookup []*big.Int,
 		augCountersBranch []*big.Int,
 		augHashesBranch []*big.Int) error
+	SetEpochData(
+		merkleRoot []*big.Int,
+		fullSizeIn128Resolution []uint64,
+		branchDepth []uint64,
+		epoch []*big.Int) error
 }

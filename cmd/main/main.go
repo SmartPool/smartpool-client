@@ -1,11 +1,11 @@
 package main
 
 import (
-	"../"
-	"../ethereum"
-	"../ethereum/ethminer"
-	"../ethereum/geth"
-	"../protocol"
+	"../../"
+	"../../ethereum"
+	"../../ethereum/ethminer"
+	"../../ethereum/geth"
+	"../../protocol"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
@@ -25,22 +25,18 @@ func buildExtraData(address common.Address, diff *big.Int) string {
 
 func Initialize() *smartpool.Input {
 	// Setting
-	ipcPath := "/Users/victor/Dropbox/Project/BlockChain/SmartPool/spclient_exp/.privatedata/geth.ipc"
 	rpcEndPoint := "http://localhost:8545"
 	keystorePath := "/Users/victor/Dropbox/Project/BlockChain/SmartPool/spclient_exp/.privatedata/keystore"
 	shareThreshold := 1
 	shareDifficulty := big.NewInt(100000)
-	submitInterval := 10 * time.Second
-	contractAddr := "0xeb69b29551f5830581a29858d1aca0e39ec14d57"
-	minerAddr := "0xad42beeb07db31149f5d2c4bd33d01c6d7c34116"
-	extraData := buildExtraData(
-		common.HexToAddress(minerAddr),
-		shareDifficulty)
-	inp := smartpool.NewInput(
-		ipcPath, rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
+	submitInterval := 3 * time.Minute
+	contractAddr := "0xc071df9e80d2d13d3f6a7a062a764df4f34c65fd"
+	minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
+	extraData := buildExtraData(common.HexToAddress(minerAddr), shareDifficulty)
+	return smartpool.NewInput(
+		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
 		submitInterval, contractAddr, minerAddr, extraData,
 	)
-	return inp
 }
 
 func promptUserPassPhrase(acc string) (string, error) {
@@ -59,17 +55,23 @@ func main() {
 	input := Initialize()
 	output := &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
-	gethRPC, err := ethereum.NewGethRPC(
+	gethRPC, _ := ethereum.NewGethRPC(
 		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
 	)
+	client, err := gethRPC.Client()
 	if err != nil {
-		fmt.Printf("Geth RPC server is unavailable.\n")
-		fmt.Printf("Make sure you have Geth installed. If you do, you can run geth by following command (Note: --etherbase and --extradata params are required.):\n")
+		fmt.Printf("Node RPC server is unavailable.\n")
+		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\nRun Geth by following command (Note: --etherbase and --extradata params are required.):\n")
 		fmt.Printf(
 			"geth --rpc --etherbase \"%s\" --extradata \"%s\"\n",
 			input.ContractAddress(), input.ExtraData())
+		fmt.Printf("Or run Parity by following command (Note: --etherbase and --extradata params are required.)\n")
+		fmt.Printf(
+			"parity --author \"%s\" --extra-data \"%s\"\n",
+			input.ContractAddress(), input.ExtraData())
 		return
 	}
+	fmt.Printf("Connected to Ethereum node: %s\n", client)
 	ethereumNetworkClient := ethereum.NewNetworkClient(
 		gethRPC,
 		ethereumWorkPool,
@@ -82,7 +84,7 @@ func main() {
 		)
 		gethContractClient, err = geth.NewGethContractClient(
 			common.HexToAddress(input.ContractAddress()), gethRPC,
-			input.IPCPath(), input.KeystorePath(), passphrase,
+			input.RPCEndpoint(), input.KeystorePath(), passphrase,
 		)
 		if gethContractClient != nil {
 			break
