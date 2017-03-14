@@ -9,17 +9,18 @@ import (
 )
 
 type testContract struct {
-	Registered         bool
-	Registerable       bool
-	SubmitFailed       bool
-	VerifyFailed       bool
-	SubmitTime         *time.Time
-	IndexRequestedTime *time.Time
-	claim              *testClaim
+	Registered          bool
+	Registerable        bool
+	SubmitFailed        bool
+	VerifyFailed        bool
+	SubmitTime          *time.Time
+	IndexRequestedTime  *time.Time
+	claim               *testClaim
+	DelayedVerification bool
 }
 
 func newTestContract() *testContract {
-	return &testContract{false, false, false, false, nil, nil, nil}
+	return &testContract{false, false, false, false, nil, nil, nil, false}
 }
 
 func (c *testContract) Version() string {
@@ -52,6 +53,9 @@ func (c *testContract) GetShareIndex(claim smartpool.Claim) *big.Int {
 func (c *testContract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error {
 	if c.VerifyFailed {
 		return errors.New("fail")
+	}
+	if c.DelayedVerification {
+		time.Sleep(50 * time.Millisecond)
 	}
 	return nil
 }

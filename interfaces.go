@@ -78,24 +78,6 @@ type Contract interface {
 	// in order to prove that the claim is valid so the miner can take credit
 	// of it.
 	VerifyClaim(shareIndex *big.Int, claim Claim) error
-
-	// // SubmitClaim takes some necessary parameters that represent a claim and
-	// // submit to the contract using miner's address. The address should be
-	// // unlocked first.
-	// // TODO: explain all parameters including examples.
-	// SubmitClaim(
-	// 	numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int,
-	// 	augMerkle *big.Int) (*types.Transaction, error)
-	// // VerifyClaim takes some necessary parameters that provides complete proof
-	// // including ethash proof and augmented merkle tree proof and submit to
-	// // contract side in order to prove that the claim is valid so the miner
-	// // can take credit of it.
-	// // TODO: explain all parameters including examples.
-	// VerifyClaim(
-	// 	rlpHeader []byte, nonce *big.Int, shareIndex *big.Int,
-	// 	dataSetLookup []*big.Int, witnessForLookup []*big.Int,
-	// 	augCountersBranch []*big.Int,
-	// 	augHashesBranch []*big.Int) (*types.Transaction, error)
 }
 
 // NetworkClient represents client for blockchain network that miner is mining
@@ -113,31 +95,6 @@ type NetworkClient interface {
 	// between miner and the network client.
 	SubmitSolution(s Solution) bool
 }
-
-// type EthereumClient interface {
-// 	// GetPendingBlockHeader returns Ethereum block header for pending block
-// 	// which potentially is the work that Ethereum client is wanting miner to
-// 	// work on.
-// 	GetPendingBlockHeader() *types.Header
-// 	// GetBlockHeader returns Ethereum block for specific number.
-// 	// TODO: this function should be removed because its redundant to actual
-// 	// protocol.
-// 	GetBlockHeader(number int) *types.Header
-// 	// GetWork returns a Work for SmartPool to give to the miner. How the work
-// 	// is formed is upto structs implementing this interface.
-// 	GetWork() Work
-// 	// SubmitHashrate submits the current hashrate to Ethereum Client in order
-// 	// to maintain workflow between ethminer and Ethereum Client.
-// 	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
-// 	// SubmitWork submits the solution that miner has submitted to SmartPool
-// 	// so the full block solution can take credits. It also maintain workflow
-// 	// between ethminer and Ethereum Client.
-// 	SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool
-// 	// IsVerified returns true if the transaction with hash `h` in included in a
-// 	// block. It returns false if the transaction is not yet included in any
-// 	// blocks.
-// 	IsVerified(h common.Hash) bool
-// }
 
 // ShareReceiver represents SmartPool itself which accepts solutions from
 // miners.

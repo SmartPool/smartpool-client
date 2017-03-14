@@ -20,7 +20,7 @@ func Initialize() *smartpool.Input {
 	shareThreshold := 1
 	shareDifficulty := big.NewInt(100000)
 	submitInterval := 3 * time.Minute
-	contractAddr := "0xc071df9e80d2d13d3f6a7a062a764df4f34c65fd"
+	contractAddr := "0x92a71342C2EaBc92d09b83a8C82D48F41C0ddbaf"
 	minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	extraData := ""
 	return smartpool.NewInput(
@@ -43,7 +43,7 @@ func promptUserPassPhrase(acc string) (string, error) {
 
 func main() {
 	input := Initialize()
-	gethRPC, _ := ethereum.NewGethRPC(
+	gethRPC, _ := geth.NewGethRPC(
 		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
 	)
 	var gethContractClient *geth.GethContractClient
@@ -54,6 +54,7 @@ func main() {
 		)
 		gethContractClient, err = geth.NewGethContractClient(
 			common.HexToAddress(input.ContractAddress()), gethRPC,
+			common.HexToAddress(input.MinerAddress()),
 			input.RPCEndpoint(), input.KeystorePath(), passphrase,
 		)
 		if gethContractClient != nil {

@@ -14,6 +14,7 @@ func newTestSmartPool() *SmartPool {
 		&testClaimRepo{},
 		&testUserOutput{},
 		&testContract{},
+		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
 		time.Minute,
 		100,
 	)
@@ -160,8 +161,17 @@ func TestSmartPoolSubmitReturnFalseWhenUnableToVerify(t *testing.T) {
 	}
 }
 
+func TestSmartPoolDoesntRunWhenMinerRegistered(t *testing.T) {
+	sp := newTestSmartPool()
+	if sp.Run() {
+		t.Fail()
+	}
+}
+
 func TestSmartPoolOnlySubmitPeriodly(t *testing.T) {
 	sp := newTestSmartPool()
+	ct := sp.Contract.(*testContract)
+	ct.Registered = true
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
 	c := sp.Contract.(*testContract)
 	sp.SubmitInterval = 40 * time.Millisecond
@@ -189,12 +199,14 @@ func TestSmartPoolOnlySubmitWhenMeetShareThreshold(t *testing.T) {
 	}
 }
 
-func TestSmartPoolRememberLatestCounterAFterSubmitAndVerifyClaim(t *testing.T) {
+func TestSmartPoolRememberLatestCounterAfterFormAClaim(t *testing.T) {
 	sp := newTestSmartPool()
 	sp.ShareThreshold = 1
 	sp.LatestCounter = big.NewInt(5)
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(100)})
-	sp.Submit()
+	ct := sp.Contract.(*testContract)
+	ct.DelayedVerification = true
+	go sp.Submit()
 	t.Logf("latest counter: %s\n", sp.LatestCounter)
 	if sp.LatestCounter.Int64() != 100 {
 		t.Fail()

@@ -19,10 +19,11 @@ type Claim struct {
 	shares     Shares
 	shareIndex *big.Int
 	amt        *mtree.AugTree
+	pamt       *mtree.AugTree
 }
 
 func NewClaim() *Claim {
-	return &Claim{Shares{}, nil, nil}
+	return &Claim{Shares{}, nil, nil, nil}
 }
 
 func (c *Claim) AddShare(s smartpool.Share) {
@@ -40,10 +41,10 @@ func (c *Claim) NumShares() *big.Int {
 func (c *Claim) Difficulty() *big.Int {
 	var m *big.Int
 	if len(c.shares) > 0 {
-		m = c.shares[0].Difficulty()
+		m = c.shares[0].ShareDifficulty()
 		for _, s := range c.shares {
-			if m.Cmp(s.Difficulty()) >= 0 {
-				m = s.Difficulty()
+			if m.Cmp(s.ShareDifficulty()) >= 0 {
+				m = s.ShareDifficulty()
 			}
 		}
 	}
@@ -51,39 +52,24 @@ func (c *Claim) Difficulty() *big.Int {
 }
 
 func (c *Claim) Min() *big.Int {
-	var m *big.Int
-	if len(c.shares) > 0 {
-		m = c.shares[0].Counter()
-		for _, s := range c.shares {
-			if m.Cmp(s.Counter()) >= 0 {
-				m = s.Counter()
-			}
-		}
+	if c.amt == nil {
+		c.buildAugTree()
 	}
-	return m
+	return c.amt.RootMin()
 }
 
 func (c *Claim) Max() *big.Int {
-	var m *big.Int
-	if len(c.shares) > 0 {
-		m = c.shares[0].Counter()
-		for _, s := range c.shares {
-			if m.Cmp(s.Counter()) <= 0 {
-				m = s.Counter()
-			}
-		}
+	if c.amt == nil {
+		c.buildAugTree()
 	}
-	return m
+	return c.amt.RootMax()
 }
 
 func (c *Claim) AugMerkle() smartpool.SPHash {
-	sort.Sort(c.shares)
-	amt := mtree.NewAugTree()
-	for i, s := range c.shares {
-		amt.Insert(s, uint32(i))
+	if c.amt == nil {
+		c.buildAugTree()
 	}
-	amt.Finalize()
-	return amt.RootHash()
+	return c.amt.RootHash()
 }
 
 func (c *Claim) SetEvidence(shareIndex *big.Int) {
@@ -91,23 +77,32 @@ func (c *Claim) SetEvidence(shareIndex *big.Int) {
 }
 
 func (c *Claim) CounterBranch() []*big.Int {
-	if c.amt == nil {
-		c.buildAugTree()
+	if c.pamt == nil {
+		c.buildProofAugTree()
 	}
-	return c.amt.CounterBranchArray()
+	return c.pamt.CounterBranchArray()
 }
 
 func (c *Claim) HashBranch() []*big.Int {
-	if c.amt == nil {
-		c.buildAugTree()
+	if c.pamt == nil {
+		c.buildProofAugTree()
 	}
-	return c.amt.HashBranchArray()
+	return c.pamt.HashBranchArray()
+}
+
+func (c *Claim) buildProofAugTree() {
+	sort.Sort(c.shares)
+	c.pamt = mtree.NewAugTree()
+	c.pamt.RegisterIndex(uint32(c.shareIndex.Int64()))
+	for i, s := range c.shares {
+		c.pamt.Insert(s, uint32(i))
+	}
+	c.pamt.Finalize()
 }
 
 func (c *Claim) buildAugTree() {
 	sort.Sort(c.shares)
 	c.amt = mtree.NewAugTree()
-	c.amt.RegisterIndex(uint32(c.shareIndex.Int64()))
 	for i, s := range c.shares {
 		c.amt.Insert(s, uint32(i))
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type NetworkClient struct {
-	rpc      *GethRPC
+	rpc      RPCClient
 	workpool *WorkPool
 }
 
@@ -26,7 +26,7 @@ func (nc *NetworkClient) SubmitSolution(s smartpool.Solution) bool {
 	return nc.rpc.SubmitWork(sol.Nonce, sol.Hash, sol.MixDigest)
 }
 
-func NewNetworkClient(rpc *GethRPC, workpool *WorkPool) *NetworkClient {
+func NewNetworkClient(rpc RPCClient, workpool *WorkPool) *NetworkClient {
 	return &NetworkClient{
 		rpc, workpool,
 	}

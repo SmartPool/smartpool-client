@@ -1,6 +1,7 @@
-package ethereum
+package geth
 
 import (
+	"../"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -34,7 +35,7 @@ type GethRPC struct {
 	ExtraData    []byte
 }
 
-func (g GethRPC) Client() (string, error) {
+func (g GethRPC) ClientVersion() (string, error) {
 	result := ""
 	err := g.client.Call(&result, "web3_clientVersion")
 	return result, err
@@ -44,7 +45,6 @@ func (g GethRPC) GetPendingBlockHeader() *types.Header {
 	header := jsonHeader{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", "pending", false)
 	if err != nil {
-		log.Fatal("Couldn't get latest block:", err)
 		return nil
 	}
 	result := types.Header{}
@@ -66,7 +66,7 @@ func (g GethRPC) GetPendingBlockHeader() *types.Header {
 	} else {
 		result.Bloom = *header.Bloom
 	}
-	result.MixDigest = *header.MixDigest
+	result.MixDigest = common.Hash{}
 	result.Nonce = types.BlockNonce{}
 	return &result
 }
@@ -85,7 +85,7 @@ type gethWork [3]string
 
 func (w gethWork) PoWHash() string { return w[0] }
 
-func (g GethRPC) GetWork() *Work {
+func (g GethRPC) GetWork() *ethereum.Work {
 	w := gethWork{}
 	var h *types.Header
 	for {
@@ -101,7 +101,7 @@ func (g GethRPC) GetWork() *Work {
 		time.Sleep(1000 * time.Millisecond)
 		// fmt.Printf("Get inconsistent pending block header. Retry in 1s...\n")
 	}
-	return NewWork(h, w[0], w[1])
+	return ethereum.NewWork(h, w[0], w[1])
 }
 
 func (g GethRPC) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
@@ -123,7 +123,7 @@ type jsonTransaction struct {
 func (g GethRPC) IsVerified(h common.Hash) bool {
 	result := jsonTransaction{}
 	g.client.Call(&result, "eth_getTransactionByHash", h)
-	return result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"
+	return result.BlockHash != "" && result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"
 }
 
 func NewGethRPC(endpoint, contractAddr, extraData string) (*GethRPC, error) {

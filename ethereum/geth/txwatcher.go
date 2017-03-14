@@ -11,12 +11,12 @@ import (
 // confirmed
 type TxWatcher struct {
 	tx      *types.Transaction
-	geth    *ethereum.GethRPC
+	node    ethereum.RPCClient
 	verChan chan bool
 }
 
 func (tw *TxWatcher) isVerified() bool {
-	return tw.geth.IsVerified(tw.tx.Hash())
+	return tw.node.IsVerified(tw.tx.Hash())
 }
 
 // loop to check transactions verification
@@ -36,6 +36,6 @@ func (tw *TxWatcher) Wait() {
 	<-tw.verChan
 }
 
-func NewTxWatcher(tx *types.Transaction, geth *ethereum.GethRPC) *TxWatcher {
-	return &TxWatcher{tx, geth, make(chan bool)}
+func NewTxWatcher(tx *types.Transaction, node ethereum.RPCClient) *TxWatcher {
+	return &TxWatcher{tx, node, make(chan bool)}
 }

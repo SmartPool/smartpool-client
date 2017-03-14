@@ -21,6 +21,6 @@ func (s *testShare) Hash() smartpool.SPHash {
 	return h
 }
 
-func (s *testShare) Difficulty() *big.Int {
+func (s *testShare) ShareDifficulty() *big.Int {
 	return s.d
 }

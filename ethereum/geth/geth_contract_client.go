@@ -14,7 +14,8 @@ type GethContractClient struct {
 	// communication with Ethereum Contract
 	pool       *TestPool
 	transactor *bind.TransactOpts
-	geth       *ethereum.GethRPC
+	node       ethereum.RPCClient
+	sender     common.Address
 }
 
 func (cc *GethContractClient) Version() string {
@@ -26,7 +27,7 @@ func (cc *GethContractClient) Version() string {
 }
 
 func (cc *GethContractClient) IsRegistered() bool {
-	ok, err := cc.pool.IsRegistered(nil)
+	ok, err := cc.pool.IsRegistered(nil, cc.sender)
 	if err != nil {
 		return false
 	}
@@ -34,7 +35,7 @@ func (cc *GethContractClient) IsRegistered() bool {
 }
 
 func (cc *GethContractClient) CanRegister() bool {
-	ok, err := cc.pool.CanRegister(nil)
+	ok, err := cc.pool.CanRegister(nil, cc.sender)
 	if err != nil {
 		return false
 	}
@@ -46,12 +47,12 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 	if err != nil {
 		return err
 	}
-	NewTxWatcher(tx, cc.geth).Wait()
+	NewTxWatcher(tx, cc.node).Wait()
 	return nil
 }
 
 func (cc *GethContractClient) GetClaimSeed() *big.Int {
-	seed, err := cc.pool.GetClaimSeed(nil)
+	seed, err := cc.pool.GetClaimSeed(nil, cc.sender)
 	if err != nil {
 		return big.NewInt(0)
 	}
@@ -69,7 +70,7 @@ func (cc *GethContractClient) SubmitClaim(
 	if err != nil {
 		return err
 	}
-	NewTxWatcher(tx, cc.geth).Wait()
+	NewTxWatcher(tx, cc.node).Wait()
 	return nil
 }
 
@@ -87,7 +88,7 @@ func (cc *GethContractClient) VerifyClaim(
 	if err != nil {
 		return err
 	}
-	NewTxWatcher(tx, cc.geth).Wait()
+	NewTxWatcher(tx, cc.node).Wait()
 	return nil
 }
 
@@ -97,7 +98,7 @@ func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128R
 	if err != nil {
 		return err
 	}
-	NewTxWatcher(tx, cc.geth).Wait()
+	NewTxWatcher(tx, cc.node).Wait()
 	return nil
 }
 
@@ -106,7 +107,7 @@ func getClient(rpc string) (*ethclient.Client, error) {
 }
 
 func NewGethContractClient(
-	contractAddr common.Address, rpc *ethereum.GethRPC,
+	contractAddr common.Address, node ethereum.RPCClient, sender common.Address,
 	ipc, keystorePath, passphrase string) (*GethContractClient, error) {
 	client, err := getClient(ipc)
 	if err != nil {
@@ -135,5 +136,5 @@ func NewGethContractClient(
 		return nil, err
 	}
 	// fmt.Printf("Done.\n")
-	return &GethContractClient{pool, auth, rpc}, nil
+	return &GethContractClient{pool, auth, node, sender}, nil
 }

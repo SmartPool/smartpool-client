@@ -28,7 +28,10 @@ func (s *Server) Start() {
 	if SmartPool == nil {
 		panic("SmartPool instance must be initialized first.")
 	}
-	SmartPool.Run()
-	s.output.Printf("RPC Server is running...\n")
-	s.server.ListenAndServe()
+	if SmartPool.Run() {
+		s.output.Printf("RPC Server is running...\n")
+		s.server.ListenAndServe()
+	} else {
+		s.output.Printf("SmartPool couldn't run. Exit.")
+	}
 }

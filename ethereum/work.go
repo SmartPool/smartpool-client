@@ -31,9 +31,10 @@ func (w *Work) AcceptSolution(sol smartpool.Solution) smartpool.Share {
 	solution := sol.(*Solution)
 	eth := ethash.New()
 	s := &Share{
-		blockHeader: w.blockHeader,
-		nonce:       solution.Nonce,
-		mixDigest:   solution.MixDigest,
+		blockHeader:     w.blockHeader,
+		nonce:           solution.Nonce,
+		mixDigest:       solution.MixDigest,
+		shareDifficulty: w.ShareDifficulty(),
 	}
 	s.SolutionState = eth.SolutionState(s, w.ShareDifficulty())
 	return s

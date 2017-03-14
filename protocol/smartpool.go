@@ -29,6 +29,7 @@ type SmartPool struct {
 	Output         smartpool.UserOutput
 	ClaimRepo      ClaimRepo
 	LatestCounter  *big.Int
+	MinerAddress   common.Address
 	SubmitInterval time.Duration
 	ShareThreshold int
 	loopStarted    bool
@@ -56,7 +57,7 @@ func (sp *SmartPool) Register(addr common.Address) bool {
 		return false
 	}
 	if !sp.Contract.IsRegistered() {
-		sp.Output.Printf("Unable to register to the pool. You might try again.")
+		sp.Output.Printf("You are not accepted by the pool yet. Please wait about 30s and try again.\n")
 		return false
 	}
 	sp.Output.Printf("Done.\n")
@@ -75,7 +76,7 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 // counter of the last verified claim
 func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
-	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
+	if share == nil || share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		return false
 	}
 	sp.ClaimRepo.AddShare(share)
@@ -102,6 +103,7 @@ func (sp *SmartPool) Submit() bool {
 	if claim == nil {
 		return false
 	}
+	sp.LatestCounter = claim.Max()
 	sp.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
@@ -119,7 +121,6 @@ func (sp *SmartPool) Submit() bool {
 	}
 	sp.Output.Printf("Verified the claim.\n")
 	sp.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
-	sp.LatestCounter = claim.Max()
 	return true
 }
 
@@ -135,27 +136,32 @@ func (sp *SmartPool) actOnTick() {
 // return false otherwise.
 // TODO: we need to have some lock here in case of concurrent invokes
 func (sp *SmartPool) Run() bool {
-	if sp.loopStarted {
-		sp.Output.Printf("Warning: calling Run() multiple times\n")
+	if sp.Register(sp.MinerAddress) {
+		if sp.loopStarted {
+			sp.Output.Printf("Warning: calling Run() multiple times\n")
+			return false
+		}
+		sp.ticker = time.Tick(sp.SubmitInterval)
+		go sp.actOnTick()
+		sp.loopStarted = true
+		sp.Output.Printf("Share collector is running...\n")
+		return true
+	} else {
 		return false
 	}
-	sp.ticker = time.Tick(sp.SubmitInterval)
-	go sp.actOnTick()
-	sp.loopStarted = true
-	sp.Output.Printf("Share collector is running...\n")
-	return true
 }
 
 func NewSmartPool(
 	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
 	cr ClaimRepo, uo smartpool.UserOutput, co smartpool.Contract,
-	interval time.Duration, threshold int) *SmartPool {
+	ma common.Address, interval time.Duration, threshold int) *SmartPool {
 	return &SmartPool{
 		ShareReceiver:  sr,
 		NetworkClient:  nc,
 		Output:         uo,
 		ClaimRepo:      cr,
 		Contract:       co,
+		MinerAddress:   ma,
 		SubmitInterval: interval,
 		ShareThreshold: threshold,
 		loopStarted:    false,

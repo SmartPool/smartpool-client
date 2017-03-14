@@ -33,6 +33,7 @@ func (c *Contract) Register(paymentAddress common.Address) error {
 }
 
 func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
+	fmt.Printf("Mix: 0x%s - Max: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16))
 	return c.client.SubmitClaim(
 		claim.NumShares(), claim.Difficulty(),
 		claim.Min(), claim.Max(), claim.AugMerkle().Big())
@@ -49,6 +50,7 @@ func (c *Contract) GetShareIndex(claim smartpool.Claim) *big.Int {
 		time.Sleep(14 * time.Second)
 	}
 	index := big.NewInt(0)
+	fmt.Printf("seed: 0x%s\nlen: %d\n", seed.Text(16), claim.NumShares().Int64())
 	index.Mod(seed, claim.NumShares())
 	return index
 }

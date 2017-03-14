@@ -26,11 +26,11 @@ func buildExtraData(address common.Address, diff *big.Int) string {
 func Initialize() *smartpool.Input {
 	// Setting
 	rpcEndPoint := "http://localhost:8545"
-	keystorePath := "/Users/victor/Dropbox/Project/BlockChain/SmartPool/spclient_exp/.privatedata/keystore"
-	shareThreshold := 1
+	keystorePath := "/Users/victor/Library/Application Support/io.parity.ethereum/keys/kovan"
+	shareThreshold := 5
 	shareDifficulty := big.NewInt(100000)
-	submitInterval := 3 * time.Minute
-	contractAddr := "0xc071df9e80d2d13d3f6a7a062a764df4f34c65fd"
+	submitInterval := 1 * time.Minute
+	contractAddr := "0x92a71342C2EaBc92d09b83a8C82D48F41C0ddbaf"
 	minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	extraData := buildExtraData(common.HexToAddress(minerAddr), shareDifficulty)
 	return smartpool.NewInput(
@@ -55,10 +55,10 @@ func main() {
 	input := Initialize()
 	output := &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
-	gethRPC, _ := geth.NewGethRPC(
+	kovanRPC, _ := geth.NewKovanRPC(
 		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
 	)
-	client, err := gethRPC.ClientVersion()
+	client, err := kovanRPC.ClientVersion()
 	if err != nil {
 		fmt.Printf("Node RPC server is unavailable.\n")
 		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\nRun Geth by following command (Note: --etherbase and --extradata params are required.):\n")
@@ -73,7 +73,7 @@ func main() {
 	}
 	fmt.Printf("Connected to Ethereum node: %s\n", client)
 	ethereumNetworkClient := ethereum.NewNetworkClient(
-		gethRPC,
+		kovanRPC,
 		ethereumWorkPool,
 	)
 	ethereumClaimRepo := protocol.NewInMemClaimRepo()
@@ -83,7 +83,7 @@ func main() {
 			input.MinerAddress(),
 		)
 		gethContractClient, err = geth.NewGethContractClient(
-			common.HexToAddress(input.ContractAddress()), gethRPC,
+			common.HexToAddress(input.ContractAddress()), kovanRPC,
 			common.HexToAddress(input.MinerAddress()),
 			input.RPCEndpoint(), input.KeystorePath(), passphrase,
 		)

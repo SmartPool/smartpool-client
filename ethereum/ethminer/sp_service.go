@@ -41,6 +41,5 @@ func (SmartPoolService) SubmitWork(nonce types.BlockNonce, hash, mixDigest commo
 		MixDigest: mixDigest,
 	}
 	nc.SubmitSolution(sol)
-	// Make sure the work submitted is present
 	return SmartPool.AcceptSolution(sol)
 }
