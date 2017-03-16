@@ -41,7 +41,7 @@ func Initialize(c *cli.Context) *smartpool.Input {
 	contractAddr := c.String("spcontract")
 	// minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	minerAddr := c.String("miner")
-	extraData := buildExtraData(common.HexToAddress(minerAddr), shareDifficulty)
+	extraData := ""
 	return smartpool.NewInput(
 		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
 		submitInterval, contractAddr, minerAddr, extraData,
@@ -64,6 +64,14 @@ func Run(c *cli.Context) error {
 	input := Initialize(c)
 	output := &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
+	address, ok := geth.GetAddress(
+		input.KeystorePath(),
+		common.HexToAddress(input.MinerAddress()),
+	)
+	input.SetMinerAddress(address)
+	input.SetExtraData(buildExtraData(
+		common.HexToAddress(input.MinerAddress()),
+		input.ShareDifficulty()))
 	kovanRPC, _ := geth.NewKovanRPC(
 		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
 	)
@@ -88,11 +96,6 @@ func Run(c *cli.Context) error {
 	ethereumClaimRepo := protocol.NewInMemClaimRepo()
 	var gethContractClient *geth.GethContractClient
 	for {
-		address, ok := geth.GetAddress(
-			input.KeystorePath(),
-			common.HexToAddress(input.MinerAddress()),
-		)
-		input.SetMinerAddress(address)
 		if ok {
 			passphrase, _ := promptUserPassPhrase(
 				input.MinerAddress(),
@@ -113,7 +116,7 @@ func Run(c *cli.Context) error {
 			} else {
 				fmt.Printf("Your keystore: %s\n", input.KeystorePath())
 				fmt.Printf("Your miner address: %s\n", input.MinerAddress())
-				fmt.Printf("We couldn't find your miner addres private key in the keystore path you specified.\nPlease make sure your keystore path exists.\nAbort!\n")
+				fmt.Printf("We couldn't find your miner address private key in the keystore path you specified.\nPlease make sure your keystore path exists.\nAbort!\n")
 			}
 			return nil
 		}
