@@ -20,7 +20,7 @@ func Initialize() *smartpool.Input {
 	shareThreshold := 1
 	shareDifficulty := big.NewInt(100000)
 	submitInterval := 3 * time.Minute
-	contractAddr := "0x92a71342C2EaBc92d09b83a8C82D48F41C0ddbaf"
+	contractAddr := "0x3dC682397e93E46EBb5bE7463658fdD658365e9D"
 	minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	extraData := ""
 	return smartpool.NewInput(
