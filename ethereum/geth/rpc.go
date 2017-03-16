@@ -2,6 +2,7 @@ package geth
 
 import (
 	"../"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -123,6 +124,7 @@ type jsonTransaction struct {
 func (g GethRPC) IsVerified(h common.Hash) bool {
 	result := jsonTransaction{}
 	g.client.Call(&result, "eth_getTransactionByHash", h)
+	fmt.Printf("result: %v\n", result)
 	return result.BlockHash != "" && result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"
 }
 

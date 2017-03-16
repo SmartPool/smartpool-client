@@ -125,6 +125,11 @@ func (sp *SmartPool) Submit() bool {
 }
 
 func (sp *SmartPool) actOnTick() {
+	defer func() {
+		if r := recover(); r != nil {
+			sp.Output.Printf("Recovered in actOnTick: %v\n", r)
+		}
+	}()
 	for _ = range sp.ticker {
 		sp.Submit()
 	}

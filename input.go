@@ -1,6 +1,7 @@
 package smartpool
 
 import (
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"time"
 )
@@ -24,6 +25,9 @@ func (i *Input) SubmitInterval() time.Duration { return i.submitInterval }
 func (i *Input) ContractAddress() string       { return i.contractAddr }
 func (i *Input) MinerAddress() string          { return i.minerAddr }
 func (i *Input) ExtraData() string             { return i.extraData }
+func (i *Input) SetMinerAddress(addr common.Address) {
+	i.minerAddr = addr.Hex()
+}
 
 func NewInput(
 	rpcEndPoint string,

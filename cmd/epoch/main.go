@@ -64,8 +64,7 @@ func main() {
 		}
 	}
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	epoch := 7
-	err = ethereumContract.SetEpochData(epoch)
+	err = ethereumContract.SetEpochData(8, 9, 10, 11, 12, 13, 14, 15)
 	if err != nil {
 		fmt.Printf("Got error: %v\n", err)
 	} else {

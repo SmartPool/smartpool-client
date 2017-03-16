@@ -29,7 +29,7 @@ func (k KovanRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash
 }
 
 func NewKovanRPC(endpoint, contractAddr, extraData string) (*KovanRPC, error) {
-	client, err := rpc.DialHTTP(endpoint)
+	client, err := rpc.Dial(endpoint)
 	if err != nil {
 		return nil, err
 	}

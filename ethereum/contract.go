@@ -33,7 +33,7 @@ func (c *Contract) Register(paymentAddress common.Address) error {
 }
 
 func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
-	fmt.Printf("Mix: 0x%s - Max: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16))
+	fmt.Printf("Mix: 0x%s - Max: 0x%s - Diff: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16), claim.Difficulty().Text(16))
 	return c.client.SubmitClaim(
 		claim.NumShares(), claim.Difficulty(),
 		claim.Min(), claim.Max(), claim.AugMerkle().Big())
@@ -64,6 +64,13 @@ func (c *Contract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error
 	augHashesBranch := claim.HashBranch()
 	dataSetLookup := share.DAGElementArray()
 	witnessForLookup := share.DAGProofArray()
+	fmt.Printf("rlpHeader %v\n", rlpHeader)
+	fmt.Printf("nonce %v\n", nonce)
+	fmt.Printf("index %v\n", shareIndex)
+	fmt.Printf("dag ele %v\n", dataSetLookup)
+	fmt.Printf("dag branch %v\n", witnessForLookup)
+	fmt.Printf("counters %v\n", augCountersBranch)
+	fmt.Printf("hashes %v\n", augHashesBranch)
 	return c.client.VerifyClaim(
 		rlpHeader,
 		nonce,

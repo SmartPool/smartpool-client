@@ -107,7 +107,7 @@ func getClient(rpc string) (*ethclient.Client, error) {
 }
 
 func NewGethContractClient(
-	contractAddr common.Address, node ethereum.RPCClient, sender common.Address,
+	contractAddr common.Address, node ethereum.RPCClient, miner common.Address,
 	ipc, keystorePath, passphrase string) (*GethContractClient, error) {
 	client, err := getClient(ipc)
 	if err != nil {
@@ -119,7 +119,7 @@ func NewGethContractClient(
 		// fmt.Printf("Couldn't get SmartPool information from Ethereum Blockchain. Error: %s\n", err)
 		return nil, err
 	}
-	account := GetAccount(keystorePath, passphrase)
+	account := GetAccount(keystorePath, miner, passphrase)
 	if account == nil {
 		// fmt.Printf("Couldn't get any account from key store.\n")
 		return nil, err
@@ -135,6 +135,8 @@ func NewGethContractClient(
 		// fmt.Printf("Failed to create authorized transactor: %s\n", err)
 		return nil, err
 	}
+	// TODO: make gas price one command line flag
+	auth.GasPrice = big.NewInt(10000000000)
 	// fmt.Printf("Done.\n")
-	return &GethContractClient{pool, auth, node, sender}, nil
+	return &GethContractClient{pool, auth, node, miner}, nil
 }
