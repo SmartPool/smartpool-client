@@ -26,6 +26,9 @@ type UserInput interface {
 	ExtraData() string
 }
 
+// Global output mechanism
+var Output UserOutput
+
 // UserOutput accepts all the information that SmartPool wants to tell the user.
 // It's only responsibility is to accept information. How the information is
 // delivered to user is upto structs implementing the interface.

@@ -56,7 +56,8 @@ func main() {
 	output := &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
 	gethRPC, _ := geth.NewGethRPC(
-		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
+		input.RPCEndpoint(), input.ContractAddress(),
+		input.ExtraData(), input.ShareDifficulty(),
 	)
 	client, err := gethRPC.ClientVersion()
 	if err != nil {
@@ -96,7 +97,7 @@ func main() {
 	ethereumContract := ethereum.NewContract(gethContractClient)
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, output, ethereumContract,
+		ethereumClaimRepo, ethereumContract,
 		common.HexToAddress(input.MinerAddress()),
 		input.SubmitInterval(), input.ShareThreshold(),
 	)

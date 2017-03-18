@@ -62,7 +62,7 @@ func promptUserPassPhrase(acc string) (string, error) {
 
 func Run(c *cli.Context) error {
 	input := Initialize(c)
-	output := &smartpool.StdOut{}
+	smartpool.Output = &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
 	address, ok := geth.GetAddress(
 		input.KeystorePath(),
@@ -73,18 +73,15 @@ func Run(c *cli.Context) error {
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	kovanRPC, _ := geth.NewKovanRPC(
-		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
+		input.RPCEndpoint(), input.ContractAddress(),
+		input.ExtraData(), input.ShareDifficulty(),
 	)
 	client, err := kovanRPC.ClientVersion()
 	if err != nil {
 		fmt.Printf("Node RPC server is unavailable.\n")
-		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\nRun Geth by following command (Note: --etherbase and --extradata params are required.):\n")
+		fmt.Printf("Make sure you have Parity installed. If you do, you can:\nRun Parity by following command (Note: --author and --extra-data params are required.):\n")
 		fmt.Printf(
-			"geth --rpc --etherbase \"%s\" --extradata \"%s\"\n",
-			input.ContractAddress(), input.ExtraData())
-		fmt.Printf("Or run Parity by following command (Note: --etherbase and --extradata params are required.)\n")
-		fmt.Printf(
-			"parity --author \"%s\" --extra-data \"%s\"\n",
+			"parity --chain kovan --author \"%s\" --extra-data \"%s\"\n",
 			input.ContractAddress(), input.ExtraData())
 		return err
 	}
@@ -124,12 +121,12 @@ func Run(c *cli.Context) error {
 	ethereumContract := ethereum.NewContract(gethContractClient)
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, output, ethereumContract,
+		ethereumClaimRepo, ethereumContract,
 		common.HexToAddress(input.MinerAddress()),
 		input.SubmitInterval(), input.ShareThreshold(),
 	)
 	server := ethminer.NewRPCServer(
-		output,
+		smartpool.Output,
 		uint16(1633),
 	)
 	server.Start()

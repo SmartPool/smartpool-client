@@ -30,9 +30,10 @@ type jsonHeader struct {
 }
 
 type GethRPC struct {
-	client       *rpc.Client
-	ContractAddr common.Address
-	ExtraData    []byte
+	client          *rpc.Client
+	ContractAddr    common.Address
+	ExtraData       []byte
+	ShareDifficulty *big.Int
 }
 
 func (g GethRPC) ClientVersion() (string, error) {
@@ -101,7 +102,7 @@ func (g GethRPC) GetWork() *ethereum.Work {
 		time.Sleep(1000 * time.Millisecond)
 		// fmt.Printf("Get inconsistent pending block header. Retry in 1s...\n")
 	}
-	return ethereum.NewWork(h, w[0], w[1])
+	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty)
 }
 
 func (g GethRPC) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
@@ -126,10 +127,10 @@ func (g GethRPC) IsVerified(h common.Hash) bool {
 	return result.BlockHash != "" && result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"
 }
 
-func NewGethRPC(endpoint, contractAddr, extraData string) (*GethRPC, error) {
+func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*GethRPC, error) {
 	client, err := rpc.DialHTTP(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	return &GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData)}, nil
+	return &GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff}, nil
 }

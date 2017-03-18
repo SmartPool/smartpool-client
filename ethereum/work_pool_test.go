@@ -4,6 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"math/big"
 	"testing"
 )
 
@@ -15,6 +16,7 @@ func newTestWork() *Work {
 		header,
 		"0x958c07589d805f63393997ea0baca55a3101baa2c6616e3a5c8d51baf590d6ec",
 		"0x0000000000000000000000000000000000000000000000000000000000000000",
+		big.NewInt(100000),
 	)
 }
 

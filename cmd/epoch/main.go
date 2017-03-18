@@ -44,7 +44,8 @@ func promptUserPassPhrase(acc string) (string, error) {
 func main() {
 	input := Initialize()
 	gethRPC, _ := geth.NewGethRPC(
-		input.RPCEndpoint(), input.ContractAddress(), input.ExtraData(),
+		input.RPCEndpoint(), input.ContractAddress(),
+		input.ExtraData(), input.ShareDifficulty(),
 	)
 	var gethContractClient *geth.GethContractClient
 	var err error

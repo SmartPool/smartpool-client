@@ -3,6 +3,7 @@ package main
 import (
 	"../../ethereum/geth"
 	"fmt"
+	"math/big"
 )
 
 func main() {
@@ -10,6 +11,7 @@ func main() {
 		"http://localhost:8545",
 		"0xc071df9e80d2d13d3f6a7a062a764df4f34c65fd",
 		"0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F",
+		big.NewInt(100000),
 	)
 	fmt.Printf("rpc: %v\nerr:%v\n", gethRPC, err)
 	client, err := gethRPC.ClientVersion()

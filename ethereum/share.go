@@ -122,8 +122,7 @@ func processDuringRead(
 }
 
 func (s *Share) buildDagTree() {
-	eth := ethash.New()
-	indices := eth.GetVerificationIndices(s)
+	indices := ethash.Instance.GetVerificationIndices(s)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
 	seedHash, err := ethash.GetSeedHash(s.NumberU64())

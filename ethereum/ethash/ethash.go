@@ -57,6 +57,8 @@ const (
 	dagSizeForTesting   C.uint64_t = 1024 * 32
 )
 
+var Instance = New()
+
 var DefaultDir = defaultDir()
 
 func defaultDir() string {
