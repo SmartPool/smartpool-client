@@ -1,8 +1,8 @@
 package protocol
 
 import (
-	"../"
-	"../mtree"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/mtree"
 	"math/big"
 	"sort"
 )

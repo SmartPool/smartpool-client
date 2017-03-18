@@ -1,8 +1,8 @@
 package ethminer
 
 import (
-	"../"
-	"../../protocol"
+	"github.com/SmartPool/smartpool-client/ethereum"
+	"github.com/SmartPool/smartpool-client/protocol"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"

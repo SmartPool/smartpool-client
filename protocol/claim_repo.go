@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 )
 
 // ClaimRepo holds many claims but only 1 active clam at a time which is

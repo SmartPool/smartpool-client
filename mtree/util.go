@@ -1,7 +1,7 @@
 package mtree
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 )
 
 func conventionalWord(data smartpool.Word) ([]byte, []byte) {

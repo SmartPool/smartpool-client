@@ -1,8 +1,8 @@
 package geth
 
 import (
-	"../"
-	"../../"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"

@@ -1,8 +1,8 @@
 package mtree
 
 import (
-	"../"
 	"container/list"
+	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

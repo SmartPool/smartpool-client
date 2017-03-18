@@ -1,13 +1,13 @@
 package ethereum
 
 import (
-	"../"
-	"../mtree"
-	"./ethash"
 	"bufio"
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/ethereum/ethash"
+	"github.com/SmartPool/smartpool-client/mtree"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"

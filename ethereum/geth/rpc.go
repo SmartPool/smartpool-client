@@ -1,7 +1,7 @@
 package geth
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"

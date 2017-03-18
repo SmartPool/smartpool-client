@@ -1,12 +1,12 @@
 package main
 
 import (
-	"../../"
-	"../../ethereum"
-	"../../ethereum/ethminer"
-	"../../ethereum/geth"
-	"../../protocol"
 	"fmt"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/ethereum"
+	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
+	"github.com/SmartPool/smartpool-client/ethereum/geth"
+	"github.com/SmartPool/smartpool-client/protocol"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"

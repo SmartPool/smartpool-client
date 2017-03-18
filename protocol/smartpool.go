@@ -4,7 +4,7 @@
 package protocol
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"time"

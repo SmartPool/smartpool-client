@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 )
 
 type testWork struct {

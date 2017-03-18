@@ -1,7 +1,7 @@
 package ethereum
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 )
 
 // workpool keeps track of pending works to ensure that each submitted solution

@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"../"
+	"github.com/SmartPool/smartpool-client"
 )
 
 // InMemClaimRepo implements ClaimRepo interface. It stores claims in one start

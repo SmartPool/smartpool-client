@@ -1,8 +1,8 @@
 package ethminer
 
 import (
-	"../../"
 	"fmt"
+	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/rpc"
 	"net/http"
 )

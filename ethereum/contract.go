@@ -1,11 +1,11 @@
 package ethereum
 
 import (
-	"../"
-	"../mtree"
-	"./ethash"
 	"encoding/hex"
 	"fmt"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/ethereum/ethash"
+	"github.com/SmartPool/smartpool-client/mtree"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"path/filepath"

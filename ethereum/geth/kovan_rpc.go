@@ -1,8 +1,8 @@
 package geth
 
 import (
-	"../"
-	"../ethash"
+	"github.com/SmartPool/smartpool-client/ethereum"
+	"github.com/SmartPool/smartpool-client/ethereum/ethash"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
