@@ -27,7 +27,7 @@ type UserInput interface {
 }
 
 // Global output mechanism
-var Output UserOutput
+var Output = &StdOut{}
 
 // UserOutput accepts all the information that SmartPool wants to tell the user.
 // It's only responsibility is to accept information. How the information is

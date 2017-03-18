@@ -2,6 +2,7 @@ package geth
 
 import (
 	"../"
+	"../../"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -44,16 +45,20 @@ func (cc *GethContractClient) CanRegister() bool {
 
 func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 	tx, err := cc.pool.Register(cc.transactor, paymentAddress)
+	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash())
 	if err != nil {
+		smartpool.Output.Printf("Registering address %s failed. Error: %s\n", err)
 		return err
 	}
 	NewTxWatcher(tx, cc.node).Wait()
+	smartpool.Output.Printf("Registered address %s to SmartPool contract. Tx %s is confirmed\n", paymentAddress.Hex(), tx.Hash())
 	return nil
 }
 
 func (cc *GethContractClient) GetClaimSeed() *big.Int {
 	seed, err := cc.pool.GetClaimSeed(nil, cc.sender)
 	if err != nil {
+		smartpool.Output.Printf("Getting claim seed failed. Error: %s\n", err)
 		return big.NewInt(0)
 	}
 	return seed
@@ -68,6 +73,7 @@ func (cc *GethContractClient) SubmitClaim(
 	tx, err := cc.pool.SubmitClaim(cc.transactor,
 		numShares, difficulty, min, max, augMerkle)
 	if err != nil {
+		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
 	NewTxWatcher(tx, cc.node).Wait()
@@ -86,6 +92,7 @@ func (cc *GethContractClient) VerifyClaim(
 		rlpHeader, nonce, shareIndex, dataSetLookup,
 		witnessForLookup, augCountersBranch, augHashesBranch)
 	if err != nil {
+		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
 		return err
 	}
 	NewTxWatcher(tx, cc.node).Wait()
@@ -96,6 +103,7 @@ func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128R
 	tx, err := cc.pool.SetEpochData(cc.transactor,
 		merkleRoot, fullSizeIn128Resolution, branchDepth, epoch)
 	if err != nil {
+		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
 		return err
 	}
 	NewTxWatcher(tx, cc.node).Wait()
@@ -111,32 +119,32 @@ func NewGethContractClient(
 	ipc, keystorePath, passphrase string) (*GethContractClient, error) {
 	client, err := getClient(ipc)
 	if err != nil {
-		// fmt.Printf("Couldn't connect to Geth via IPC file. Error: %s\n", err)
+		smartpool.Output.Printf("Couldn't connect to Geth via IPC file. Error: %s\n", err)
 		return nil, err
 	}
 	pool, err := NewTestPool(contractAddr, client)
 	if err != nil {
-		// fmt.Printf("Couldn't get SmartPool information from Ethereum Blockchain. Error: %s\n", err)
+		smartpool.Output.Printf("Couldn't get SmartPool information from Ethereum Blockchain. Error: %s\n", err)
 		return nil, err
 	}
 	account := GetAccount(keystorePath, miner, passphrase)
 	if account == nil {
-		// fmt.Printf("Couldn't get any account from key store.\n")
+		smartpool.Output.Printf("Couldn't get any account from key store.\n")
 		return nil, err
 	}
 	keyio, err := os.Open(account.KeyFile())
 	if err != nil {
-		// fmt.Printf("Failed to open key file: %s\n", err)
+		smartpool.Output.Printf("Failed to open key file: %s\n", err)
 		return nil, err
 	}
-	// fmt.Printf("Unlocking account...")
+	smartpool.Output.Printf("Unlocking account...")
 	auth, err := bind.NewTransactor(keyio, account.PassPhrase())
 	if err != nil {
-		// fmt.Printf("Failed to create authorized transactor: %s\n", err)
+		smartpool.Output.Printf("Failed to create authorized transactor: %s\n", err)
 		return nil, err
 	}
 	// TODO: make gas price one command line flag
 	auth.GasPrice = big.NewInt(10000000000)
-	// fmt.Printf("Done.\n")
+	smartpool.Output.Printf("Done.\n")
 	return &GethContractClient{pool, auth, node, miner}, nil
 }

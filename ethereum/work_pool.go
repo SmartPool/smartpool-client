@@ -21,7 +21,7 @@ const (
 func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 	work := wp[s.WorkID()]
 	if work == nil {
-		// smartpool.Output.Printf("work (%v) doesn't exist in workpool (len: %d)\n", s, len(wp))
+		smartpool.Output.Printf("work (%v) doesn't exist in workpool (len: %d)\n", s, len(wp))
 		return nil
 	}
 	share := work.AcceptSolution(s).(*Share)
@@ -29,7 +29,7 @@ func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 		delete(wp, s.WorkID())
 	}
 	if share.SolutionState == InvalidShare {
-		// smartpool.Output.Printf("Solution (%v) is invalid\n", s)
+		smartpool.Output.Printf("Solution (%v) is invalid\n", s)
 		return nil
 	} else {
 		return share

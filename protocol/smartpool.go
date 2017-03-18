@@ -42,24 +42,24 @@ type SmartPool struct {
 // address registered before or registers the address if it didn't.
 func (sp *SmartPool) Register(addr common.Address) bool {
 	if sp.Contract.IsRegistered() {
-		// smartpool.Output.Printf("The address is already registered to the pool. Good to go.\n")
+		smartpool.Output.Printf("The address is already registered to the pool. Good to go.\n")
 		return true
 	}
 	if !sp.Contract.CanRegister() {
-		// smartpool.Output.Printf("Your etherbase address couldn't register to the pool. You need to try another address.\n")
+		smartpool.Output.Printf("Your etherbase address couldn't register to the pool. You need to try another address.\n")
 		return false
 	}
-	// smartpool.Output.Printf("Registering to the pool. Please wait...")
+	smartpool.Output.Printf("Registering to the pool. Please wait...")
 	err := sp.Contract.Register(addr)
 	if err != nil {
-		// smartpool.Output.Printf("Unable to register to the pool: %s\n", err)
+		smartpool.Output.Printf("Unable to register to the pool: %s\n", err)
 		return false
 	}
 	if !sp.Contract.IsRegistered() {
-		// smartpool.Output.Printf("You are not accepted by the pool yet. Please wait about 30s and try again.\n")
+		smartpool.Output.Printf("You are not accepted by the pool yet. Please wait about 30s and try again.\n")
 		return false
 	}
-	// smartpool.Output.Printf("Done.\n")
+	smartpool.Output.Printf("Done.\n")
 	return true
 }
 
@@ -76,13 +76,13 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
 	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
-		// smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
+		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
 	}
 	if share == nil || share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		return false
 	}
 	sp.ClaimRepo.AddShare(share)
-	// smartpool.Output.Printf(".")
+	smartpool.Output.Printf(".")
 	return true
 }
 
@@ -106,30 +106,30 @@ func (sp *SmartPool) Submit() bool {
 		return false
 	}
 	sp.LatestCounter = claim.Max()
-	// smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
+	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
-		// smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
+		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		return false
 	}
-	// smartpool.Output.Printf("The claim is successfully submitted.\n")
-	// smartpool.Output.Printf("Waiting for verification index.\n")
+	smartpool.Output.Printf("The claim is successfully submitted.\n")
+	smartpool.Output.Printf("Waiting for verification index.\n")
 	index := sp.GetVerificationIndex(claim)
-	// smartpool.Output.Printf("Verification index of %d has been requested. Submitting verification for the claim.\n", index.Int64())
+	smartpool.Output.Printf("Verification index of %d has been requested. Submitting verification for the claim.\n", index.Int64())
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
-		// smartpool.Output.Printf("Got error verifing claim: %s\n", verErr)
+		smartpool.Output.Printf("Got error verifing claim: %s\n", verErr)
 		return false
 	}
-	// smartpool.Output.Printf("Verified the claim.\n")
-	// smartpool.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
+	smartpool.Output.Printf("Verified the claim.\n")
+	smartpool.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
 	return true
 }
 
 func (sp *SmartPool) actOnTick() {
 	defer func() {
 		if r := recover(); r != nil {
-			// smartpool.Output.Printf("Recovered in actOnTick: %v\n", r)
+			smartpool.Output.Printf("Recovered in actOnTick: %v\n", r)
 		}
 	}()
 	for _ = range sp.ticker {
@@ -145,13 +145,13 @@ func (sp *SmartPool) actOnTick() {
 func (sp *SmartPool) Run() bool {
 	if sp.Register(sp.MinerAddress) {
 		if sp.loopStarted {
-			// smartpool.Output.Printf("Warning: calling Run() multiple times\n")
+			smartpool.Output.Printf("Warning: calling Run() multiple times\n")
 			return false
 		}
 		sp.ticker = time.Tick(sp.SubmitInterval)
 		go sp.actOnTick()
 		sp.loopStarted = true
-		// smartpool.Output.Printf("Share collector is running...\n")
+		smartpool.Output.Printf("Share collector is running...\n")
 		return true
 	} else {
 		return false

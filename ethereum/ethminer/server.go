@@ -30,6 +30,10 @@ func (s *Server) Start() {
 	}
 	if SmartPool.Run() {
 		s.output.Printf("RPC Server is running...\n")
+		s.output.Printf("You can start mining now by running ethminer using following command:\n")
+		s.output.Printf("--------------------------\n")
+		s.output.Printf("ethminer -F localhost:1633\n")
+		s.output.Printf("--------------------------\n")
 		s.server.ListenAndServe()
 	} else {
 		s.output.Printf("SmartPool couldn't run. Exit.")
