@@ -160,7 +160,7 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.StringFlag{
 			Name:  "spcontract",
-			Value: "0x3dC682397e93E46EBb5bE7463658fdD658365e9D",
+			Value: "0xd73E3A427600412C4569e7f41A5F4528E10d1274",
 			Usage: "SmartPool latest contract address.",
 		},
 		cli.StringFlag{

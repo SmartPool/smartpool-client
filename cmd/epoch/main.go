@@ -1,10 +1,10 @@
 package main
 
 import (
-	"../../"
-	"../../ethereum"
-	"../../ethereum/geth"
 	"fmt"
+	"github.com/SmartPool/smartpool-client"
+	"github.com/SmartPool/smartpool-client/ethereum"
+	"github.com/SmartPool/smartpool-client/ethereum/geth"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"math/big"

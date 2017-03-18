@@ -1,8 +1,8 @@
 package main
 
 import (
-	"../../ethereum/geth"
 	"fmt"
+	"github.com/SmartPool/smartpool-client/ethereum/geth"
 	"math/big"
 )
 
