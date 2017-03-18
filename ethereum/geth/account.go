@@ -25,6 +25,9 @@ func GetAddress(keystorePath string, address common.Address) (common.Address, bo
 	)
 	var acc accounts.Account
 	addresses := []common.Address{}
+	for _, a := range keys.Accounts() {
+		addresses = append(addresses, a.Address)
+	}
 	defaultAcc := big.NewInt(0)
 	if address.Big().Cmp(defaultAcc) == 0 {
 		if len(keys.Accounts()) == 0 {
@@ -33,7 +36,6 @@ func GetAddress(keystorePath string, address common.Address) (common.Address, bo
 		acc = keys.Accounts()[0]
 	} else {
 		for _, a := range keys.Accounts() {
-			addresses = append(addresses, a.Address)
 			if a.Address == address {
 				acc = a
 				break

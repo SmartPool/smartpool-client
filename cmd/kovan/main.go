@@ -73,6 +73,12 @@ func Run(c *cli.Context) error {
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
 	)
+	if len(addresses) == 0 {
+		fmt.Printf("We couldn't find any private keys in your keystore path.\n")
+		fmt.Printf("Please make sure your keystore path exists.\nAbort!\n")
+		return nil
+	}
+	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
 	input.SetExtraData(buildExtraData(
 		common.HexToAddress(input.MinerAddress()),
