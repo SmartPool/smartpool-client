@@ -62,9 +62,14 @@ func promptUserPassPhrase(acc string) (string, error) {
 
 func Run(c *cli.Context) error {
 	input := Initialize(c)
+	if input.KeystorePath() == "" {
+		fmt.Printf("You have to specify keystore path by --keystore. Abort!\n")
+		return nil
+	}
 	smartpool.Output = &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
-	address, ok := geth.GetAddress(
+	go ethereumWorkPool.Cleanning()
+	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
 	)
@@ -113,7 +118,16 @@ func Run(c *cli.Context) error {
 			} else {
 				fmt.Printf("Your keystore: %s\n", input.KeystorePath())
 				fmt.Printf("Your miner address: %s\n", input.MinerAddress())
-				fmt.Printf("We couldn't find your miner address private key in the keystore path you specified.\nPlease make sure your keystore path exists.\nAbort!\n")
+				if len(addresses) > 0 {
+					fmt.Printf("We couldn't find your miner address private key in the keystore path you specified. We found following addresses:\n")
+					for i, addr := range addresses {
+						fmt.Printf("%d. %s\n", i+1, addr.Hex())
+					}
+					fmt.Printf("Please make sure you entered correct miner address.\n")
+				} else {
+					fmt.Printf("We couldn't find any private keys in your keystore path.\n")
+					fmt.Printf("Please make sure your keystore path exists.\nAbort!\n")
+				}
 			}
 			return nil
 		}

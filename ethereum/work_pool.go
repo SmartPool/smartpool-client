@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"github.com/SmartPool/smartpool-client"
+	"time"
 )
 
 // workpool keeps track of pending works to ensure that each submitted solution
@@ -38,4 +39,20 @@ func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 
 func (wp WorkPool) AddWork(w *Work) {
 	wp[w.ID()] = w
+}
+
+func (wp WorkPool) Cleanning() {
+	ticker := time.Tick(140 * time.Second)
+	for _ = range ticker {
+		count := 0
+		for hash, work := range wp {
+			if time.Since(work.createdAt) > 7*(12*time.Second) {
+				delete(wp, hash)
+				count += 1
+			}
+		}
+		if count > 0 {
+			smartpool.Output.Printf("Cleaned %d old works.\n", count)
+		}
+	}
 }

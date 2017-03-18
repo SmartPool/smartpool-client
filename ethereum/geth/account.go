@@ -17,29 +17,31 @@ func (ma MinerAccount) KeyFile() string         { return ma.keyFile }
 func (ma MinerAccount) PassPhrase() string      { return ma.passphrase }
 func (ma MinerAccount) Address() common.Address { return ma.address }
 
-func GetAddress(keystorePath string, address common.Address) (common.Address, bool) {
+func GetAddress(keystorePath string, address common.Address) (common.Address, bool, []common.Address) {
 	keys := keystore.NewKeyStore(
 		keystorePath,
 		keystore.StandardScryptN,
 		keystore.StandardScryptP,
 	)
 	var acc accounts.Account
+	addresses := []common.Address{}
 	defaultAcc := big.NewInt(0)
 	if address.Big().Cmp(defaultAcc) == 0 {
 		if len(keys.Accounts()) == 0 {
-			return address, false
+			return address, false, addresses
 		}
 		acc = keys.Accounts()[0]
 	} else {
 		for _, a := range keys.Accounts() {
+			addresses = append(addresses, a.Address)
 			if a.Address == address {
 				acc = a
 				break
 			}
-			return address, false
 		}
+		return address, false, addresses
 	}
-	return acc.Address, true
+	return acc.Address, true, addresses
 }
 
 // Get the first account in key store

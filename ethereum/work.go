@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
+	"time"
 )
 
 // Work represents Ethereum pow work
@@ -19,6 +20,7 @@ type Work struct {
 	powHash         string
 	seedHash        string
 	shareDifficulty *big.Int
+	createdAt       time.Time
 }
 
 func (w *Work) ID() string {
@@ -54,5 +56,5 @@ func (w Work) BlockHeader() *types.Header {
 }
 
 func NewWork(h *types.Header, ph string, sh string, diff *big.Int) *Work {
-	return &Work{h, ph, sh, diff}
+	return &Work{h, ph, sh, diff, time.Now()}
 }
