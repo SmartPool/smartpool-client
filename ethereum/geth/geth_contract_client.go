@@ -1,6 +1,7 @@
 package geth
 
 import (
+	"errors"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -44,13 +45,24 @@ func (cc *GethContractClient) CanRegister() bool {
 }
 
 func (cc *GethContractClient) Register(paymentAddress common.Address) error {
+	blockNo, err := cc.node.BlockNumber()
+	if err != nil {
+		smartpool.Output.Printf("Registering address %s failed. Error: %s\n", err)
+		return err
+	}
 	tx, err := cc.pool.Register(cc.transactor, paymentAddress)
 	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
 	if err != nil {
 		smartpool.Output.Printf("Registering address %s failed. Error: %s\n", err)
 		return err
 	}
-	NewTxWatcher(tx, cc.node).Wait()
+	errCode, errInfo := NewTxWatcher(
+		tx, cc.node, blockNo, RegisterEventTopic,
+		cc.sender.Big()).Wait()
+	if errCode.Cmp(common.Big0) != 0 {
+		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		return errors.New(ErrorMsg(errCode, errInfo))
+	}
 	smartpool.Output.Printf("Registered address %s to SmartPool contract. Tx %s is confirmed\n", paymentAddress.Hex(), tx.Hash().Hex())
 	return nil
 }
@@ -70,13 +82,24 @@ func (cc *GethContractClient) SubmitClaim(
 	min *big.Int,
 	max *big.Int,
 	augMerkle *big.Int) error {
+	blockNo, err := cc.node.BlockNumber()
+	if err != nil {
+		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
+		return err
+	}
 	tx, err := cc.pool.SubmitClaim(cc.transactor,
 		numShares, difficulty, min, max, augMerkle)
 	if err != nil {
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	NewTxWatcher(tx, cc.node).Wait()
+	errCode, errInfo := NewTxWatcher(
+		tx, cc.node, blockNo, SubmitClaimEventTopic,
+		cc.sender.Big()).Wait()
+	if errCode.Cmp(common.Big0) != 0 {
+		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		return errors.New(ErrorMsg(errCode, errInfo))
+	}
 	return nil
 }
 
@@ -88,6 +111,11 @@ func (cc *GethContractClient) VerifyClaim(
 	witnessForLookup []*big.Int,
 	augCountersBranch []*big.Int,
 	augHashesBranch []*big.Int) error {
+	blockNo, err := cc.node.BlockNumber()
+	if err != nil {
+		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
+		return err
+	}
 	tx, err := cc.pool.VerifyClaim(cc.transactor,
 		rlpHeader, nonce, shareIndex, dataSetLookup,
 		witnessForLookup, augCountersBranch, augHashesBranch)
@@ -95,18 +123,35 @@ func (cc *GethContractClient) VerifyClaim(
 		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
 		return err
 	}
-	NewTxWatcher(tx, cc.node).Wait()
+	errCode, errInfo := NewTxWatcher(
+		tx, cc.node, blockNo, VerifyClaimEventTopic,
+		cc.sender.Big()).Wait()
+	if errCode.Cmp(common.Big0) != 0 {
+		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		return errors.New(ErrorMsg(errCode, errInfo))
+	}
 	return nil
 }
 
 func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128Resolution []uint64, branchDepth []uint64, epoch []*big.Int) error {
+	blockNo, err := cc.node.BlockNumber()
+	if err != nil {
+		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
+		return err
+	}
 	tx, err := cc.pool.SetEpochData(cc.transactor,
 		merkleRoot, fullSizeIn128Resolution, branchDepth, epoch)
 	if err != nil {
 		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
 		return err
 	}
-	NewTxWatcher(tx, cc.node).Wait()
+	errCode, errInfo := NewTxWatcher(
+		tx, cc.node, blockNo, SetEpochDataEventTopic,
+		cc.sender.Big()).Wait()
+	if errCode.Cmp(common.Big0) != 0 {
+		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		return errors.New(ErrorMsg(errCode, errInfo))
+	}
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"math/big"
 )
 
 type RPCClient interface {
@@ -12,4 +13,6 @@ type RPCClient interface {
 	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
 	SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool
 	IsVerified(h common.Hash) bool
+	BlockNumber() (*big.Int, error)
+	GetLog(from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
 }
