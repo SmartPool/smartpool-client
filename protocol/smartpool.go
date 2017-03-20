@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// const balanceThreshold = common.HexToHash("0xDE0B6B3A7640000").Big()
+
 // SmartPool represent smartpool protocol which interacts smartpool high level
 // interfaces and types together to do following procedures:
 // 1. Register the miner if needed
@@ -65,6 +67,9 @@ func (sp *SmartPool) Register(addr common.Address) bool {
 	return true
 }
 
+// func (sp *SmartPool) BalanceOk() bool {
+// }
+
 // GetWork returns miner work
 func (sp *SmartPool) GetWork() smartpool.Work {
 	return sp.NetworkClient.GetWork()
@@ -103,17 +108,17 @@ func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
 // the claim then verify it.
 // It returns true when the claim is fully verified and accepted by the
 // contract. It returns false otherwise.
-func (sp *SmartPool) Submit() bool {
+func (sp *SmartPool) Submit() (bool, error) {
 	claim := sp.GetCurrentClaim(sp.ShareThreshold)
 	if claim == nil {
-		return false
+		return false, nil
 	}
 	sp.LatestCounter = claim.Max()
 	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
-		return false
+		return false, subErr
 	}
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
 	smartpool.Output.Printf("Waiting for verification index...")
@@ -122,11 +127,11 @@ func (sp *SmartPool) Submit() bool {
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		smartpool.Output.Printf("%s\n", verErr)
-		return false
+		return false, verErr
 	}
 	smartpool.Output.Printf("Claim is successfully verified.\n")
 	smartpool.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
-	return true
+	return true, nil
 }
 
 func (sp *SmartPool) actOnTick() {
@@ -135,10 +140,10 @@ func (sp *SmartPool) actOnTick() {
 			smartpool.Output.Printf("Recovered in actOnTick: %v\n", r)
 		}
 	}()
-	var ok bool
+	var err error
 	for _ = range sp.ticker {
-		ok = sp.Submit()
-		if !ok && sp.HotStop {
+		_, err = sp.Submit()
+		if err != nil && sp.HotStop {
 			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
 			break
 		}

@@ -105,3 +105,6 @@ type NetworkClient interface {
 type ShareReceiver interface {
 	AcceptSolution(s Solution) Share
 }
+
+type PoolMonitor interface {
+}
