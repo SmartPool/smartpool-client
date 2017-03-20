@@ -43,12 +43,15 @@ func ErrorMsg(errCode, errInfo *big.Int) string {
 		smartpool.Output.Printf("ErrorMap is not welformed for errCode(0x%s)\n", errCode.Text(16))
 		return ""
 	} else {
+		msg := infos[1]
+		function := infos[0]
+		name := infos[2]
 		return fmt.Sprintf(
-			"Contract returned error code 0x%s(%s). Function(%s)-Name(%s)-Value(0x%s)\n",
+			"Contract returned error code 0x%s. \n%s: %s. %s is 0x%s\n",
 			errCode.Text(16),
-			infos[1],
-			infos[0],
-			infos[2],
+			function,
+			msg,
+			name,
 			errInfo.Text(16),
 		)
 	}

@@ -60,7 +60,7 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 		tx, cc.node, blockNo, RegisterEventTopic,
 		cc.sender.Big()).Wait()
 	if errCode.Cmp(common.Big0) != 0 {
-		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
 	}
 	smartpool.Output.Printf("Registered address %s to SmartPool contract. Tx %s is confirmed\n", paymentAddress.Hex(), tx.Hash().Hex())
@@ -97,7 +97,7 @@ func (cc *GethContractClient) SubmitClaim(
 		tx, cc.node, blockNo, SubmitClaimEventTopic,
 		cc.sender.Big()).Wait()
 	if errCode.Cmp(common.Big0) != 0 {
-		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
 	}
 	return nil
@@ -127,7 +127,7 @@ func (cc *GethContractClient) VerifyClaim(
 		tx, cc.node, blockNo, VerifyClaimEventTopic,
 		cc.sender.Big()).Wait()
 	if errCode.Cmp(common.Big0) != 0 {
-		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
 	}
 	return nil
@@ -149,7 +149,7 @@ func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128R
 		tx, cc.node, blockNo, SetEpochDataEventTopic,
 		cc.sender.Big()).Wait()
 	if errCode.Cmp(common.Big0) != 0 {
-		smartpool.Output.Printf("Error code: %s - Error info: %s\n", errCode, errInfo)
+		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
 	}
 	return nil
