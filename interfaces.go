@@ -107,4 +107,7 @@ type ShareReceiver interface {
 }
 
 type PoolMonitor interface {
+	RequireClientUpdate() bool
+	RequireContractUpdate() bool
+	ContractAddress() common.Address
 }

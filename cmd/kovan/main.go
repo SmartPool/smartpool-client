@@ -106,6 +106,15 @@ func Run(c *cli.Context) error {
 		ethereumWorkPool,
 	)
 	ethereumClaimRepo := protocol.NewInMemClaimRepo()
+	ethereumPoolMonitor, err := geth.NewPoolMonitor(
+		common.HexToAddress(input.ContractAddress()),
+		smartpool.VERSION,
+		input.RPCEndpoint(),
+	)
+	if err != nil {
+		fmt.Printf("Couln't connect to gateway.\n")
+		return err
+	}
 	var gethContractClient *geth.GethContractClient
 	for {
 		if ok {
@@ -144,6 +153,7 @@ func Run(c *cli.Context) error {
 	}
 	ethereumContract := ethereum.NewContract(gethContractClient)
 	ethminer.SmartPool = protocol.NewSmartPool(
+		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
 		ethereumClaimRepo, ethereumContract,
 		common.HexToAddress(input.MinerAddress()),
@@ -162,7 +172,7 @@ func BuildAppCommandLine() *cli.App {
 	app := cli.NewApp()
 	app.Description = "Efficient Decentralized Mining Pools for Existing Cryptocurrencies Based on Ethereum Smart Contracts"
 	app.Name = "SmartPool commandline tool"
-	app.Version = "0.0.1"
+	app.Version = smartpool.VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "rpc",
@@ -175,12 +185,12 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.UintFlag{
 			Name:  "threshold",
-			Value: 10,
+			Value: 50,
 			Usage: "Minimum number of shares in a claim. SmartPool will not submit the claim if it does not have more than or equal to this threshold numer of share.",
 		},
 		cli.UintFlag{
 			Name:  "diff",
-			Value: 100000,
+			Value: 1000000,
 			Usage: "Difficulty of a share.",
 		},
 		cli.StringFlag{

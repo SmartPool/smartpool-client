@@ -47,15 +47,13 @@ func (cc *GethContractClient) CanRegister() bool {
 func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 	blockNo, err := cc.node.BlockNumber()
 	if err != nil {
-		smartpool.Output.Printf("Registering address %s failed. Error: %s\n", err)
 		return err
 	}
 	tx, err := cc.pool.Register(cc.transactor, paymentAddress)
-	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
 	if err != nil {
-		smartpool.Output.Printf("Registering address %s failed. Error: %s\n", err)
 		return err
 	}
+	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
 	errCode, errInfo := NewTxWatcher(
 		tx, cc.node, blockNo, RegisterEventTopic,
 		cc.sender.Big()).Wait()

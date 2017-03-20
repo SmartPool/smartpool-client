@@ -9,6 +9,7 @@ import (
 
 func newTestSmartPool() *SmartPool {
 	return NewSmartPool(
+		&testPoolMonitor{},
 		&testShareReceiver{},
 		&testNetworkClient{},
 		&testClaimRepo{},
@@ -105,7 +106,7 @@ func TestSmartPoolSubmitCorrectClaim(t *testing.T) {
 
 func TestSmartPoolReturnFalseIfNoClaim(t *testing.T) {
 	sp := newTestSmartPool()
-	if sp.Submit() {
+	if ok, _ := sp.Submit(); ok {
 		t.Fail()
 	}
 }
@@ -114,7 +115,7 @@ func TestSmartPoolSuccessfullySubmitAndVerifyClaim(t *testing.T) {
 	sp := newTestSmartPool()
 	sp.ShareThreshold = 1
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
-	if !sp.Submit() {
+	if ok, _ := sp.Submit(); !ok {
 		t.Fail()
 	}
 }
@@ -146,7 +147,7 @@ func TestSmartPoolSubmitReturnFalseWhenUnableToSubmit(t *testing.T) {
 	c := sp.Contract.(*testContract)
 	c.SubmitFailed = true
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
-	if sp.Submit() {
+	if ok, _ := sp.Submit(); ok {
 		t.Fail()
 	}
 }
@@ -156,7 +157,7 @@ func TestSmartPoolSubmitReturnFalseWhenUnableToVerify(t *testing.T) {
 	c := sp.Contract.(*testContract)
 	c.VerifyFailed = true
 	sp.AcceptSolution(&testSolution{Counter: big.NewInt(9)})
-	if sp.Submit() {
+	if ok, _ := sp.Submit(); ok {
 		t.Fail()
 	}
 }
