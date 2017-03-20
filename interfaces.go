@@ -24,6 +24,7 @@ type UserInput interface {
 	ContractAddress() string
 	MinerAddress() string
 	ExtraData() string
+	HotStop() bool
 }
 
 // Global output mechanism

@@ -7,6 +7,7 @@ import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
+	"os"
 	"time"
 )
 
@@ -31,6 +32,7 @@ type SmartPool struct {
 	MinerAddress   common.Address
 	SubmitInterval time.Duration
 	ShareThreshold int
+	HotStop        bool
 	loopStarted    bool
 	ticker         <-chan time.Time
 }
@@ -79,6 +81,7 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
 	}
 	if share == nil || share.Counter().Cmp(sp.LatestCounter) <= 0 {
+		smartpool.Output.Printf("Share is discarded.\n")
 		return false
 	}
 	sp.ClaimRepo.AddShare(share)
@@ -113,15 +116,15 @@ func (sp *SmartPool) Submit() bool {
 		return false
 	}
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
-	smartpool.Output.Printf("Waiting for verification index.\n")
+	smartpool.Output.Printf("Waiting for verification index...")
 	index := sp.GetVerificationIndex(claim)
-	smartpool.Output.Printf("Verification index of %d has been requested. Submitting verification for the claim.\n", index.Int64())
+	smartpool.Output.Printf("Verification index of %d has been requested. Submitting claim verification.\n", index.Int64())
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
-		smartpool.Output.Printf("Got error verifing claim: %s\n", verErr)
+		smartpool.Output.Printf("%s\n", verErr)
 		return false
 	}
-	smartpool.Output.Printf("Verified the claim.\n")
+	smartpool.Output.Printf("Claim is successfully verified.\n")
 	smartpool.Output.Printf("Set Latest Counter to %s.\n", claim.Max())
 	return true
 }
@@ -132,9 +135,15 @@ func (sp *SmartPool) actOnTick() {
 			smartpool.Output.Printf("Recovered in actOnTick: %v\n", r)
 		}
 	}()
+	var ok bool
 	for _ = range sp.ticker {
-		sp.Submit()
+		ok = sp.Submit()
+		if !ok && sp.HotStop {
+			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--hot-stop false\".\n")
+			break
+		}
 	}
+	os.Exit(1)
 }
 
 // Run can be called at most once to start a loop to submit and verify claims
@@ -161,7 +170,7 @@ func (sp *SmartPool) Run() bool {
 func NewSmartPool(
 	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
 	cr ClaimRepo, co smartpool.Contract, ma common.Address,
-	interval time.Duration, threshold int) *SmartPool {
+	interval time.Duration, threshold int, hotStop bool) *SmartPool {
 	return &SmartPool{
 		ShareReceiver:  sr,
 		NetworkClient:  nc,
@@ -170,6 +179,7 @@ func NewSmartPool(
 		MinerAddress:   ma,
 		SubmitInterval: interval,
 		ShareThreshold: threshold,
+		HotStop:        hotStop,
 		loopStarted:    false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
 		LatestCounter: big.NewInt(0),

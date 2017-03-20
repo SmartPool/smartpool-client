@@ -15,6 +15,7 @@ type Input struct {
 	contractAddr    string
 	minerAddr       string
 	extraData       string
+	hotStop         bool
 }
 
 func (i *Input) RPCEndpoint() string           { return i.rpcEndPoint }
@@ -25,6 +26,7 @@ func (i *Input) SubmitInterval() time.Duration { return i.submitInterval }
 func (i *Input) ContractAddress() string       { return i.contractAddr }
 func (i *Input) MinerAddress() string          { return i.minerAddr }
 func (i *Input) ExtraData() string             { return i.extraData }
+func (i *Input) HotStop() bool                 { return i.hotStop }
 func (i *Input) SetMinerAddress(addr common.Address) {
 	i.minerAddr = addr.Hex()
 }
@@ -41,9 +43,10 @@ func NewInput(
 	contractAddr string,
 	minerAddr string,
 	extraData string,
+	hotStop bool,
 ) *Input {
 	return &Input{
 		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData,
+		submitInterval, contractAddr, minerAddr, extraData, hotStop,
 	}
 }

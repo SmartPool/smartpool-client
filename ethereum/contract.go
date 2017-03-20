@@ -33,7 +33,7 @@ func (c *Contract) Register(paymentAddress common.Address) error {
 }
 
 func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
-	fmt.Printf("Mix: 0x%s - Max: 0x%s - Diff: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16), claim.Difficulty().Text(16))
+	fmt.Printf("Min: 0x%s - Max: 0x%s - Diff: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16), claim.Difficulty().Text(16))
 	return c.client.SubmitClaim(
 		claim.NumShares(), claim.Difficulty(),
 		claim.Min(), claim.Max(), claim.AugMerkle().Big())

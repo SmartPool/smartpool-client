@@ -41,10 +41,14 @@ func Initialize(c *cli.Context) *smartpool.Input {
 	contractAddr := c.String("spcontract")
 	// minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	minerAddr := c.String("miner")
+	hotStop := !c.Bool("no-hot-stop")
+	if hotStop {
+		fmt.Printf("SmartPool is in Hot-Stop mode: It will exit immediately if the contract returns errors.\n")
+	}
 	extraData := ""
 	return smartpool.NewInput(
 		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData,
+		submitInterval, contractAddr, minerAddr, extraData, hotStop,
 	)
 }
 
@@ -144,6 +148,7 @@ func Run(c *cli.Context) error {
 		ethereumClaimRepo, ethereumContract,
 		common.HexToAddress(input.MinerAddress()),
 		input.SubmitInterval(), input.ShareThreshold(),
+		input.HotStop(),
 	)
 	server := ethminer.NewRPCServer(
 		smartpool.Output,
@@ -186,6 +191,10 @@ func BuildAppCommandLine() *cli.App {
 		cli.StringFlag{
 			Name:  "miner",
 			Usage: "The address that would be paid by SmartPool. This is often your address. (Default: First account in your keystore.)",
+		},
+		cli.BoolFlag{
+			Name:  "no-hot-stop",
+			Usage: "If hot-stop is true, SmartPool will stop running once it got an error returned from the Contract",
 		},
 	}
 	app.Action = Run
