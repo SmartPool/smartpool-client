@@ -49,7 +49,7 @@ func Initialize(c *cli.Context) *smartpool.Input {
 }
 
 func promptUserPassPhrase(acc string) (string, error) {
-	fmt.Printf("Using account address: %s\n", acc)
+	fmt.Printf("Using miner address: %s\n", acc)
 	fmt.Printf("Please enter passphrase: ")
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	fmt.Printf("\n")
@@ -125,7 +125,7 @@ func Run(c *cli.Context) error {
 				fmt.Printf("Your keystore: %s\n", input.KeystorePath())
 				fmt.Printf("Your miner address: %s\n", input.MinerAddress())
 				if len(addresses) > 0 {
-					fmt.Printf("We couldn't find your miner address private key in the keystore path you specified. We found following addresses:\n")
+					fmt.Printf("We couldn't find the private key of your miner address in the keystore path you specified. We found following addresses:\n")
 					for i, addr := range addresses {
 						fmt.Printf("%d. %s\n", i+1, addr.Hex())
 					}

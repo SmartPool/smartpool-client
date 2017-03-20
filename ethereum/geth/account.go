@@ -23,7 +23,7 @@ func GetAddress(keystorePath string, address common.Address) (common.Address, bo
 		keystore.StandardScryptN,
 		keystore.StandardScryptP,
 	)
-	var acc accounts.Account
+	var acc *accounts.Account
 	addresses := []common.Address{}
 	for _, a := range keys.Accounts() {
 		addresses = append(addresses, a.Address)
@@ -33,14 +33,16 @@ func GetAddress(keystorePath string, address common.Address) (common.Address, bo
 		if len(keys.Accounts()) == 0 {
 			return address, false, addresses
 		}
-		acc = keys.Accounts()[0]
+		acc = &keys.Accounts()[0]
 	} else {
 		for _, a := range keys.Accounts() {
 			if a.Address == address {
-				acc = a
+				acc = &a
 				break
 			}
 		}
+	}
+	if acc == nil {
 		return address, false, addresses
 	}
 	return acc.Address, true, addresses
