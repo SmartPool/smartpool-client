@@ -7,15 +7,34 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
 	"math/big"
+	"sync"
+	"time"
 )
+
+var BlockTime = 4 * time.Second
 
 type KovanRPC struct {
 	*GethRPC
+	mu            sync.Mutex
+	lastTimestamp *big.Int
+	lastTime      time.Time
 }
 
-func (k KovanRPC) GetWork() *ethereum.Work {
+func (k *KovanRPC) GetWork() *ethereum.Work {
 	var h *types.Header
 	h = k.GethRPC.GetPendingBlockHeader()
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.lastTimestamp != nil {
+		if time.Since(k.lastTime) > BlockTime {
+			h.Time.Add(k.lastTimestamp, big.NewInt(1))
+		}
+	}
+	if k.lastTimestamp == nil || k.lastTimestamp.Cmp(h.Time) != 0 {
+		k.lastTimestamp = big.NewInt(0)
+		k.lastTimestamp.Set(h.Time)
+		k.lastTime = time.Now()
+	}
 	seedHash, err := ethash.GetSeedHash(uint64(h.Number.Int64()))
 	if err != nil {
 		panic(err)
@@ -25,7 +44,7 @@ func (k KovanRPC) GetWork() *ethereum.Work {
 }
 
 // never submit solution to the node because in Kovan, miners can't propose blocks
-func (k KovanRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
+func (k *KovanRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
 	return false
 }
 
@@ -34,5 +53,10 @@ func NewKovanRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*Kova
 	if err != nil {
 		return nil, err
 	}
-	return &KovanRPC{&GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff}}, nil
+	return &KovanRPC{
+		&GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff},
+		sync.Mutex{},
+		nil,
+		time.Now(),
+	}, nil
 }

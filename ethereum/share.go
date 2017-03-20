@@ -63,18 +63,19 @@ func (s *Share) RlpHeaderWithoutNonce() ([]byte, error) {
 	return buffer.Bytes(), err
 }
 
-func (s *Share) Timestamp() big.Int {
-	return *s.blockHeader.Time
+func (s *Share) Timestamp() *big.Int {
+	return s.blockHeader.Time
 }
 
 // We use concatenation of timestamp and nonce
 // as share counter
 // Nonce in ethereum is 8 bytes so counter = timestamp << 64 + nonce
 func (s *Share) Counter() *big.Int {
-	t := s.Timestamp()
-	t.Lsh(&t, 64)
+	t := big.NewInt(0)
+	t.Set(s.Timestamp())
+	t.Lsh(t, 64)
 	n := big.NewInt(0).SetBytes(s.nonce[:])
-	return t.Add(&t, n)
+	return t.Add(t, n)
 }
 
 func (s *Share) Hash() (result smartpool.SPHash) {

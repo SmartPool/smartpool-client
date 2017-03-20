@@ -25,7 +25,7 @@ func Initialize() *smartpool.Input {
 	extraData := ""
 	return smartpool.NewInput(
 		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData,
+		submitInterval, contractAddr, minerAddr, extraData, false,
 	)
 }
 

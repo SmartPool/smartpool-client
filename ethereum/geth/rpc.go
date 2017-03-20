@@ -39,20 +39,20 @@ type GethRPC struct {
 	ShareDifficulty *big.Int
 }
 
-func (g GethRPC) ClientVersion() (string, error) {
+func (g *GethRPC) ClientVersion() (string, error) {
 	result := ""
 	err := g.client.Call(&result, "web3_clientVersion")
 	return result, err
 }
 
-func (g GethRPC) BlockNumber() (*big.Int, error) {
+func (g *GethRPC) BlockNumber() (*big.Int, error) {
 	str := ""
 	err := g.client.Call(&str, "eth_blockNumber")
 	result := common.HexToHash(str).Big()
 	return result, err
 }
 
-func (g GethRPC) GetPendingBlockHeader() *types.Header {
+func (g *GethRPC) GetPendingBlockHeader() *types.Header {
 	header := jsonHeader{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", "pending", false)
 	if err != nil {
@@ -82,7 +82,7 @@ func (g GethRPC) GetPendingBlockHeader() *types.Header {
 	return &result
 }
 
-func (g GethRPC) GetBlockHeader(number int) *types.Header {
+func (g *GethRPC) GetBlockHeader(number int) *types.Header {
 	header := types.Header{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", number, false)
 	if err != nil {
@@ -96,7 +96,7 @@ type gethWork [3]string
 
 func (w gethWork) PoWHash() string { return w[0] }
 
-func (g GethRPC) GetWork() *ethereum.Work {
+func (g *GethRPC) GetWork() *ethereum.Work {
 	w := gethWork{}
 	var h *types.Header
 	for {
@@ -115,13 +115,13 @@ func (g GethRPC) GetWork() *ethereum.Work {
 	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty)
 }
 
-func (g GethRPC) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
+func (g *GethRPC) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
 	var result bool
 	g.client.Call(&result, "eth_submitHashrate", hashrate, id)
 	return result
 }
 
-func (g GethRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
+func (g *GethRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
 	var result bool
 	g.client.Call(&result, "eth_submitWork", nonce, hash, mixDigest)
 	return result
@@ -144,7 +144,7 @@ type logs []struct {
 	Topics           []string `json:"topics,omitempty"`
 }
 
-func (g GethRPC) GetLog(
+func (g *GethRPC) GetLog(
 	from *big.Int, event *big.Int,
 	sender *big.Int) (*big.Int, *big.Int) {
 	param := filter{
@@ -187,7 +187,7 @@ type jsonTransaction struct {
 	BlockHash string `json:"blockHash"`
 }
 
-func (g GethRPC) IsVerified(h common.Hash) bool {
+func (g *GethRPC) IsVerified(h common.Hash) bool {
 	result := jsonTransaction{}
 	g.client.Call(&result, "eth_getTransactionByHash", h)
 	return result.BlockHash != "" && result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"

@@ -35,7 +35,7 @@ func Initialize() *smartpool.Input {
 	extraData := buildExtraData(common.HexToAddress(minerAddr), shareDifficulty)
 	return smartpool.NewInput(
 		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData,
+		submitInterval, contractAddr, minerAddr, extraData, false,
 	)
 }
 
@@ -100,6 +100,7 @@ func main() {
 		ethereumClaimRepo, ethereumContract,
 		common.HexToAddress(input.MinerAddress()),
 		input.SubmitInterval(), input.ShareThreshold(),
+		input.HotStop(),
 	)
 	server := ethminer.NewRPCServer(
 		output,

@@ -139,7 +139,7 @@ func (sp *SmartPool) actOnTick() {
 	for _ = range sp.ticker {
 		ok = sp.Submit()
 		if !ok && sp.HotStop {
-			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--hot-stop false\".\n")
+			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
 			break
 		}
 	}
