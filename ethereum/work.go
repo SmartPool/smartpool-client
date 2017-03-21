@@ -27,6 +27,10 @@ func (w *Work) ID() string {
 	return w.powHash
 }
 
+func (w *Work) CreatedAt() time.Time {
+	return w.createdAt
+}
+
 func (w *Work) AcceptSolution(sol smartpool.Solution) smartpool.Share {
 	solution := sol.(*Solution)
 	s := &Share{
