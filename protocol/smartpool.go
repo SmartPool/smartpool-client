@@ -9,11 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"os"
+	"sync"
 	"time"
 )
-
-const BalanceThreshold = 1.0 // ether
-//common.HexToHash("0xDE0B6B3A7640000").Big()
 
 // SmartPool represent smartpool protocol which interacts smartpool high level
 // interfaces and types together to do following procedures:
@@ -40,6 +38,7 @@ type SmartPool struct {
 	HotStop        bool
 	loopStarted    bool
 	ticker         <-chan time.Time
+	counterMu      sync.RWMutex
 }
 
 // Register registers miner address to the contract.
@@ -82,6 +81,8 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 // counter of the last verified claim
 func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
+	sp.counterMu.RLock()
+	defer sp.counterMu.RUnlock()
 	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
 	}
@@ -104,17 +105,26 @@ func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
 	return sp.Contract.GetShareIndex(claim)
 }
 
+func (sp *SmartPool) SealClaim() smartpool.Claim {
+	sp.counterMu.Lock()
+	defer sp.counterMu.Unlock()
+	claim := sp.GetCurrentClaim(sp.ShareThreshold)
+	if claim != nil {
+		sp.LatestCounter = claim.Max()
+		smartpool.Output.Printf("Set Latest Counter to 0x%s.\n", sp.LatestCounter.Text(16))
+	}
+	return claim
+}
+
 // Submit does all the protocol that communicates with the contract to submit
 // the claim then verify it.
 // It returns true when the claim is fully verified and accepted by the
 // contract. It returns false otherwise.
 func (sp *SmartPool) Submit() (bool, error) {
-	claim := sp.GetCurrentClaim(sp.ShareThreshold)
+	claim := sp.SealClaim()
 	if claim == nil {
 		return false, nil
 	}
-	sp.LatestCounter = claim.Max()
-	smartpool.Output.Printf("Set Latest Counter to 0x%s.\n", sp.LatestCounter.Text(16))
 	if sp.PoolMonitor.RequireClientUpdate() {
 		return false, errors.New("client update required")
 	}
@@ -211,5 +221,6 @@ func NewSmartPool(
 		loopStarted:    false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
 		LatestCounter: big.NewInt(0),
+		counterMu:     sync.RWMutex{},
 	}
 }

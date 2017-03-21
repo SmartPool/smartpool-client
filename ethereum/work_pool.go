@@ -33,12 +33,12 @@ func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 		smartpool.Output.Printf("Solution (%v) is invalid\n", s)
 		return nil
 	} else {
-		smartpool.Output.Printf(
-			"Create share for work: ID: %s - createdAt: %s - timestamp: 0x%s\n",
-			work.ID(),
-			work.CreatedAt(),
-			work.BlockHeader().Time.Text(16),
-		)
+		// smartpool.Output.Printf(
+		// 	"Create share for work: ID: %s - createdAt: %s - timestamp: 0x%s\n",
+		// 	work.ID(),
+		// 	work.CreatedAt(),
+		// 	work.BlockHeader().Time.Text(16),
+		// )
 		return share
 	}
 }
