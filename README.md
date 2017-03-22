@@ -1,4 +1,4 @@
-# Smartpool - The first decentralized smart contract pool (alpha)
+# Smartpool - The first decentralized mining pool based on smart contract (alpha)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/SmartPool/Lobby)
 
 [Smartpool](http://smartpool.io) is [live on Kovan testnet](https://kovan.etherscan.io/address/0x0398ae5a974fe8179b6b0ab9baf4d5f366e932bf).
