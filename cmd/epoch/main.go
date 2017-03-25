@@ -26,7 +26,7 @@ func Initialize(c *cli.Context) *Input {
 	rpcEndPoint := c.String("rpc")
 	keystorePath := c.String("keystore")
 	contractAddr := "0x3dC682397e93E46EBb5bE7463658fdD658365e9D"
-	minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
+	minerAddr := c.String("account")
 	from := c.Uint("from")
 	to := c.Uint("to")
 	return &Input{
@@ -156,6 +156,10 @@ func BuildAppCommandLine() *cli.App {
 		cli.StringFlag{
 			Name:  "keystore",
 			Usage: "Keystore path to your ethereum account private key. SmartPool will look for private key of the miner address you specified in that path.",
+		},
+		cli.StringFlag{
+			Name:  "account",
+			Usage: "The address that is used to submit epoch data (Default: First account in your keystore.)",
 		},
 		cli.UintFlag{
 			Name:  "from",
