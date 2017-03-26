@@ -24,3 +24,7 @@ func (s *testShare) Hash() smartpool.SPHash {
 func (s *testShare) ShareDifficulty() *big.Int {
 	return s.d
 }
+
+func (s *testShare) FullSolution() bool {
+	return true
+}
