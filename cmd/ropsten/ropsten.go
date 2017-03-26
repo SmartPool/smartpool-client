@@ -175,6 +175,7 @@ func BuildAppCommandLine() *cli.App {
 	app := cli.NewApp()
 	app.Description = "Efficient Decentralized Mining Pools for Existing Cryptocurrencies Based on Ethereum Smart Contracts"
 	app.Name = "SmartPool commandline tool"
+	app.Usage = "SmartPool client for ropsten ethereum chain"
 	app.Version = smartpool.VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
