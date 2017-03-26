@@ -83,6 +83,9 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
+	if share.FullSolution() {
+		sp.NetworkClient.SubmitSolution(s)
+	}
 	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
 	}

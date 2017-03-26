@@ -39,6 +39,10 @@ func (s *Share) NonceBig() *big.Int {
 	return n
 }
 
+func (s *Share) FullSolution() bool {
+	return s.SolutionState == 2
+}
+
 func (s *Share) BlockHeader() *types.Header {
 	return s.blockHeader
 }

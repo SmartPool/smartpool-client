@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-var PoolMonitorAddress = common.HexToAddress("0x7727D4535f1A9c9ECC59FB17B6bF8145C7d5D58c")
+// var PoolMonitorAddress = common.HexToAddress("0x7727D4535f1A9c9ECC59FB17B6bF8145C7d5D58c")
+var PoolMonitorAddress = common.HexToAddress("0xddcdad6b099b1b237bdb1341cc6881eb63ee3b28")
 
 type PoolMonitor struct {
 	client   *PoolMonitorClient
