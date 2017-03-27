@@ -193,6 +193,14 @@ func (g *GethRPC) IsVerified(h common.Hash) bool {
 	return result.BlockHash != "" && result.BlockHash != "0x0000000000000000000000000000000000000000000000000000000000000000"
 }
 
+func (g *GethRPC) Syncing() bool {
+	result := ""
+	g.client.Call(&result, "net_peerCount")
+	peerCount := common.HexToHash(result).Big().Uint64()
+	fmt.Printf("peerCount: %d\n", peerCount)
+	return peerCount == uint64(0)
+}
+
 func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*GethRPC, error) {
 	client, err := rpc.DialHTTP(endpoint)
 	if err != nil {

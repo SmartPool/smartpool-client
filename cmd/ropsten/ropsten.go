@@ -103,7 +103,7 @@ func Run(c *cli.Context) error {
 		gethRPC,
 		ethereumWorkPool,
 	)
-	ethereumClaimRepo := protocol.NewInMemClaimRepo()
+	ethereumClaimRepo := ethereum.NewTimestampClaimRepo()
 	ethereumPoolMonitor, err := geth.NewPoolMonitor(
 		common.HexToAddress(input.ContractAddress()),
 		smartpool.VERSION,

@@ -98,6 +98,9 @@ type NetworkClient interface {
 	// so the full block solution can take credits. It also maintain workflow
 	// between miner and the network client.
 	SubmitSolution(s Solution) bool
+	// ReadyToMine returns true when the network is ready to give and accept
+	// pow work and solution. It returns false otherwise.
+	ReadyToMine() bool
 }
 
 // ShareReceiver represents SmartPool itself which accepts solutions from

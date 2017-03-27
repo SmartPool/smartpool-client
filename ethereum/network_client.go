@@ -26,6 +26,10 @@ func (nc *NetworkClient) SubmitSolution(s smartpool.Solution) bool {
 	return nc.rpc.SubmitWork(sol.Nonce, sol.Hash, sol.MixDigest)
 }
 
+func (nc *NetworkClient) ReadyToMine() bool {
+	return !nc.rpc.Syncing()
+}
+
 func NewNetworkClient(rpc RPCClient, workpool *WorkPool) *NetworkClient {
 	return &NetworkClient{
 		rpc, workpool,

@@ -13,6 +13,7 @@ type RPCClient interface {
 	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
 	SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool
 	IsVerified(h common.Hash) bool
+	Syncing() bool
 	BlockNumber() (*big.Int, error)
 	GetLog(from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
 }
