@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"os"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -84,6 +85,7 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
 	if share.FullSolution() {
+		smartpool.Output.Printf("-->Yay! We found potential block!<--\n")
 		sp.NetworkClient.SubmitSolution(s)
 	}
 	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
@@ -163,6 +165,7 @@ func (sp *SmartPool) actOnTick() {
 	defer func() {
 		if r := recover(); r != nil {
 			smartpool.Output.Printf("Recovered in actOnTick: %v\n", r)
+			debug.PrintStack()
 		}
 	}()
 	var err error
@@ -196,8 +199,16 @@ func (sp *SmartPool) Run() bool {
 			smartpool.Output.Printf("Warning: calling Run() multiple times\n")
 			return false
 		}
-		sp.ticker = time.Tick(sp.SubmitInterval)
-		go sp.actOnTick()
+		for {
+			if sp.NetworkClient.ReadyToMine() {
+				smartpool.Output.Printf("The network is ready for mining.\n")
+				sp.ticker = time.Tick(sp.SubmitInterval)
+				go sp.actOnTick()
+				break
+			}
+			smartpool.Output.Printf("The network is not ready for mining yet. Try in 5s...\n")
+			time.Sleep(5 * time.Second)
+		}
 		sp.loopStarted = true
 		smartpool.Output.Printf("Share collector is running...\n")
 		return true
