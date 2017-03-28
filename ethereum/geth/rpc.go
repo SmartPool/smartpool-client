@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"log"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -199,6 +200,37 @@ func (g *GethRPC) Syncing() bool {
 	peerCount := common.HexToHash(result).Big().Uint64()
 	fmt.Printf("peerCount: %d\n", peerCount)
 	return peerCount == uint64(0)
+}
+
+func (g *GethRPC) SetEtherbase(etherbase common.Address) error {
+	client, err := g.ClientVersion()
+	if err != nil {
+		return err
+	}
+	result := false
+	if strings.HasPrefix(client, "Geth") {
+		err = g.client.Call(&result, "miner_setEtherbase", etherbase)
+	} else {
+		// Client must be Parity
+		err = g.client.Call(&result, "parity_setAuthor", etherbase)
+	}
+	return err
+}
+
+func (g *GethRPC) SetExtradata(extradata string) error {
+	client, err := g.ClientVersion()
+	if err != nil {
+		return err
+	}
+	result := false
+	if strings.HasPrefix(client, "Geth") {
+		err = g.client.Call(&result, "miner_setExtra", extradata)
+	} else {
+		// Client must be Parity
+		err = g.client.Call(&result, "parity_setExtraData",
+			common.StringToHash(extradata))
+	}
+	return err
 }
 
 func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*GethRPC, error) {

@@ -27,19 +27,22 @@ import (
 // 5. Then Submit the claim to the contract
 // 6. Then If successful, submit the claim proof to the contract.
 type SmartPool struct {
-	PoolMonitor    smartpool.PoolMonitor
-	ShareReceiver  smartpool.ShareReceiver
-	NetworkClient  smartpool.NetworkClient
-	Contract       smartpool.Contract
-	ClaimRepo      ClaimRepo
-	LatestCounter  *big.Int
-	MinerAddress   common.Address
-	SubmitInterval time.Duration
-	ShareThreshold int
-	HotStop        bool
-	loopStarted    bool
-	ticker         <-chan time.Time
-	counterMu      sync.RWMutex
+	PoolMonitor     smartpool.PoolMonitor
+	ShareReceiver   smartpool.ShareReceiver
+	NetworkClient   smartpool.NetworkClient
+	Contract        smartpool.Contract
+	ClaimRepo       ClaimRepo
+	LatestCounter   *big.Int
+	ContractAddress common.Address
+	MinerAddress    common.Address
+	ExtraData       string
+	SubmitInterval  time.Duration
+	ShareThreshold  int
+	HotStop         bool
+	loopStarted     bool
+	ticker          <-chan time.Time
+	counterMu       sync.RWMutex
+	runMu           sync.Mutex
 }
 
 // Register registers miner address to the contract.
@@ -192,11 +195,19 @@ func (sp *SmartPool) actOnTick() {
 // after an interval.
 // If the loop has not been started, it starts the loop and return true, it
 // return false otherwise.
-// TODO: we need to have some lock here in case of concurrent invokes
 func (sp *SmartPool) Run() bool {
+	sp.runMu.Lock()
+	defer sp.runMu.Unlock()
 	if sp.Register(sp.MinerAddress) {
 		if sp.loopStarted {
 			smartpool.Output.Printf("Warning: calling Run() multiple times\n")
+			return false
+		}
+		err := sp.NetworkClient.Configure(
+			sp.ContractAddress,
+			sp.ExtraData,
+		)
+		if err != nil {
 			return false
 		}
 		for {
@@ -206,11 +217,11 @@ func (sp *SmartPool) Run() bool {
 				go sp.actOnTick()
 				break
 			}
-			smartpool.Output.Printf("The network is not ready for mining yet. Try in 5s...\n")
-			time.Sleep(5 * time.Second)
+			smartpool.Output.Printf("The network is not ready for mining yet. Retry in 10s...\n")
+			time.Sleep(10 * time.Second)
 		}
 		sp.loopStarted = true
-		smartpool.Output.Printf("Share collector is running...\n")
+		smartpool.Output.Printf("Share collector is running...")
 		return true
 	} else {
 		return false
@@ -218,23 +229,26 @@ func (sp *SmartPool) Run() bool {
 }
 
 func NewSmartPool(
-	pm smartpool.PoolMonitor,
-	sr smartpool.ShareReceiver, nc smartpool.NetworkClient,
-	cr ClaimRepo, co smartpool.Contract, ma common.Address,
+	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
+	nc smartpool.NetworkClient, cr ClaimRepo, co smartpool.Contract,
+	ca common.Address, ma common.Address, ed string,
 	interval time.Duration, threshold int, hotStop bool) *SmartPool {
 	return &SmartPool{
-		PoolMonitor:    pm,
-		ShareReceiver:  sr,
-		NetworkClient:  nc,
-		ClaimRepo:      cr,
-		Contract:       co,
-		MinerAddress:   ma,
-		SubmitInterval: interval,
-		ShareThreshold: threshold,
-		HotStop:        hotStop,
-		loopStarted:    false,
+		PoolMonitor:     pm,
+		ShareReceiver:   sr,
+		NetworkClient:   nc,
+		ClaimRepo:       cr,
+		Contract:        co,
+		ContractAddress: ca,
+		MinerAddress:    ma,
+		ExtraData:       ed,
+		SubmitInterval:  interval,
+		ShareThreshold:  threshold,
+		HotStop:         hotStop,
+		loopStarted:     false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
 		LatestCounter: big.NewInt(0),
 		counterMu:     sync.RWMutex{},
+		runMu:         sync.Mutex{},
 	}
 }

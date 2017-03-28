@@ -88,14 +88,11 @@ func Run(c *cli.Context) error {
 	client, err := gethRPC.ClientVersion()
 	if err != nil {
 		fmt.Printf("Node RPC server is unavailable.\n")
-		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\nRun Geth by following command (Note: --etherbase and --extradata params are required.):\n")
-		fmt.Printf(
-			"geth --testnet --rpc --etherbase \"%s\" --extradata \"%s\"\n",
-			input.ContractAddress(), input.ExtraData())
-		fmt.Printf("Or run Parity by following command (Note: --author and --extra-data params are required.)\n")
-		fmt.Printf(
-			"parity --chain ropsten --author \"%s\" --extra-data \"%s\"\n",
-			input.ContractAddress(), input.ExtraData())
+		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\n")
+		fmt.Printf("Run Geth by following command:\n")
+		fmt.Printf("geth --testnet --rpc --rpcapi \"db,eth,net,web3,miner\"\n")
+		fmt.Printf("Or run Parity by following command:\n")
+		fmt.Printf("parity --chain ropsten --jsonrpc-apis \"web3,eth,net,parity,traces,rpc,parity_set\"\n")
 		return err
 	}
 	fmt.Printf("Connected to Ethereum node: %s\n", client)
@@ -159,9 +156,10 @@ func Run(c *cli.Context) error {
 		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
 		ethereumClaimRepo, ethereumContract,
+		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
-		input.SubmitInterval(), input.ShareThreshold(),
-		input.HotStop(),
+		input.ExtraData(), input.SubmitInterval(),
+		input.ShareThreshold(), input.HotStop(),
 	)
 	server := ethminer.NewRPCServer(
 		smartpool.Output,
