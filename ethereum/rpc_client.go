@@ -16,4 +16,6 @@ type RPCClient interface {
 	Syncing() bool
 	BlockNumber() (*big.Int, error)
 	GetLog(from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
+	SetEtherbase(etherbase common.Address) error
+	SetExtradata(extradata string) error
 }

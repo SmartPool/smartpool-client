@@ -156,9 +156,10 @@ func Run(c *cli.Context) error {
 		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
 		ethereumClaimRepo, ethereumContract,
+		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
-		input.SubmitInterval(), input.ShareThreshold(),
-		input.HotStop(),
+		input.ExtraData(), input.SubmitInterval(),
+		input.ShareThreshold(), input.HotStop(),
 	)
 	server := ethminer.NewRPCServer(
 		smartpool.Output,

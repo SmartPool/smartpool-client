@@ -19,7 +19,7 @@ func NewRPCServer(output smartpool.UserOutput, port uint16) *Server {
 	service := SmartPoolService{}
 	rpcServer.RegisterName("eth", service)
 	return &Server{port, rpcServer, &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
 		Handler: rpcServer,
 	}, output}
 }
@@ -36,6 +36,6 @@ func (s *Server) Start() {
 		s.output.Printf("--------------------------\n")
 		s.server.ListenAndServe()
 	} else {
-		s.output.Printf("SmartPool couldn't run. Exit.")
+		s.output.Printf("SmartPool couldn't run. Exit.\n")
 	}
 }

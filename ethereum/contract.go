@@ -33,7 +33,7 @@ func (c *Contract) Register(paymentAddress common.Address) error {
 }
 
 func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
-	fmt.Printf("Min: 0x%s - Max: 0x%s - Diff: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16), claim.Difficulty().Text(16))
+	smartpool.Output.Printf("Min: 0x%s - Max: 0x%s - Diff: 0x%s\n", claim.Min().Text(16), claim.Max().Text(16), claim.Difficulty().Text(16))
 	return c.client.SubmitClaim(
 		claim.NumShares(), claim.Difficulty(),
 		claim.Min(), claim.Max(), claim.AugMerkle().Big())
@@ -81,7 +81,7 @@ func (c *Contract) SetEpochData(epochs ...int) error {
 	eps := []*big.Int{}
 	for _, epoch := range epochs {
 		eps = append(eps, big.NewInt(int64(epoch)))
-		fmt.Printf("Checking DAG file. Generate if needed...\n")
+		smartpool.Output.Printf("Checking DAG file. Generate if needed...\n")
 		fullSize, _ := ethash.MakeDAGWithSize(uint64(epoch*30000), "")
 		fullSizeIn128Resolution := fullSize / 128
 		sizes = append(sizes, fullSizeIn128Resolution)
