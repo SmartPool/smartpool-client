@@ -57,8 +57,8 @@ To run smartpool you must have a testnet Kovan account with least 0.5 Ether. You
 3. `./kovan_compile.sh`
 
 ### Running
-1. Run Parity on Kovan testnet. `parity --chain kovan`
-2. Run smartpool client `./smartpool --keystore keystore_path --miner account --spcontract 0x0398ae5a974FE8179B6B0ab9baF4d5f366E932Bf`
+1. Run Parity on Kovan testnet. `parity --chain kovan --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
+2. Run smartpool client `./kovan --keystore keystore_path --miner account --spcontract 0x0398ae5a974FE8179B6B0ab9baF4d5f366E932Bf`
 Where
 - `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
 - `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
