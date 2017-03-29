@@ -50,7 +50,7 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) {
 func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
-	smartpool.Output.Printf("Have %d eligible shares\n", cr.noShares)
+	smartpool.Output.Printf("Have %d valid shares\n", cr.noShares)
 	smartpool.Output.Printf("Current timestamp: 0x%s\n", cr.recentTimestamp.Text(16))
 	smartpool.Output.Printf("Shares with current timestamp: %d\n", cr.noRecentShares)
 	if cr.noShares < uint64(threshold) {
