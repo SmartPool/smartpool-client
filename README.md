@@ -23,7 +23,8 @@ The client is currently tested only on Mac OS and Ubuntu.
 We support CPU and GPU mining with [ethminer](https://github.com/ethereum/cpp-ethereum) version 1.2.9 or higher.
 
 #### ETH balance
-To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. You can get testnet Ethers from [metamask faucets](https://faucet.metamask.io/) or ping us on our gitter channel.
+To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. You can get testnet Ethers from [metamask faucets](https://faucet.metamask.io/) or ping us on our [gitter channel](https://gitter.im/SmartPool/Lobby).
+
 *Note:* To get Ether from metamask faucet, you need to install metamask browser add-on.
 
 
@@ -38,8 +39,9 @@ To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. Y
 Where
 - `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
 - `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
+E.g., `./smartpool --keystore ~/Library/Ethereum/testnet/keystore --miner 0xe034afdcc2ba0441ff215ee9ba0da3e86450108d`
 3. Enter your key passphrase.
-4. Run `ethminer -F localhost:1633`
+4. Run `ethminer -F localhost:1633` or `ethminer -G -F localhost:1633` if you mine with your GPU.
 
 ## Kovan testnet
 
@@ -63,7 +65,7 @@ Where
 - `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
 - `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
 3. Enter your key passphrase.
-4. Run `ethminer -F localhost:1633`
+4. Run `ethminer -F localhost:1633` or `ethminer -G -F localhost:1633` if you mine with your GPU.
 
 ## Support
 Contact us at [gitter](https://gitter.im/SmartPool/Lobby) for support.
