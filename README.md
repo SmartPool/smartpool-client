@@ -35,12 +35,11 @@ To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. Y
 
 ### Running
 1. Run Geth on Ropsten testnet: `geth --testnet --fast --rpc --rpcapi "db,eth,net,web3,miner"` or Parity: `parity --chain ropsten --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
-2. Run smartpool client `./smartpool --keystore keystore_path --miner account`
+2. Run smartpool client `./smartpool --keystore keystore_path --miner account`.
 Where
 - `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
-- `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
-
-E.g., `./smartpool --keystore ~/Library/Ethereum/testnet/keystore --miner 0xe034afdcc2ba0441ff215ee9ba0da3e86450108d`
+- `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`.
+- E.g., `./smartpool --keystore ~/Library/Ethereum/testnet/keystore --miner 0xe034afdcc2ba0441ff215ee9ba0da3e86450108d`.
 3. Enter your key passphrase.
 4. Run `ethminer -F localhost:1633` or `ethminer -G -F localhost:1633` if you mine with your GPU.
 
@@ -61,7 +60,7 @@ To run smartpool you must have a testnet Kovan account with least 0.5 Ether. You
 
 ### Running
 1. Run Parity on Kovan testnet. `parity --chain kovan --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
-2. Run smartpool client `./kovan --keystore keystore_path --miner account --spcontract 0x0398ae5a974FE8179B6B0ab9baF4d5f366E932Bf`
+2. Run smartpool client `./kovan --keystore keystore_path --miner account --spcontract 0x0398ae5a974FE8179B6B0ab9baF4d5f366E932Bf`.
 Where
 - `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
 - `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
