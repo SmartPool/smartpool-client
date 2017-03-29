@@ -131,6 +131,9 @@ type Share interface {
 	// Hash return the hash of the share to be used as leaf hash of the augmented
 	// merkle tree.
 	Hash() SPHash
+	// FullSolution returns true if the share is solution for its full block pow
+	// hash. It returns false otherwise.
+	FullSolution() bool
 }
 
 // Claim represent a batch of shares which needs to reorganize its shares in

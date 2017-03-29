@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
@@ -27,19 +28,12 @@ func buildExtraData(address common.Address, diff *big.Int) string {
 
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
-	// rpcEndPoint := "http://localhost:8545"
 	rpcEndPoint := c.String("rpc")
-	// rpcEndPoint := "/Users/victor/Library/Application Support/io.parity.ethereum/jsonrpc.ipc"
-	// keystorePath := "/Users/victor/Library/Application Support/io.parity.ethereum/keys/kovan"
 	keystorePath := c.String("keystore")
-	// shareThreshold := 5
 	shareThreshold := int(c.Uint("threshold"))
-	// shareDifficulty := big.NewInt(100000)
 	shareDifficulty := big.NewInt(int64(c.Uint("diff")))
 	submitInterval := 1 * time.Minute
-	// contractAddr := "0x92a71342C2EaBc92d09b83a8C82D48F41C0ddbaf"
 	contractAddr := c.String("spcontract")
-	// minerAddr := "0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"
 	minerAddr := c.String("miner")
 	hotStop := !c.Bool("no-hot-stop")
 	if hotStop {
@@ -87,33 +81,39 @@ func Run(c *cli.Context) error {
 	input.SetExtraData(buildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
-	kovanRPC, _ := geth.NewKovanRPC(
+	gethRPC, _ := geth.NewGethRPC(
 		input.RPCEndpoint(), input.ContractAddress(),
 		input.ExtraData(), input.ShareDifficulty(),
 	)
-	client, err := kovanRPC.ClientVersion()
+	client, err := gethRPC.ClientVersion()
 	if err != nil {
 		fmt.Printf("Node RPC server is unavailable.\n")
-		fmt.Printf("Make sure you have Parity installed. If you do, you can:\nRun Parity by following command (Note: --author and --extra-data params are required.):\n")
-		fmt.Printf(
-			"parity --chain kovan --author \"%s\" --extra-data \"%s\"\n",
-			input.ContractAddress(), input.ExtraData())
+		fmt.Printf("Make sure you have Geth or Parity installed. If you do, you can:\n")
+		fmt.Printf("Run Geth by following command:\n")
+		fmt.Printf("geth --testnet --rpc --rpcapi \"db,eth,net,web3,miner\"\n")
+		fmt.Printf("Or run Parity by following command:\n")
+		fmt.Printf("parity --chain ropsten --jsonrpc-apis \"web3,eth,net,parity,traces,rpc,parity_set\"\n")
 		return err
 	}
 	fmt.Printf("Connected to Ethereum node: %s\n", client)
 	ethereumNetworkClient := ethereum.NewNetworkClient(
-		kovanRPC,
+		gethRPC,
 		ethereumWorkPool,
 	)
-	ethereumClaimRepo := protocol.NewInMemClaimRepo()
+	ethereumClaimRepo := ethereum.NewTimestampClaimRepo()
 	ethereumPoolMonitor, err := geth.NewPoolMonitor(
 		common.HexToAddress(input.ContractAddress()),
 		smartpool.VERSION,
 		input.RPCEndpoint(),
 	)
+	contractAddr := ethereumPoolMonitor.ContractAddress()
 	if err != nil {
 		fmt.Printf("Couln't connect to gateway.\n")
 		return err
+	}
+	if contractAddr.Big().Cmp(common.Big0) == 0 {
+		fmt.Printf("Couldn't get SmartPool contract address from gateway.\n")
+		return errors.New("Contract address is not set on the gateway")
 	}
 	var gethContractClient *geth.GethContractClient
 	for {
@@ -122,7 +122,7 @@ func Run(c *cli.Context) error {
 				input.MinerAddress(),
 			)
 			gethContractClient, err = geth.NewGethContractClient(
-				common.HexToAddress(input.ContractAddress()), kovanRPC,
+				common.HexToAddress(input.ContractAddress()), gethRPC,
 				common.HexToAddress(input.MinerAddress()),
 				input.RPCEndpoint(), input.KeystorePath(), passphrase,
 			)
@@ -173,6 +173,7 @@ func BuildAppCommandLine() *cli.App {
 	app := cli.NewApp()
 	app.Description = "Efficient Decentralized Mining Pools for Existing Cryptocurrencies Based on Ethereum Smart Contracts"
 	app.Name = "SmartPool commandline tool"
+	app.Usage = "SmartPool client for ropsten ethereum chain"
 	app.Version = smartpool.VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -196,7 +197,7 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.StringFlag{
 			Name:  "spcontract",
-			Value: "0xd73E3A427600412C4569e7f41A5F4528E10d1274",
+			Value: "0xf7d93BCB8e4372F46383ecee82f9adF1aA397BA9",
 			Usage: "SmartPool latest contract address.",
 		},
 		cli.StringFlag{

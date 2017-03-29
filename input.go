@@ -33,6 +33,9 @@ func (i *Input) SetMinerAddress(addr common.Address) {
 func (i *Input) SetExtraData(extra string) {
 	i.extraData = extra
 }
+func (i *Input) SetContractAddress(addr common.Address) {
+	i.contractAddr = addr.Hex()
+}
 
 func NewInput(
 	rpcEndPoint string,

@@ -23,6 +23,7 @@ type GethContractClient struct {
 func (cc *GethContractClient) Version() string {
 	v, err := cc.pool.Version(nil)
 	if err != nil {
+		smartpool.Output.Printf("Couldn't get contract version: %s\n", err)
 		return ""
 	}
 	return v
@@ -31,6 +32,7 @@ func (cc *GethContractClient) Version() string {
 func (cc *GethContractClient) IsRegistered() bool {
 	ok, err := cc.pool.IsRegistered(nil, cc.sender)
 	if err != nil {
+		smartpool.Output.Printf("Couldn't check the address's registration: %s\n", err)
 		return false
 	}
 	return ok
@@ -39,6 +41,7 @@ func (cc *GethContractClient) IsRegistered() bool {
 func (cc *GethContractClient) CanRegister() bool {
 	ok, err := cc.pool.CanRegister(nil, cc.sender)
 	if err != nil {
+		smartpool.Output.Printf("Couldn't check slot availability for the address: %s\n", err)
 		return false
 	}
 	return ok
@@ -187,7 +190,7 @@ func NewGethContractClient(
 		return nil, err
 	}
 	// TODO: make gas price one command line flag
-	auth.GasPrice = big.NewInt(10000000000)
+	auth.GasPrice = big.NewInt(20000000000)
 	smartpool.Output.Printf("Done.\n")
 	return &GethContractClient{pool, auth, node, miner}, nil
 }

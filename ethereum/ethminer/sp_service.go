@@ -32,14 +32,10 @@ func (SmartPoolService) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) 
 }
 
 func (SmartPoolService) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
-	// Because it's time critical when miner found a full block so just broadcast
-	// everything miner submitted
-	nc := SmartPool.NetworkClient.(*ethereum.NetworkClient)
 	sol := &ethereum.Solution{
 		Nonce:     nonce,
 		Hash:      hash,
 		MixDigest: mixDigest,
 	}
-	nc.SubmitSolution(sol)
 	return SmartPool.AcceptSolution(sol)
 }
