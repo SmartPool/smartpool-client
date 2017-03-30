@@ -10,22 +10,19 @@ import (
 func newTestSmartPool() *SmartPool {
 	return NewSmartPool(
 		&testPoolMonitor{},
-		&testShareReceiver{},
-		&testNetworkClient{},
-		&testClaimRepo{},
-		&testContract{},
+		&testShareReceiver{}, &testNetworkClient{},
+		&testClaimRepo{}, &testContract{},
 		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
-		time.Minute,
-		100,
-		false,
+		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
+		"extradata", time.Minute,
+		100, true,
 	)
 }
 
 func TestSmartPoolRegisterMinerAfterRegister(t *testing.T) {
 	sp := newTestSmartPool()
-	testContract := newTestContract()
+	testContract := sp.Contract.(*testContract)
 	testContract.Registered = true
-	sp.Contract = testContract
 	if !sp.Register(common.Address{}) {
 		t.Fail()
 	}
@@ -33,9 +30,8 @@ func TestSmartPoolRegisterMinerAfterRegister(t *testing.T) {
 
 func TestSmartPoolRegisterMinerWhenUnableToRegister(t *testing.T) {
 	sp := newTestSmartPool()
-	testContract := newTestContract()
+	testContract := sp.Contract.(*testContract)
 	testContract.Registerable = false
-	sp.Contract = testContract
 	if sp.Register(common.Address{}) {
 		t.Fail()
 	}
@@ -43,7 +39,7 @@ func TestSmartPoolRegisterMinerWhenUnableToRegister(t *testing.T) {
 
 func TestSmartPoolRegisterMinerWhenAbleToRegister(t *testing.T) {
 	sp := newTestSmartPool()
-	testContract := newTestContract()
+	testContract := sp.Contract.(*testContract)
 	testContract.Registerable = true
 	sp.Contract = testContract
 	if !sp.Register(common.Address{}) {
@@ -196,6 +192,87 @@ func TestSmartPoolOnlySubmitWhenMeetShareThreshold(t *testing.T) {
 	sp.Run()
 	time.Sleep(60 * time.Millisecond)
 	if c.GetLastSubmittedClaim() != nil {
+		t.Fail()
+	}
+}
+
+func TestSmartPoolOnlyRunAfterNetworkReady(t *testing.T) {
+	sp := newTestSmartPool()
+	testContract := sp.Contract.(*testContract)
+	testContract.Registered = true
+	nw := sp.NetworkClient.(*testNetworkClient)
+	nw.NotReadyToMine = true
+	ran := make(chan bool, 1)
+	timeout := make(chan bool, 1)
+	go func() {
+		ran <- sp.Run()
+	}()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		timeout <- true
+	}()
+	select {
+	case <-ran:
+		t.Fail()
+	case <-timeout:
+		break
+	}
+}
+
+func TestSmartPoolStopIfClientVersionChangedInHotStopMode(t *testing.T) {
+	sp := newTestSmartPool()
+	testContract := sp.Contract.(*testContract)
+	testContract.Registered = true
+	timeout := make(chan bool, 1)
+	sp.PoolMonitor.(*testPoolMonitor).ClientUpdate = true
+	sp.Run()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		timeout <- true
+	}()
+	select {
+	case <-sp.SubmitterStopped:
+		break
+	case <-timeout:
+		t.Fail()
+	}
+}
+
+func TestSmartPoolDoesntStopIfHotStopModeIsDisabled(t *testing.T) {
+	sp := newTestSmartPool()
+	sp.HotStop = false
+	testContract := sp.Contract.(*testContract)
+	testContract.Registered = true
+	timeout := make(chan bool, 1)
+	sp.PoolMonitor.(*testPoolMonitor).ContractUpdate = true
+	sp.Run()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		timeout <- true
+	}()
+	select {
+	case <-sp.SubmitterStopped:
+		t.Fail()
+	case <-timeout:
+		break
+	}
+}
+
+func TestSmartPoolStopIfContractAddressChangedInHotStopMode(t *testing.T) {
+	sp := newTestSmartPool()
+	testContract := sp.Contract.(*testContract)
+	testContract.Registered = true
+	timeout := make(chan bool, 1)
+	sp.PoolMonitor.(*testPoolMonitor).ContractUpdate = true
+	sp.Run()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		timeout <- true
+	}()
+	select {
+	case <-sp.SubmitterStopped:
+		break
+	case <-timeout:
 		t.Fail()
 	}
 }
