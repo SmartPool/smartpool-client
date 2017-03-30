@@ -5,6 +5,7 @@ import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/rpc"
 	"net/http"
+	"os"
 )
 
 type Server struct {
@@ -29,6 +30,10 @@ func (s *Server) Start() {
 		panic("SmartPool instance must be initialized first.")
 	}
 	if SmartPool.Run() {
+		go func() {
+			<-SmartPool.SubmitterStopped
+			os.Exit(1)
+		}()
 		s.output.Printf("RPC Server is running...\n")
 		s.output.Printf("You can start mining now by running ethminer using following command:\n")
 		s.output.Printf("--------------------------\n")

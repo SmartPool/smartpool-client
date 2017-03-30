@@ -4,11 +4,9 @@
 package protocol
 
 import (
-	"errors"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
-	"os"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -27,22 +25,24 @@ import (
 // 5. Then Submit the claim to the contract
 // 6. Then If successful, submit the claim proof to the contract.
 type SmartPool struct {
-	PoolMonitor     smartpool.PoolMonitor
-	ShareReceiver   smartpool.ShareReceiver
-	NetworkClient   smartpool.NetworkClient
-	Contract        smartpool.Contract
-	ClaimRepo       ClaimRepo
-	LatestCounter   *big.Int
-	ContractAddress common.Address
-	MinerAddress    common.Address
-	ExtraData       string
-	SubmitInterval  time.Duration
-	ShareThreshold  int
-	HotStop         bool
-	loopStarted     bool
-	ticker          <-chan time.Time
-	counterMu       sync.RWMutex
-	runMu           sync.Mutex
+	PoolMonitor       smartpool.PoolMonitor
+	ShareReceiver     smartpool.ShareReceiver
+	NetworkClient     smartpool.NetworkClient
+	Contract          smartpool.Contract
+	ClaimRepo         ClaimRepo
+	LatestCounter     *big.Int
+	ContractAddress   common.Address
+	MinerAddress      common.Address
+	ExtraData         string
+	SubmitInterval    time.Duration
+	ShareThreshold    int
+	HotStop           bool
+	loopStarted       bool
+	ticker            <-chan time.Time
+	counterMu         sync.RWMutex
+	runMu             sync.Mutex
+	SubmitterStopped  chan bool
+	stopSubmitterChan chan bool
 }
 
 // Register registers miner address to the contract.
@@ -133,12 +133,6 @@ func (sp *SmartPool) Submit() (bool, error) {
 	if claim == nil {
 		return false, nil
 	}
-	if sp.PoolMonitor.RequireClientUpdate() {
-		return false, errors.New("client update required")
-	}
-	if sp.PoolMonitor.RequireContractUpdate() {
-		return false, errors.New("contract update required")
-	}
 	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	subErr := sp.Contract.SubmitClaim(claim)
 	if subErr != nil {
@@ -149,12 +143,6 @@ func (sp *SmartPool) Submit() (bool, error) {
 	smartpool.Output.Printf("Waiting for verification index...")
 	index := sp.GetVerificationIndex(claim)
 	smartpool.Output.Printf("Verification index of %d has been requested. Submitting claim verification.\n", index.Int64())
-	if sp.PoolMonitor.RequireClientUpdate() {
-		return false, errors.New("client update required")
-	}
-	if sp.PoolMonitor.RequireContractUpdate() {
-		return false, errors.New("contract update required")
-	}
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		smartpool.Output.Printf("%s\n", verErr)
@@ -162,6 +150,37 @@ func (sp *SmartPool) Submit() (bool, error) {
 	}
 	smartpool.Output.Printf("Claim is successfully verified.\n")
 	return true, nil
+}
+
+func (sp *SmartPool) stopSubmitter() {
+	sp.stopSubmitterChan <- true
+}
+
+func (sp *SmartPool) monitor() {
+	for {
+		if sp.PoolMonitor.RequireContractUpdate() {
+			smartpool.Output.Printf(
+				"We deployed new contract at %s. Please restart SmartPool client with --spcontract %s.\n",
+				sp.PoolMonitor.ContractAddress().Hex(),
+				sp.PoolMonitor.ContractAddress().Hex())
+			if sp.HotStop {
+				sp.stopSubmitter()
+				return
+			}
+		}
+		if sp.PoolMonitor.RequireClientUpdate() {
+			smartpool.Output.Printf("Your SmartPool client is too old. Please update to new version by going to https://github.com/SmartPool/smartpool-client.\n")
+			if sp.HotStop {
+				sp.stopSubmitter()
+				return
+			}
+		}
+		time.Sleep(1 * time.Minute)
+	}
+}
+
+func (sp *SmartPool) SubmitterRunning() bool {
+	return sp.loopStarted
 }
 
 func (sp *SmartPool) actOnTick() {
@@ -172,23 +191,20 @@ func (sp *SmartPool) actOnTick() {
 		}
 	}()
 	var err error
-	for _ = range sp.ticker {
-		_, err = sp.Submit()
-		if err != nil && err.Error() == "client update required" {
-			smartpool.Output.Printf("Your SmartPool client is too old. Please update to new version by going to https://github.com/SmartPool/smartpool-client.\n")
-		}
-		if err != nil && err.Error() == "contract update required" {
-			smartpool.Output.Printf(
-				"We deployed new contract at %s. Please restart SmartPool client with --spcontract %s.\n",
-				sp.PoolMonitor.ContractAddress().Hex(),
-				sp.PoolMonitor.ContractAddress().Hex())
-		}
-		if err != nil && sp.HotStop {
-			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
-			break
+Loop:
+	for {
+		select {
+		case <-sp.ticker:
+			_, err = sp.Submit()
+			if err != nil && sp.HotStop {
+				smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running when it's not able to submit claims to contract, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
+				break Loop
+			}
+		case <-sp.stopSubmitterChan:
+			break Loop
 		}
 	}
-	os.Exit(1)
+	sp.SubmitterStopped <- true
 }
 
 // Run can be called at most once to start a loop to submit and verify claims
@@ -214,14 +230,15 @@ func (sp *SmartPool) Run() bool {
 			if sp.NetworkClient.ReadyToMine() {
 				smartpool.Output.Printf("The network is ready for mining.\n")
 				sp.ticker = time.Tick(sp.SubmitInterval)
+				go sp.monitor()
 				go sp.actOnTick()
+				sp.loopStarted = true
+				smartpool.Output.Printf("Share collector is running...")
 				break
 			}
 			smartpool.Output.Printf("The network is not ready for mining yet. Retry in 10s...\n")
 			time.Sleep(10 * time.Second)
 		}
-		sp.loopStarted = true
-		smartpool.Output.Printf("Share collector is running...")
 		return true
 	} else {
 		return false
@@ -247,8 +264,10 @@ func NewSmartPool(
 		HotStop:         hotStop,
 		loopStarted:     false,
 		// TODO: should be persist between startups instead of having 0 hardcoded
-		LatestCounter: big.NewInt(0),
-		counterMu:     sync.RWMutex{},
-		runMu:         sync.Mutex{},
+		LatestCounter:     big.NewInt(0),
+		counterMu:         sync.RWMutex{},
+		runMu:             sync.Mutex{},
+		SubmitterStopped:  make(chan bool, 1),
+		stopSubmitterChan: make(chan bool, 1),
 	}
 }

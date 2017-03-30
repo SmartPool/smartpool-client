@@ -2,6 +2,7 @@ package protocol
 
 import (
 	"math/big"
+	"sync"
 	"testing"
 )
 
@@ -9,6 +10,7 @@ func TestInMemClaimRepoGetSpecificClaim(t *testing.T) {
 	cr := &InMemClaimRepo{
 		map[int]*Claim{0: NewClaim()},
 		0,
+		sync.Mutex{},
 	}
 	claim := cr.GetClaim(0)
 	if claim.NumShares().Int64() != 0 {
