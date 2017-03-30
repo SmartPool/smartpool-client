@@ -33,6 +33,7 @@ To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. Y
 2. `cd smartpool-client`
 3. `./compile.sh`
 
+*Note:* If you are on MacOS, there is a issue with Go and XCode 8.3 that might make you see `killed     ./smartpool` error. To fix this issue, please run `build/env.sh go build -o smartpool cmd/ropsten/ropsten.go -ldflags -s` instead of ./compile.sh.
 ### Running
 1. Run Geth on Ropsten testnet: `geth --testnet --fast --rpc --rpcapi "db,eth,net,web3,miner"` or Parity: `parity --chain ropsten --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
 2. Run smartpool client `./smartpool --keystore keystore_path --miner account`.
