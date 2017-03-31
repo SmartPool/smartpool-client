@@ -42,14 +42,6 @@ type UserOutput interface {
 	Printf(format string, a ...interface{}) (n int, err error)
 }
 
-// PersistentStorage is the gateway for smartpool to interact with external
-// persistent storage such as a file system, a database or even a cloud based
-// service.
-// Smartpool should only persist something via this interface.
-type PersistentStorage interface {
-	// TODO: Add necessary methods
-}
-
 // Contract is the interface for smartpool to interact with contract side of
 // SmartPool protocol.
 // Contract can be used for only one caller (Ethereum account) per
