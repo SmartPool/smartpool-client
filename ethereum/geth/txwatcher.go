@@ -1,7 +1,10 @@
 package geth
 
 import (
+	"errors"
+	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"time"
@@ -36,10 +39,38 @@ func (tw *TxWatcher) loop() {
 	}
 }
 
-func (tw *TxWatcher) Wait() (*big.Int, *big.Int) {
+func (tw *TxWatcher) WaitAndRetry() (*big.Int, *big.Int, error) {
+	errCode, errInfo, err := tw.Wait()
+	if err != nil {
+		smartpool.Output.Printf("Rebroadcast tx: %s...\n", tw.tx.Hash().Hex())
+		hash, err := tw.node.Broadcast(tw.tx.Data())
+		if err != nil {
+			return nil, nil, err
+		}
+		if hash.Big().Cmp(common.Big0) == 0 {
+			return nil, nil, errors.New("Rebroadcast tx got 0 tx hash. This is not supposed to happend.")
+		}
+		return tw.Wait()
+	} else {
+		return errCode, errInfo, err
+	}
+}
+
+func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
+	timeout := make(chan bool, 1)
 	go tw.loop()
-	<-tw.verChan
-	return tw.node.GetLog(tw.block, tw.event, tw.sender)
+	go func() {
+		time.Sleep(10 * time.Minute)
+		timeout <- true
+	}()
+	select {
+	case <-tw.verChan:
+		break
+	case <-timeout:
+		return nil, nil, errors.New("timeout error")
+	}
+	errCode, errInfo := tw.node.GetLog(tw.block, tw.event, tw.sender)
+	return errCode, errInfo, nil
 }
 
 func NewTxWatcher(

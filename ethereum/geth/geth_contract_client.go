@@ -57,9 +57,13 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 		return err
 	}
 	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
-	errCode, errInfo := NewTxWatcher(
+	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, RegisterEventTopic,
-		cc.sender.Big()).Wait()
+		cc.sender.Big()).WaitAndRetry()
+	if err != nil {
+		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
+		return err
+	}
 	if errCode.Cmp(common.Big0) != 0 {
 		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
@@ -94,9 +98,13 @@ func (cc *GethContractClient) SubmitClaim(
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo := NewTxWatcher(
+	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, SubmitClaimEventTopic,
-		cc.sender.Big()).Wait()
+		cc.sender.Big()).WaitAndRetry()
+	if err != nil {
+		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
+		return err
+	}
 	if errCode.Cmp(common.Big0) != 0 {
 		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
@@ -124,9 +132,13 @@ func (cc *GethContractClient) VerifyClaim(
 		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo := NewTxWatcher(
+	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, VerifyClaimEventTopic,
-		cc.sender.Big()).Wait()
+		cc.sender.Big()).WaitAndRetry()
+	if err != nil {
+		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
+		return err
+	}
 	if errCode.Cmp(common.Big0) != 0 {
 		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
@@ -146,9 +158,13 @@ func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128R
 		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo := NewTxWatcher(
+	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, SetEpochDataEventTopic,
-		cc.sender.Big()).Wait()
+		cc.sender.Big()).WaitAndRetry()
+	if err != nil {
+		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
+		return err
+	}
 	if errCode.Cmp(common.Big0) != 0 {
 		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
 		return errors.New(ErrorMsg(errCode, errInfo))
