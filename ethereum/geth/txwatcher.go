@@ -1,7 +1,9 @@
 package geth
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -43,8 +45,14 @@ func (tw *TxWatcher) WaitAndRetry() (*big.Int, *big.Int, error) {
 	errCode, errInfo, err := tw.Wait()
 	if err != nil {
 		smartpool.Output.Printf("Rebroadcast tx: %s...\n", tw.tx.Hash().Hex())
-		hash, err := tw.node.Broadcast(tw.tx.Data())
+		buff := bytes.NewBuffer([]byte{})
+		err = tw.tx.EncodeRLP(buff)
 		if err != nil {
+			return nil, nil, err
+		}
+		hash, err := tw.node.Broadcast(buff.Bytes())
+		if err != nil {
+			smartpool.Output.Printf("Broadcast error: %s\n", err)
 			return nil, nil, err
 		}
 		if hash.Big().Cmp(common.Big0) == 0 {
