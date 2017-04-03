@@ -233,6 +233,13 @@ func (g *GethRPC) SetExtradata(extradata string) error {
 	return err
 }
 
+func (g *GethRPC) Broadcast(data []byte) (common.Hash, error) {
+	hash := common.Hash{}
+	err := g.client.Call(&hash, "eth_sendRawTransaction",
+		fmt.Sprintf("0x%s", common.Bytes2Hex(data)))
+	return hash, err
+}
+
 func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*GethRPC, error) {
 	client, err := rpc.DialHTTP(endpoint)
 	if err != nil {

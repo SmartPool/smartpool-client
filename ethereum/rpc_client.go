@@ -18,4 +18,5 @@ type RPCClient interface {
 	GetLog(from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
 	SetEtherbase(etherbase common.Address) error
 	SetExtradata(extradata string) error
+	Broadcast(raw []byte) (common.Hash, error)
 }
