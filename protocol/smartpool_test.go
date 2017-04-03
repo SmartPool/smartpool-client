@@ -276,23 +276,3 @@ func TestSmartPoolStopIfContractAddressChangedInHotStopMode(t *testing.T) {
 		t.Fail()
 	}
 }
-
-func TestSmartPoolRememberLatestCounterAfterFormAClaim(t *testing.T) {
-	sp := newTestSmartPool()
-	sp.ShareThreshold = 1
-	sp.LatestCounter = big.NewInt(5)
-	sp.AcceptSolution(&testSolution{Counter: big.NewInt(100)})
-	ct := sp.Contract.(*testContract)
-	ct.DelayedVerification = true
-	go sp.Submit()
-	t.Logf("latest counter: %s\n", sp.LatestCounter)
-	if sp.LatestCounter.Int64() != 100 {
-		t.Fail()
-	}
-}
-
-//
-// func TestSmartPoolConstructsAShare(t *testing.T) {
-// 	sp := newTestSmartPool()
-// }
-//
