@@ -59,7 +59,7 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
 	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, RegisterEventTopic,
-		cc.sender.Big()).WaitAndRetry()
+		cc.sender.Big()).Wait()
 	if err != nil {
 		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
@@ -100,7 +100,7 @@ func (cc *GethContractClient) SubmitClaim(
 	}
 	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, SubmitClaimEventTopic,
-		cc.sender.Big()).WaitAndRetry()
+		cc.sender.Big()).Wait()
 	if err != nil {
 		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
@@ -134,7 +134,7 @@ func (cc *GethContractClient) VerifyClaim(
 	}
 	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, VerifyClaimEventTopic,
-		cc.sender.Big()).WaitAndRetry()
+		cc.sender.Big()).Wait()
 	if err != nil {
 		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
@@ -160,7 +160,7 @@ func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128R
 	}
 	errCode, errInfo, err := NewTxWatcher(
 		tx, cc.node, blockNo, SetEpochDataEventTopic,
-		cc.sender.Big()).WaitAndRetry()
+		cc.sender.Big()).Wait()
 	if err != nil {
 		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err

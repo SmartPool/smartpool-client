@@ -3,7 +3,6 @@ package geth
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/common"
