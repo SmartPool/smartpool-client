@@ -164,6 +164,20 @@ func (sp *SmartPool) Submit() (bool, error) {
 	return true, nil
 }
 
+func (sp *SmartPool) shouldStop(err error) bool {
+	if err == nil {
+		return false
+	}
+	if err.Error() == "timeout error" {
+		smartpool.Output.Printf("The tx might not be verified. Current claim is dropped. Continue with next claim.\n")
+		return false
+	} else if sp.HotStop {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (sp *SmartPool) actOnTick() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -183,7 +197,7 @@ func (sp *SmartPool) actOnTick() {
 				sp.PoolMonitor.ContractAddress().Hex(),
 				sp.PoolMonitor.ContractAddress().Hex())
 		}
-		if err != nil && sp.HotStop {
+		if sp.shouldStop(err) {
 			smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
 			break
 		}
