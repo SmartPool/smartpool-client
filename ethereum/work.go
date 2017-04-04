@@ -20,6 +20,7 @@ type Work struct {
 	powHash         string
 	seedHash        string
 	shareDifficulty *big.Int
+	minerAddress    string
 	createdAt       time.Time
 }
 
@@ -38,6 +39,7 @@ func (w *Work) AcceptSolution(sol smartpool.Solution) smartpool.Share {
 		nonce:           solution.Nonce,
 		mixDigest:       solution.MixDigest,
 		shareDifficulty: w.ShareDifficulty(),
+		minerAddress:    w.minerAddress,
 	}
 	s.SolutionState = ethash.Instance.SolutionState(s, w.ShareDifficulty())
 	return s
@@ -59,6 +61,6 @@ func (w Work) BlockHeader() *types.Header {
 	return w.blockHeader
 }
 
-func NewWork(h *types.Header, ph string, sh string, diff *big.Int) *Work {
-	return &Work{h, ph, sh, diff, time.Now()}
+func NewWork(h *types.Header, ph string, sh string, diff *big.Int, miner string) *Work {
+	return &Work{h, ph, sh, diff, miner, time.Now()}
 }

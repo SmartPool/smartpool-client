@@ -84,6 +84,7 @@ func Run(c *cli.Context) error {
 	gethRPC, _ := geth.NewGethRPC(
 		input.RPCEndpoint(), input.ContractAddress(),
 		input.ExtraData(), input.ShareDifficulty(),
+		input.MinerAddress(),
 	)
 	client, err := gethRPC.ClientVersion()
 	if err != nil {
@@ -100,7 +101,6 @@ func Run(c *cli.Context) error {
 		gethRPC,
 		ethereumWorkPool,
 	)
-	ethereumClaimRepo := ethereum.NewTimestampClaimRepo()
 	ethereumPoolMonitor, err := geth.NewPoolMonitor(
 		common.HexToAddress(input.ContractAddress()),
 		smartpool.VERSION,
@@ -151,11 +151,16 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
+	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
+		input.ShareDifficulty(),
+		input.MinerAddress(),
+	)
 	ethereumContract := ethereum.NewContract(gethContractClient)
+	fileStorage := ethereum.NewFileStorage()
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, ethereumContract,
+		ethereumClaimRepo, fileStorage, ethereumContract,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),

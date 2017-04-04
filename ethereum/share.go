@@ -23,6 +23,7 @@ type Share struct {
 	nonce           types.BlockNonce
 	mixDigest       common.Hash
 	shareDifficulty *big.Int
+	minerAddress    string
 	SolutionState   int
 	dt              *mtree.DagTree
 }
@@ -33,6 +34,7 @@ func (s *Share) HashNoNonce() common.Hash  { return s.blockHeader.HashNoNonce() 
 func (s *Share) Nonce() uint64             { return s.nonce.Uint64() }
 func (s *Share) MixDigest() common.Hash    { return s.mixDigest }
 func (s *Share) NumberU64() uint64         { return s.blockHeader.Number.Uint64() }
+func (s *Share) MinerAddress() string      { return s.minerAddress }
 func (s *Share) NonceBig() *big.Int {
 	n := new(big.Int)
 	n.SetBytes(s.nonce[:])
@@ -164,12 +166,13 @@ func (s *Share) DAGProofArray() []*big.Int {
 	return result
 }
 
-func NewShare(h *types.Header, dif *big.Int) *Share {
+func NewShare(h *types.Header, dif *big.Int, miner string) *Share {
 	return &Share{
 		h,
 		types.BlockNonce{},
 		common.Hash{},
 		dif,
+		miner,
 		0,
 		nil,
 	}
