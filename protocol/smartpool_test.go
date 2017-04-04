@@ -11,7 +11,8 @@ func newTestSmartPool() *SmartPool {
 	return NewSmartPool(
 		&testPoolMonitor{},
 		&testShareReceiver{}, &testNetworkClient{},
-		&testClaimRepo{}, &testContract{},
+		&testClaimRepo{}, &testPersistentStorage{},
+		&testContract{},
 		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
 		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
 		"extradata", time.Minute,

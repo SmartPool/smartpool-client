@@ -90,6 +90,7 @@ func Run(c *cli.Context) error {
 	kovanRPC, _ := geth.NewKovanRPC(
 		input.RPCEndpoint(), input.ContractAddress(),
 		input.ExtraData(), input.ShareDifficulty(),
+		input.MinerAddress(),
 	)
 	client, err := kovanRPC.ClientVersion()
 	if err != nil {
@@ -152,10 +153,11 @@ func Run(c *cli.Context) error {
 		}
 	}
 	ethereumContract := ethereum.NewContract(gethContractClient)
+	fileStorage := ethereum.NewFileStorage()
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, ethereumContract,
+		ethereumClaimRepo, fileStorage, ethereumContract,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),

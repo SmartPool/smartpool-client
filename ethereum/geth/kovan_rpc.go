@@ -63,7 +63,7 @@ func (k *KovanRPC) GetWork() *ethereum.Work {
 		panic(err)
 	}
 	seed := common.BytesToHash(seedHash).Hex()
-	return ethereum.NewWork(h, h.HashNoNonce().Hex(), seed, k.ShareDifficulty)
+	return ethereum.NewWork(h, h.HashNoNonce().Hex(), seed, k.ShareDifficulty, k.MinerAddress)
 }
 
 // never submit solution to the node because in Kovan, miners can't propose blocks
@@ -71,7 +71,7 @@ func (k *KovanRPC) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Has
 	return false
 }
 
-func NewKovanRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*KovanRPC, error) {
+func NewKovanRPC(endpoint, contractAddr, extraData string, diff *big.Int, miner string) (*KovanRPC, error) {
 	client, err := rpc.Dial(endpoint)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func NewKovanRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*Kova
 		}
 	}
 	return &KovanRPC{
-		&GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff},
+		&GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff, miner},
 		sync.Mutex{},
 		t,
 		time.Now(),

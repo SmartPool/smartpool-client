@@ -10,6 +10,7 @@ echo "Install dependencies..."
 mustrun build/env.sh go get -v github.com/ethereum/go-ethereum
 mustrun build/env.sh go get -v golang.org/x/crypto/ssh/terminal
 mustrun build/env.sh go get -v gopkg.in/urfave/cli.v1
+mustrun build/env.sh go get -v github.com/mitchellh/go-homedir
 echo "Compiling SmartPool client..."
 mustrun build/env.sh go build -o kovan cmd/kovan/main.go
 echo "Done. You can run SmartPool by ./kovan --help"

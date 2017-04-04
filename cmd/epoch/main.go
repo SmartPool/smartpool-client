@@ -67,7 +67,7 @@ func Run(c *cli.Context) error {
 	input.MinerAddr = address.Hex()
 	gethRPC, _ := geth.NewGethRPC(
 		input.RpcEndPoint, input.ContractAddr,
-		"", big.NewInt(1),
+		"", big.NewInt(1), "",
 	)
 	client, err := gethRPC.ClientVersion()
 	if err != nil {

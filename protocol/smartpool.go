@@ -30,6 +30,7 @@ type SmartPool struct {
 	NetworkClient     smartpool.NetworkClient
 	Contract          smartpool.Contract
 	ClaimRepo         ClaimRepo
+	Storage           PersistentStorage
 	LatestCounter     *big.Int
 	ContractAddress   common.Address
 	MinerAddress      common.Address
@@ -120,6 +121,9 @@ func (sp *SmartPool) SealClaim() smartpool.Claim {
 	if claim != nil {
 		sp.LatestCounter = claim.Max()
 		smartpool.Output.Printf("Set Latest Counter to 0x%s.\n", sp.LatestCounter.Text(16))
+		smartpool.Output.Printf("Persisting Latest Counter to storage...")
+		sp.Storage.PersistLatestCounter(sp.LatestCounter)
+		smartpool.Output.Printf("Done.\n")
 	}
 	return claim
 }
@@ -212,7 +216,7 @@ Loop:
 			_, err = sp.Submit()
 			if sp.shouldStop(err) {
 				smartpool.Output.Printf("SmartPool stopped. If you want SmartPool to keep running, please use \"--no-hot-stop\" to disable Hot Stop mode.\n")
-				break
+				break Loop
 			}
 		case <-sp.stopSubmitterChan:
 			break Loop
@@ -261,24 +265,29 @@ func (sp *SmartPool) Run() bool {
 
 func NewSmartPool(
 	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
-	nc smartpool.NetworkClient, cr ClaimRepo, co smartpool.Contract,
-	ca common.Address, ma common.Address, ed string,
+	nc smartpool.NetworkClient, cr ClaimRepo, ps PersistentStorage,
+	co smartpool.Contract, ca common.Address, ma common.Address, ed string,
 	interval time.Duration, threshold int, hotStop bool) *SmartPool {
+	counter, err := ps.LoadLatestCounter()
+	if err != nil {
+		smartpool.Output.Printf("Couldn't load counter from storage. Initialize it to 0.\n")
+		counter = big.NewInt(0)
+	}
 	return &SmartPool{
-		PoolMonitor:     pm,
-		ShareReceiver:   sr,
-		NetworkClient:   nc,
-		ClaimRepo:       cr,
-		Contract:        co,
-		ContractAddress: ca,
-		MinerAddress:    ma,
-		ExtraData:       ed,
-		SubmitInterval:  interval,
-		ShareThreshold:  threshold,
-		HotStop:         hotStop,
-		loopStarted:     false,
-		// TODO: should be persist between startups instead of having 0 hardcoded
-		LatestCounter:     big.NewInt(0),
+		PoolMonitor:       pm,
+		ShareReceiver:     sr,
+		NetworkClient:     nc,
+		ClaimRepo:         cr,
+		Storage:           ps,
+		Contract:          co,
+		ContractAddress:   ca,
+		MinerAddress:      ma,
+		ExtraData:         ed,
+		SubmitInterval:    interval,
+		ShareThreshold:    threshold,
+		HotStop:           hotStop,
+		loopStarted:       false,
+		LatestCounter:     counter,
 		counterMu:         sync.RWMutex{},
 		runMu:             sync.Mutex{},
 		SubmitterStopped:  make(chan bool, 1),
