@@ -74,6 +74,9 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 			fmt.Scanf("%s", &choice)
 			if choice == "1" {
 				shares = map[string]*Share{}
+				noShares = 0
+				noRecentShares = 0
+				currentTimestamp = big.NewInt(0)
 				smartpool.Output.Printf("You chose to discard the shares from last session.\n")
 				break
 			} else if choice == "2" {
@@ -97,6 +100,9 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 			fmt.Scanf("%s", &choice)
 			if choice == "1" {
 				shares = map[string]*Share{}
+				noShares = 0
+				noRecentShares = 0
+				currentTimestamp = big.NewInt(0)
 				smartpool.Output.Printf("You chose to discard the shares from last session.\n")
 				break
 			} else if choice == "2" {
