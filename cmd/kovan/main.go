@@ -70,6 +70,11 @@ func Run(c *cli.Context) error {
 		fmt.Printf("You have to specify keystore path by --keystore. Abort!\n")
 		return nil
 	}
+	gateway := common.HexToAddress(c.String("gateway"))
+	if gateway.Big().Cmp(common.Big0) == 0 {
+		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
+		return nil
+	}
 	smartpool.Output = &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
 	go ethereumWorkPool.Cleanning()
@@ -108,6 +113,7 @@ func Run(c *cli.Context) error {
 	)
 	ethereumClaimRepo := protocol.NewInMemClaimRepo()
 	ethereumPoolMonitor, err := geth.NewPoolMonitor(
+		gateway,
 		common.HexToAddress(input.ContractAddress()),
 		smartpool.VERSION,
 		input.RPCEndpoint(),
@@ -200,6 +206,11 @@ func BuildAppCommandLine() *cli.App {
 			Name:  "spcontract",
 			Value: "0xd73E3A427600412C4569e7f41A5F4528E10d1274",
 			Usage: "SmartPool latest contract address.",
+		},
+		cli.StringFlag{
+			Name:  "gateway",
+			Value: "0x7727D4535f1A9c9ECC59FB17B6bF8145C7d5D58c",
+			Usage: "Gateway address. Its default value is the official gateway maintained by SmartPool team",
 		},
 		cli.StringFlag{
 			Name:  "miner",
