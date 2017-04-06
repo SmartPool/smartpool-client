@@ -21,6 +21,7 @@ func (cr *testClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	return claim
 }
 
-func (cr *testClaimRepo) AddShare(s smartpool.Share) {
+func (cr *testClaimRepo) AddShare(s smartpool.Share) error {
 	cr.c = append(cr.c, s)
+	return nil
 }

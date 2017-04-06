@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"encoding/gob"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/mitchellh/go-homedir"
@@ -71,7 +72,7 @@ type gobShare struct {
 	SolutionState   int
 }
 
-func (*FileStorage) PersistActiveShares(shares []*Share) error {
+func (*FileStorage) PersistActiveShares(shares map[string]*Share) error {
 	err := os.MkdirAll(SmartPoolDir, 0766)
 	if err != nil {
 		return err
@@ -82,24 +83,29 @@ func (*FileStorage) PersistActiveShares(shares []*Share) error {
 	}
 	defer f.Close()
 	enc := gob.NewEncoder(f)
-	gobShares := []gobShare{}
+	gobShares := map[string]gobShare{}
+	var shareID string
 	for _, s := range shares {
-		gobShares = append(gobShares, gobShare{
+		shareID = fmt.Sprintf(
+			"%s-%s",
+			s.BlockHeader().Hash().Hex(),
+			s.Nonce())
+		gobShares[shareID] = gobShare{
 			s.BlockHeader(),
 			s.nonce,
 			s.mixDigest,
 			s.shareDifficulty,
 			s.minerAddress,
 			s.SolutionState,
-		})
+		}
 	}
 	err = enc.Encode(gobShares)
 	return err
 }
 
-func (*FileStorage) LoadActiveShares() ([]*Share, error) {
-	shares := []*Share{}
-	gobShares := []gobShare{}
+func (*FileStorage) LoadActiveShares() (map[string]*Share, error) {
+	shares := map[string]*Share{}
+	gobShares := map[string]gobShare{}
 	f, err := os.Open(SharesFile)
 	if err != nil {
 		return shares, err
@@ -109,8 +115,8 @@ func (*FileStorage) LoadActiveShares() ([]*Share, error) {
 	if err != nil {
 		return shares, err
 	}
-	for _, gobShare := range gobShares {
-		shares = append(shares, &Share{
+	for k, gobShare := range gobShares {
+		shares[k] = &Share{
 			gobShare.BlockHeader,
 			gobShare.Nonce,
 			gobShare.MixDigest,
@@ -118,7 +124,7 @@ func (*FileStorage) LoadActiveShares() ([]*Share, error) {
 			gobShare.MinerAddress,
 			gobShare.SolutionState,
 			nil,
-		})
+		}
 	}
 	return shares, nil
 }

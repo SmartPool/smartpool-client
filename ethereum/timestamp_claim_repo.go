@@ -1,6 +1,7 @@
 package ethereum
 
 import (
+	"errors"
 	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/protocol"
@@ -15,7 +16,7 @@ import (
 // in order to make sure coming shares' counters are greater than selected
 // shares
 type TimestampClaimRepo struct {
-	activeShares    []*Share
+	activeShares    map[string]*Share
 	recentTimestamp *big.Int
 	noShares        uint64
 	noRecentShares  uint64
@@ -56,18 +57,23 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 			}
 		}
 	}
+	var oneShare *Share
 	if changedMiner {
-		fmt.Printf("You have %d shares from last session with miner %s that were not submitted to the contract.\n", len(shares), shares[0].BlockHeader().Coinbase.Hex())
+		for _, s := range shares {
+			oneShare = s
+			break
+		}
+		fmt.Printf("You have %d shares from last session with miner %s that were not submitted to the contract.\n", len(shares), oneShare.BlockHeader().Coinbase.Hex())
 		fmt.Printf("However you are going to run SmartPool with different miner %s.\n", miner)
 		fmt.Printf("Please choose one of following options:\n")
 		fmt.Printf("1. Discard those shares and continue running SmartPool with new miner.\n")
-		fmt.Printf("2. Abort SmartPool and rerun it with --miner %s\n", shares[0].MinerAddress())
+		fmt.Printf("2. Abort SmartPool and rerun it with --miner %s\n", oneShare.MinerAddress())
 		var choice string
 		for {
 			fmt.Printf("Enter 1 or 2: ")
 			fmt.Scanf("%s", &choice)
 			if choice == "1" {
-				shares = []*Share{}
+				shares = map[string]*Share{}
 				smartpool.Output.Printf("You chose to discard the shares from last session.\n")
 				break
 			} else if choice == "2" {
@@ -76,17 +82,21 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 		}
 	}
 	if changedDiff {
-		fmt.Printf("You have %d shares from last session with difficulty %s that were not submitted to the contract.\n", len(shares), shares[0].ShareDifficulty().Text(10))
+		for _, s := range shares {
+			oneShare = s
+			break
+		}
+		fmt.Printf("You have %d shares from last session with difficulty %s that were not submitted to the contract.\n", len(shares), oneShare.ShareDifficulty().Text(10))
 		fmt.Printf("However you are going to run SmartPool with different share difficulty %s.\n", diff.Text(10))
 		fmt.Printf("Please choose one of following options:\n")
 		fmt.Printf("1. Discard those shares and continue running SmartPool with new difficulty.\n")
-		fmt.Printf("2. Abort SmartPool and rerun it with --diff %s\n", shares[0].ShareDifficulty().Text(10))
+		fmt.Printf("2. Abort SmartPool and rerun it with --diff %s\n", oneShare.ShareDifficulty().Text(10))
 		var choice string
 		for {
 			fmt.Printf("Enter 1 or 2: ")
 			fmt.Scanf("%s", &choice)
 			if choice == "1" {
-				shares = []*Share{}
+				shares = map[string]*Share{}
 				smartpool.Output.Printf("You chose to discard the shares from last session.\n")
 				break
 			} else if choice == "2" {
@@ -123,11 +133,19 @@ func (cr *TimestampClaimRepo) Persist() error {
 	return cr.storage.PersistActiveShares(cr.activeShares)
 }
 
-func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) {
+func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 	share := s.(*Share)
-	cr.activeShares = append(cr.activeShares, share)
+	shareID := fmt.Sprintf(
+		"%s-%s",
+		share.BlockHeader().Hash().Hex(),
+		share.Nonce())
+	if cr.activeShares[shareID] != nil {
+		return errors.New("duplicated share")
+	} else {
+		cr.activeShares[shareID] = share
+	}
 	if share.Timestamp().Cmp(cr.recentTimestamp) == 0 {
 		cr.noRecentShares++
 	} else if share.Timestamp().Cmp(cr.recentTimestamp) < 0 {
@@ -138,6 +156,7 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) {
 		cr.recentTimestamp = big.NewInt(0)
 		cr.recentTimestamp.Add(share.Timestamp(), common.Big0)
 	}
+	return nil
 }
 
 func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
@@ -150,12 +169,16 @@ func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 		return nil
 	}
 	c := protocol.NewClaim()
-	newActiveShares := []*Share{}
+	newActiveShares := map[string]*Share{}
 	for _, s := range cr.activeShares {
 		if s.Timestamp().Cmp(cr.recentTimestamp) < 0 {
 			c.AddShare(s)
 		} else {
-			newActiveShares = append(newActiveShares, s)
+			shareID := fmt.Sprintf(
+				"%s-%s",
+				s.BlockHeader().Hash().Hex(),
+				s.Nonce())
+			newActiveShares[shareID] = s
 		}
 	}
 	cr.activeShares = newActiveShares
