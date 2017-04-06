@@ -24,10 +24,11 @@ func NewInMemClaimRepo() *InMemClaimRepo {
 	}
 }
 
-func (cr *InMemClaimRepo) AddShare(s smartpool.Share) {
+func (cr *InMemClaimRepo) AddShare(s smartpool.Share) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 	cr.claims[int(cr.cClaimNumber)].AddShare(s)
+	return nil
 }
 
 func (cr *InMemClaimRepo) GetClaim(number uint64) smartpool.Claim {

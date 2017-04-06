@@ -99,7 +99,11 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 		smartpool.Output.Printf("Share is discarded.\n")
 		return false
 	}
-	sp.ClaimRepo.AddShare(share)
+	err := sp.ClaimRepo.AddShare(share)
+	if err != nil {
+		smartpool.Output.Printf("Discarded duplicated share.\n")
+		return false
+	}
 	smartpool.Output.Printf(".")
 	return true
 }
