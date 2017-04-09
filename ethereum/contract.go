@@ -74,34 +74,36 @@ func (c *Contract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error
 	)
 }
 
-func (c *Contract) SetEpochData(epochs ...int) error {
-	roots := []*big.Int{}
-	sizes := []uint64{}
-	depths := []uint64{}
-	eps := []*big.Int{}
-	for _, epoch := range epochs {
-		eps = append(eps, big.NewInt(int64(epoch)))
-		smartpool.Output.Printf("Checking DAG file. Generate if needed...\n")
-		fullSize, _ := ethash.MakeDAGWithSize(uint64(epoch*30000), "")
-		fullSizeIn128Resolution := fullSize / 128
-		sizes = append(sizes, fullSizeIn128Resolution)
-		seedHash, err := ethash.GetSeedHash(uint64(epoch * 30000))
-		if err != nil {
-			panic(err)
-		}
-		path := filepath.Join(
-			ethash.DefaultDir,
-			fmt.Sprintf("full-R%s-%s", "23", hex.EncodeToString(seedHash[:8])),
-		)
-		mt := mtree.NewDagTree()
-		processDuringRead(path, mt)
-		mt.Finalize()
-		merkleRoot := mt.RootHash().Big()
-		roots = append(roots, merkleRoot)
-		branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))
-		depths = append(depths, uint64(branchDepth))
+func (c *Contract) SetEpochData(epoch int) error {
+	smartpool.Output.Printf("Checking DAG file. Generate if needed...\n")
+	fullSize, _ := ethash.MakeDAGWithSize(uint64(epoch*30000), "")
+	fullSizeIn128Resolution := fullSize / 128
+	seedHash, err := ethash.GetSeedHash(uint64(epoch * 30000))
+	if err != nil {
+		panic(err)
 	}
-	return c.client.SetEpochData(roots, sizes, depths, eps)
+	path := filepath.Join(
+		ethash.DefaultDir,
+		fmt.Sprintf("full-R%s-%s", "23", hex.EncodeToString(seedHash[:8])),
+	)
+	branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))
+	mt := mtree.NewDagTree()
+	// TODO: 10 is just an experimental level
+	mt.RegisterStoredLevel(uint32(branchDepth), 10)
+	processDuringRead(path, mt)
+	mt.Finalize()
+	err = c.client.SetEpochData(
+		big.NewInt(int64(epoch)),
+		big.NewInt(int64(fullSizeIn128Resolution)),
+		big.NewInt(int64(branchDepth-10)),
+		mt.MerkleNodes(),
+	)
+	if err != nil {
+		fmt.Printf("Got error: %s\n", err)
+		return err
+	}
+	fmt.Printf("Done.\n")
+	return nil
 }
 
 func NewContract(client ContractClient) *Contract {

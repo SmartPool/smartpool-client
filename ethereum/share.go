@@ -132,6 +132,10 @@ func (s *Share) buildDagTree() {
 	indices := ethash.Instance.GetVerificationIndices(s)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
+	fullSize, _ := ethash.MakeDAGWithSize(s.NumberU64(), "")
+	fullSizeIn128Resolution := fullSize / 128
+	branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))
+	s.dt.RegisterStoredLevel(uint32(branchDepth), uint32(10))
 	seedHash, err := ethash.GetSeedHash(s.NumberU64())
 	if err != nil {
 		panic(err)
