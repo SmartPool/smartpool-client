@@ -2,6 +2,7 @@ package geth
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -146,28 +147,48 @@ func (cc *GethContractClient) VerifyClaim(
 	return nil
 }
 
-func (cc *GethContractClient) SetEpochData(merkleRoot []*big.Int, fullSizeIn128Resolution []uint64, branchDepth []uint64, epoch []*big.Int) error {
-	blockNo, err := cc.node.BlockNumber()
-	if err != nil {
-		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
-		return err
-	}
-	tx, err := cc.pool.SetEpochData(cc.transactor,
-		merkleRoot, fullSizeIn128Resolution, branchDepth, epoch)
-	if err != nil {
-		smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
-		return err
-	}
-	errCode, errInfo, err := NewTxWatcher(
-		tx, cc.node, blockNo, SetEpochDataEventTopic,
-		cc.sender.Big()).Wait()
-	if err != nil {
-		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
-		return err
-	}
-	if errCode.Cmp(common.Big0) != 0 {
-		smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
-		return errors.New(ErrorMsg(errCode, errInfo))
+func (cc *GethContractClient) SetEpochData(
+	epoch *big.Int,
+	fullSizeIn128Resolution *big.Int,
+	branchDepth *big.Int,
+	merkleNodes []*big.Int) error {
+
+	nodes := []*big.Int{}
+	start := big.NewInt(0)
+	fmt.Printf("No meaningful nodes: %d\n", len(merkleNodes))
+	for k, n := range merkleNodes {
+		nodes = append(nodes, n)
+		if len(nodes) == 40 || k == len(merkleNodes)-1 {
+			mnlen := big.NewInt(int64(len(nodes)))
+			blockNo, err := cc.node.BlockNumber()
+			blockNo.Add(blockNo, big.NewInt(1))
+			if err != nil {
+				smartpool.Output.Printf("Setting epoch data. Error: %s\n", err)
+				return err
+			}
+			fmt.Printf("Going to do tx\n")
+			fmt.Printf("Block Number: %d\n", blockNo.Int64())
+			tx, err := cc.pool.SetEpochData(
+				cc.transactor, epoch, fullSizeIn128Resolution,
+				branchDepth, nodes, start, mnlen)
+			if err != nil {
+				smartpool.Output.Printf("Setting optimized epoch data. Error: %s\n", err)
+				return err
+			}
+			errCode, errInfo, err := NewTxWatcher(
+				tx, cc.node, blockNo, SetEpochDataEventTopic,
+				cc.sender.Big()).Wait()
+			if err != nil {
+				smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
+				return err
+			}
+			if errCode.Cmp(common.Big0) != 0 {
+				smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
+				return errors.New(ErrorMsg(errCode, errInfo))
+			}
+			start.Add(start, mnlen)
+			nodes = []*big.Int{}
+		}
 	}
 	return nil
 }

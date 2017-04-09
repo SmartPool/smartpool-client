@@ -26,8 +26,9 @@ type ContractClient interface {
 		augCountersBranch []*big.Int,
 		augHashesBranch []*big.Int) error
 	SetEpochData(
-		merkleRoot []*big.Int,
-		fullSizeIn128Resolution []uint64,
-		branchDepth []uint64,
-		epoch []*big.Int) error
+		epoch *big.Int,
+		fullSizeIn128Resolution *big.Int,
+		branchDepth *big.Int,
+		merkleNodes []*big.Int,
+	) error
 }
