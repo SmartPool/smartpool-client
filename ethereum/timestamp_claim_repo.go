@@ -26,7 +26,7 @@ type TimestampClaimRepo struct {
 	miner           string
 }
 
-func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
+func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string) *TimestampClaimRepo {
 	storage := NewFileStorage()
 	shares, err := storage.LoadActiveShares()
 	if err != nil {
@@ -37,6 +37,7 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 	currentTimestamp := big.NewInt(0)
 	changedDiff := false
 	changedMiner := false
+	changedCoinbase := false
 	if len(shares) > 0 {
 		for _, s := range shares {
 			if currentTimestamp.Cmp(s.Timestamp()) < 0 {
@@ -55,9 +56,19 @@ func NewTimestampClaimRepo(diff *big.Int, miner string) *TimestampClaimRepo {
 			if s.MinerAddress() != miner {
 				changedMiner = true
 			}
+			if s.BlockHeader().Coinbase.Hex() != coinbase {
+				changedCoinbase = true
+			}
 		}
 	}
 	var oneShare *Share
+	if changedCoinbase {
+		smartpool.Output.Printf("SmartPool contract address changed. Discarded %d shares from last session.\n", len(shares))
+		shares = map[string]*Share{}
+		noShares = 0
+		noRecentShares = 0
+		currentTimestamp = big.NewInt(0)
+	}
 	if changedMiner {
 		for _, s := range shares {
 			oneShare = s

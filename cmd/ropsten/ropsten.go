@@ -160,6 +160,7 @@ func Run(c *cli.Context) error {
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
 		input.MinerAddress(),
+		input.ContractAddress(),
 	)
 	ethereumContract := ethereum.NewContract(gethContractClient)
 	fileStorage := ethereum.NewFileStorage()
