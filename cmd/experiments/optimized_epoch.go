@@ -91,7 +91,7 @@ func main() {
 		fmt.Printf("Failed to create authorized transactor: %s\n", err)
 		return
 	}
-	epoch := 23
+	epoch := 24
 	fmt.Printf("Checking DAG file for epoch %d. Generate if needed...\n", epoch)
 	fullSize, _ := ethash.MakeDAGWithSize(uint64(epoch*30000), "")
 	fullSizeIn128Resolution := fullSize / 128

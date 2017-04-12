@@ -75,7 +75,7 @@ func main() {
 		fmt.Printf("Failed to create authorized transactor: %s\n", err)
 		return
 	}
-	epoch := 23
+	epoch := 24
 	fmt.Printf("Checking DAG file for epoch %d. Generate if needed...\n", epoch)
 	seedHash, err := ethash.GetSeedHash(uint64(epoch * 30000))
 	if err != nil {
@@ -86,7 +86,10 @@ func main() {
 		fmt.Sprintf("full-R%s-%s", "23", hex.EncodeToString(seedHash[:8])),
 	)
 	mt := mtree.NewDagTree()
-	mt.RegisterIndex(4744867)
+	indexes := []uint32{
+		6100258, 1679244, 7186452, 8548988, 5525504, 8591682, 7817920, 7707803, 3647301, 9632067, 9094506, 4755354, 2769219, 9468202, 1218192, 2887829, 1870009, 921735, 1366012, 1755583, 6391156, 9760105, 7323962, 7959186, 4833456, 2553397, 6345470, 6437303, 120678, 1919905, 8868019, 6865013, 9030547, 1369996, 5453685, 4696215, 3063135, 6757181, 2950714, 3222015, 231031, 8526593, 626784, 9121376, 2544823, 8974305, 8106659, 8366486, 1997695, 4428246, 7150657, 6338147, 7533776, 3443142, 8294240, 9186007, 8267176, 9324280, 4741270, 5541823, 4858294, 7689845, 7943904, 8895903,
+	}
+	mt.RegisterIndex(indexes...)
 	fullSize, _ := ethash.MakeDAGWithSize(uint64(epoch*30000), "")
 	fullSizeIn128Resolution := fullSize / 128
 	branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))
@@ -103,12 +106,16 @@ func main() {
 	for i := 0; i < len(branch); i++ {
 		proof = append(proof, branch[i].Big())
 	}
+	bigIndexes := []*big.Int{}
+	for _, i := range indexes {
+		bigIndexes = append(bigIndexes, big.NewInt(int64(i)))
+	}
 	result, err := testClient.TestOptimization(
 		nil,
-		[]*big.Int{big.NewInt(4744867)},
+		bigIndexes,
 		elements,
 		proof,
-		big.NewInt(23),
+		big.NewInt(int64(epoch)),
 	)
 	fmt.Printf("Elements: [")
 	for _, e := range elements {

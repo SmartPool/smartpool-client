@@ -66,6 +66,7 @@ func (s *Share) RlpHeaderWithoutNonce() ([]byte, error) {
 		s.BlockHeader().Time,
 		s.BlockHeader().Extra,
 	})
+	fmt.Printf("RLP: 0x%s\n", hex.EncodeToString(buffer.Bytes()))
 	return buffer.Bytes(), err
 }
 
@@ -130,6 +131,7 @@ func processDuringRead(
 
 func (s *Share) buildDagTree() {
 	indices := ethash.Instance.GetVerificationIndices(s)
+	fmt.Print("indices: %v\n", indices)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
 	fullSize, _ := ethash.MakeDAGWithSize(s.NumberU64(), "")

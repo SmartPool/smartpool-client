@@ -104,15 +104,10 @@ func (g *GethRPC) GetWork() *ethereum.Work {
 	for {
 		h = g.GetPendingBlockHeader()
 		g.client.Call(&w, "eth_getWork")
-		// waiting for pending block to be the same as
-		// block we are going to pass to miner
 		if w.PoWHash() != "" && w.PoWHash() == h.HashNoNonce().Hex() {
-			// json, _ := h.MarshalJSON()
-			// fmt.Printf("Pow Hash: %s - Header: %s\n", w.PoWHash(), json)
 			break
 		}
 		time.Sleep(1000 * time.Millisecond)
-		// fmt.Printf("Get inconsistent pending block header. Retry in 1s...\n")
 	}
 	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty, g.MinerAddress)
 }
@@ -161,7 +156,7 @@ func (g *GethRPC) GetLog(
 	g.client.Call(&result, "eth_getLogs", param)
 	if len(result) != 1 {
 		smartpool.Output.Printf(
-			"Got %d logs. This must be a bug. Topic: %s, sender: %s, from: %s\n",
+			"Got %d logs. Contract unexpectedly threw. Topic: %s, sender: %s, from: %s\n",
 			len(result),
 			common.BigToHash(event).Hex(),
 			common.BigToHash(sender).Hex(),
