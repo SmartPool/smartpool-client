@@ -101,7 +101,7 @@ func processDuringRead(
 	r := bufio.NewReader(f)
 	buf := [128]byte{}
 	// ignore first 8 bytes magic number at the beginning
-	// of dataset. See more at https://github.com/ethereum/wiki/wiki/Ethash-DAG-Disk-Storage-Format
+	// of dataset. See more at https://gopkg.in/ethereum/wiki/wiki/Ethash-DAG-Disk-Storage-Format
 	_, err = io.ReadFull(r, buf[:8])
 	if err != nil {
 		log.Fatal(err)
