@@ -200,5 +200,6 @@ func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	}
 	cr.activeShares = newActiveShares
 	cr.noShares = 0
+	cr.Persist()
 	return c
 }
