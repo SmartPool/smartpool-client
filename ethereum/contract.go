@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"path/filepath"
-	"time"
 )
 
 type Contract struct {
@@ -40,16 +39,7 @@ func (c *Contract) SubmitClaim(claim smartpool.Claim) error {
 }
 
 func (c *Contract) GetShareIndex(claim smartpool.Claim) *big.Int {
-	zero := big.NewInt(0)
-	var seed *big.Int
-	time.Sleep(30 * time.Second)
-	for {
-		seed = c.client.GetClaimSeed()
-		if seed.Cmp(zero) != 0 {
-			break
-		}
-		time.Sleep(time.Second)
-	}
+	seed := c.client.GetClaimSeed()
 	fmt.Printf("seed mod no.shares: 0x%s mod %s\n", seed.Text(16), claim.NumShares().Text(10))
 	index := big.NewInt(0)
 	index.Mod(seed, claim.NumShares())
