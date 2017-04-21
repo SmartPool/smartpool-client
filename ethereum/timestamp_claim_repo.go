@@ -68,8 +68,7 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string) *TimestampClai
 		noShares = 0
 		noRecentShares = 0
 		currentTimestamp = big.NewInt(0)
-	}
-	if changedMiner {
+	} else if changedMiner {
 		for _, s := range shares {
 			oneShare = s
 			break
@@ -94,8 +93,7 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string) *TimestampClai
 				os.Exit(1)
 			}
 		}
-	}
-	if changedDiff {
+	} else if changedDiff {
 		for _, s := range shares {
 			oneShare = s
 			break
