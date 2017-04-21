@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"os"
+	"time"
 )
 
 type GethContractClient struct {
@@ -74,10 +75,20 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 }
 
 func (cc *GethContractClient) GetClaimSeed() *big.Int {
-	seed, err := cc.pool.GetClaimSeed(nil, cc.sender)
-	if err != nil {
-		smartpool.Output.Printf("Getting claim seed failed. Error: %s\n", err)
-		return big.NewInt(0)
+	var seed *big.Int
+	var err error
+	// Wait for 30s because the seed is only available after several blocks
+	time.Sleep(30 * time.Second)
+	for {
+		seed, err = cc.pool.GetClaimSeed(nil, cc.sender)
+		if err != nil {
+			smartpool.Output.Printf("Getting claim seed failed. Error: %s\n", err)
+			return big.NewInt(0)
+		}
+		if seed.Cmp(common.Big0) != 0 {
+			break
+		}
+		time.Sleep(time.Second)
 	}
 	return seed
 }
