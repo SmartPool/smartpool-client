@@ -8,6 +8,7 @@ package smartpool
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 	"time"
 )
@@ -90,6 +91,7 @@ type NetworkClient interface {
 	// so the full block solution can take credits. It also maintain workflow
 	// between miner and the network client.
 	SubmitSolution(s Solution) bool
+	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
 	// ReadyToMine returns true when the network is ready to give and accept
 	// pow work and solution. It returns false otherwise.
 	ReadyToMine() bool
@@ -107,4 +109,10 @@ type PoolMonitor interface {
 	RequireClientUpdate() bool
 	RequireContractUpdate() bool
 	ContractAddress() common.Address
+}
+
+type EventRecorder interface {
+	Record(eventName string, rig Rig, datas ...interface{})
+	FarmStats(start *big.Int, end *big.Int) interface{}
+	RigStats(rig Rig, start *big.Int, end *big.Int) interface{}
 }

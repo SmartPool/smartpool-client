@@ -6,6 +6,7 @@ package protocol
 import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 	"runtime/debug"
 	"sync"
@@ -29,6 +30,7 @@ type SmartPool struct {
 	ShareReceiver     smartpool.ShareReceiver
 	NetworkClient     smartpool.NetworkClient
 	Contract          smartpool.Contract
+	EventRecorder     smartpool.EventRecorder
 	ClaimRepo         ClaimRepo
 	Storage           PersistentStorage
 	LatestCounter     *big.Int
@@ -75,8 +77,12 @@ func (sp *SmartPool) Register(addr common.Address) bool {
 }
 
 // GetWork returns miner work
-func (sp *SmartPool) GetWork() smartpool.Work {
+func (sp *SmartPool) GetWork(rig smartpool.Rig) smartpool.Work {
 	return sp.NetworkClient.GetWork()
+}
+
+func (sp *SmartPool) SubmitHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash) bool {
+	return sp.NetworkClient.SubmitHashrate(hashrate, id)
 }
 
 // AcceptSolution accepts solutions from miners and construct corresponding
@@ -84,7 +90,7 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 // successfully added, false otherwise.
 // A share can only be added when it's counter is greater than the maximum
 // counter of the last verified claim
-func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
+func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
@@ -270,8 +276,9 @@ func (sp *SmartPool) Run() bool {
 func NewSmartPool(
 	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
 	nc smartpool.NetworkClient, cr ClaimRepo, ps PersistentStorage,
-	co smartpool.Contract, ca common.Address, ma common.Address, ed string,
-	interval time.Duration, threshold int, hotStop bool) *SmartPool {
+	co smartpool.Contract, er smartpool.EventRecorder, ca common.Address,
+	ma common.Address, ed string, interval time.Duration, threshold int,
+	hotStop bool) *SmartPool {
 	counter, err := ps.LoadLatestCounter()
 	if err != nil {
 		smartpool.Output.Printf("Couldn't load counter from storage. Initialize it to 0.\n")
@@ -284,6 +291,7 @@ func NewSmartPool(
 		ClaimRepo:         cr,
 		Storage:           ps,
 		Contract:          co,
+		EventRecorder:     er,
 		ContractAddress:   ca,
 		MinerAddress:      ma,
 		ExtraData:         ed,

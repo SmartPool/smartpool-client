@@ -21,8 +21,7 @@ type Server struct {
 	output    smartpool.UserOutput
 }
 
-type RPCServer struct {
-}
+type RPCServer struct{}
 
 func (server *RPCServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var (

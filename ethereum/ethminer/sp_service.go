@@ -12,12 +12,12 @@ import (
 var SmartPool *protocol.SmartPool
 
 type SmartPoolService struct {
-	rigName string
+	rig *ethereum.Rig
 }
 
 func (sps *SmartPoolService) GetWork() ([3]string, error) {
 	var res [3]string
-	w := SmartPool.GetWork().(*ethereum.Work)
+	w := SmartPool.GetWork(sps.rig).(*ethereum.Work)
 	res[0] = w.PoWHash().Hex()
 	res[1] = w.SeedHash()
 	n := big.NewInt(1)
@@ -29,8 +29,9 @@ func (sps *SmartPoolService) GetWork() ([3]string, error) {
 }
 
 func (sps *SmartPoolService) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
-	nc := SmartPool.NetworkClient.(*ethereum.NetworkClient)
-	return nc.SubmitHashrate(hashrate, id)
+	// nc := SmartPool.NetworkClient.(*ethereum.NetworkClient)
+	// return nc.SubmitHashrate(sps.rig, hashrate, id)
+	return SmartPool.SubmitHashrate(sps.rig, hashrate, id)
 }
 
 func (sps *SmartPoolService) SubmitWork(nonce types.BlockNonce, hash, mixDigest common.Hash) bool {
@@ -39,9 +40,9 @@ func (sps *SmartPoolService) SubmitWork(nonce types.BlockNonce, hash, mixDigest 
 		Hash:      hash,
 		MixDigest: mixDigest,
 	}
-	return SmartPool.AcceptSolution(sol)
+	return SmartPool.AcceptSolution(sps.rig, sol)
 }
 
 func NewSmartPoolService(rigName string) *SmartPoolService {
-	return &SmartPoolService{rigName}
+	return &SmartPoolService{ethereum.NewRig(rigName)}
 }
