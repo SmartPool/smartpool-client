@@ -74,6 +74,7 @@ func (c *Claim) AugMerkle() smartpool.SPHash {
 
 func (c *Claim) SetEvidence(shareIndex *big.Int) {
 	c.shareIndex = shareIndex
+	c.pamt = nil
 }
 
 func (c *Claim) CounterBranch() []*big.Int {

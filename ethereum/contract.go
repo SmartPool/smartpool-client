@@ -47,23 +47,26 @@ func (c *Contract) GetShareIndex(claim smartpool.Claim) *big.Int {
 }
 
 func (c *Contract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error {
-	share := claim.GetShare(int(shareIndex.Int64())).(*Share)
-	rlpHeader, _ := share.RlpHeaderWithoutNonce()
-	nonce := share.NonceBig()
-	claim.SetEvidence(shareIndex)
-	augCountersBranch := claim.CounterBranch()
-	augHashesBranch := claim.HashBranch()
-	dataSetLookup := share.DAGElementArray()
-	witnessForLookup := share.DAGProofArray()
-	return c.client.VerifyClaim(
-		rlpHeader,
-		nonce,
-		shareIndex,
-		dataSetLookup,
-		witnessForLookup,
-		augCountersBranch,
-		augHashesBranch,
-	)
+	for i := 0; i < int(claim.NumShares().Uint64()); i++ {
+		share := claim.GetShare(int(i)).(*Share)
+		rlpHeader, _ := share.RlpHeaderWithoutNonce()
+		nonce := share.NonceBig()
+		claim.SetEvidence(big.NewInt(int64(i)))
+		augCountersBranch := claim.CounterBranch()
+		augHashesBranch := claim.HashBranch()
+		dataSetLookup := share.DAGElementArray()
+		witnessForLookup := share.DAGProofArray()
+		c.client.VerifyClaim(
+			rlpHeader,
+			nonce,
+			big.NewInt(int64(i)),
+			dataSetLookup,
+			witnessForLookup,
+			augCountersBranch,
+			augHashesBranch,
+		)
+	}
+	return nil
 }
 
 func (c *Contract) SetEpochData(epoch int) error {
