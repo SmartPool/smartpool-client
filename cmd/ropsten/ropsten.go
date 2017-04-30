@@ -172,7 +172,7 @@ func Run(c *cli.Context) error {
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.HotStop(), input,
 	)
 	server := ethminer.NewServer(
 		smartpool.Output,

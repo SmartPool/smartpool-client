@@ -42,7 +42,9 @@ func NewServer(output smartpool.UserOutput, port uint16) *Server {
 	mux := pat.New()
 	rpcService := NewRPCService()
 	statService := NewStatService()
+	statusService := NewStatusService()
 	mux.Post("/:rig/", rpcService)
+	mux.Get("/status", statusService)
 	mux.Get("/:method/:rig", statService)
 	mux.Get("/:method", statService)
 	return &Server{port, rpcService, &http.Server{

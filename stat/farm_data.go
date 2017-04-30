@@ -9,20 +9,20 @@ import (
 )
 
 type PeriodFarmData struct {
-	TotalSubmittedShare      uint64          `json:"total_submitted_share"`
-	TotalAcceptedShare       uint64          `json:"total_accepted_share"`
-	TotalRejectedShare       uint64          `json:"total_rejected_share"`
-	TotalAcceptedDifficulty  *big.Int        `json:"total_accepted_difficulty"`
+	MinedShare               uint64          `json:"mined_share"`
+	ValidShare               uint64          `json:"valid_share"`
+	TotalValidDifficulty     *big.Int        `json:"-"`
 	AverageShareDifficulty   *big.Int        `json:"average_share_difficulty"`
-	TotalSubmittedClaim      uint64          `json:"total_submitted_claim"`
-	TotalAcceptedClaim       uint64          `json:"total_accepted_claim"`
-	TotalRejectedClaim       uint64          `json:"total_rejected"`
-	TotalHashrate            *big.Int        `json:"total_hashrate"`
-	NoHashrateSubmission     uint64          `json:"no_hashrate_submission"`
-	AverageReportedHashrate  *big.Int        `json:"average_reported_hashrate"`
-	AverageEffectiveHashrate *big.Int        `json:"average_effective_hashrate"`
+	RejectedShare            uint64          `json:"rejected_share"`
+	SubmittedClaim           uint64          `json:"submitted_claim"`
+	AcceptedClaim            uint64          `json:"accepted_claim"`
+	RejectedClaim            uint64          `json:"rejected_claim"`
+	TotalHashrate            *big.Int        `json:"-"`
+	NoHashrateSubmission     uint64          `json:"-"`
+	AverageReportedHashrate  *big.Int        `json:"reported_hashrate"`
+	AverageEffectiveHashrate *big.Int        `json:"effective_hashrate"`
 	Rigs                     map[string]bool `json:"rigs"`
-	TotalBlockFound          uint64          `json:"total_block_found"`
+	BlockFound               uint64          `json:"block_found"`
 	TimePeriod               uint64          `json:"time_period"`
 	StartTime                *time.Time      `json:"start_time"`
 }
@@ -30,7 +30,7 @@ type PeriodFarmData struct {
 func NewPeriodFarmData(timePeriod uint64) *PeriodFarmData {
 	return &PeriodFarmData{
 		TotalHashrate:            big.NewInt(0),
-		TotalAcceptedDifficulty:  big.NewInt(0),
+		TotalValidDifficulty:     big.NewInt(0),
 		AverageShareDifficulty:   big.NewInt(0),
 		AverageReportedHashrate:  big.NewInt(0),
 		AverageEffectiveHashrate: big.NewInt(0),
@@ -52,43 +52,44 @@ func (pfd *PeriodFarmData) updateAvgEffHashrate(t time.Time) {
 	duration := int64(t.Sub(*pfd.StartTime).Seconds())
 	if duration > 0 {
 		pfd.AverageEffectiveHashrate.Div(
-			pfd.TotalAcceptedDifficulty,
+			pfd.TotalValidDifficulty,
 			big.NewInt(duration),
 		)
 	}
 }
 
 func (pfd *PeriodFarmData) updateAvgShareDifficulty(t time.Time) {
-	if pfd.TotalAcceptedShare > 0 {
+	if pfd.ValidShare > 0 {
 		pfd.AverageShareDifficulty.Div(
-			pfd.TotalAcceptedDifficulty,
-			big.NewInt(int64(pfd.TotalAcceptedShare)),
+			pfd.TotalValidDifficulty,
+			big.NewInt(int64(pfd.ValidShare)),
 		)
 	}
 }
 
 type OverallFarmData struct {
-	LastSubmittedShare       *time.Time      `json:"last_submitted_share"`
-	LastAcceptedShare        *time.Time      `json:"last_accepted_share"`
+	LastMinedShare           *time.Time      `json:"last_mined_share"`
+	LastValidShare           *time.Time      `json:"last_valid_share"`
 	LastRejectedShare        *time.Time      `json:"last_rejected_share"`
 	LastBlock                *time.Time      `json:"last_block"`
-	TotalSubmittedShare      uint64          `json:"total_submitted_share"`
-	TotalAcceptedShare       uint64          `json:"total_accepted_share"`
-	TotalAcceptedDifficulty  *big.Int        `json:"total_accepted_difficulty"`
+	MinedShare               uint64          `json:"mined_share"`
+	ValidShare               uint64          `json:"valid_share"`
+	TotalValidDifficulty     *big.Int        `json:"-"`
 	AverageShareDifficulty   *big.Int        `json:"average_share_difficulty"`
-	TotalRejectedShare       uint64          `json:"total_rejected_share"`
+	RejectedShare            uint64          `json:"rejected_share"`
 	LastSubmittedClaim       *time.Time      `json:"last_submitted_claim"`
 	LastAcceptedClaim        *time.Time      `json:"last_accepted_claim"`
 	LastRejectedClaim        *time.Time      `json:"last_rejected_claim"`
-	TotalSubmittedClaim      uint64          `json:"total_submitted_claim"`
-	TotalAcceptedClaim       uint64          `json:"total_accepted_claim"`
-	TotalRejectedClaim       uint64          `json:"total_rejected_claim"`
-	TotalHashrate            *big.Int        `json:"total_hashrate"`
-	NoHashrateSubmission     uint64          `json:"no_hashrate_submission"`
-	AverageReportedHashrate  *big.Int        `json:"average_reported_hashrate"`
-	AverageEffectiveHashrate *big.Int        `json:"average_effective_hashrate"`
+	SubmittedClaim           uint64          `json:"total_submitted_claim"`
+	AcceptedClaim            uint64          `json:"total_accepted_claim"`
+	RejectedClaim            uint64          `json:"total_rejected_claim"`
+	TotalHashrate            *big.Int        `json:"-"`
+	NoHashrateSubmission     uint64          `json:"-"`
+	AverageReportedHashrate  *big.Int        `json:"reported_hashrate"`
+	AverageEffectiveHashrate *big.Int        `json:"effective_hashrate"`
 	Rigs                     map[string]bool `json:"rigs"`
-	TotalBlockFound          uint64          `json:"total_block_found"`
+	BlockFound               uint64          `json:"total_block_found"`
+	PendingShare             uint64          `json:"pending_share"`
 	StartTime                *time.Time      `json:"start_time"`
 }
 
@@ -101,7 +102,7 @@ func NewFarmData() *FarmData {
 	return &FarmData{
 		Datas: map[uint64]*PeriodFarmData{},
 		OverallFarmData: &OverallFarmData{
-			TotalAcceptedDifficulty:  big.NewInt(0),
+			TotalValidDifficulty:     big.NewInt(0),
 			TotalHashrate:            big.NewInt(0),
 			AverageShareDifficulty:   big.NewInt(0),
 			AverageReportedHashrate:  big.NewInt(0),
@@ -126,41 +127,43 @@ func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.S
 		fd.StartTime = &t
 	}
 	fd.Rigs[rig.ID()] = true
-	fd.LastSubmittedShare = &t
-	fd.TotalSubmittedShare++
+	fd.LastMinedShare = &t
+	fd.MinedShare++
 	curPeriodData := fd.getData(t)
 	if curPeriodData.StartTime == nil {
 		curPeriodData.StartTime = &t
 	}
-	curPeriodData.TotalSubmittedShare++
+	curPeriodData.MinedShare++
 	curPeriodData.Rigs[rig.ID()] = true
 	if status == "accepted" {
-		fd.LastAcceptedShare = &t
-		fd.TotalAcceptedShare++
-		fd.TotalAcceptedDifficulty.Add(fd.TotalAcceptedDifficulty, share.ShareDifficulty())
+		fd.LastValidShare = &t
+		fd.ValidShare++
+		fd.TotalValidDifficulty.Add(fd.TotalValidDifficulty, share.ShareDifficulty())
 		fd.updateAvgShareDifficulty(t)
 		fd.updateAvgEffHashrate(t)
-		curPeriodData.TotalAcceptedShare++
-		curPeriodData.TotalAcceptedDifficulty.Add(curPeriodData.TotalAcceptedDifficulty, share.ShareDifficulty())
+		fd.PendingShare++
+		curPeriodData.ValidShare++
+		curPeriodData.TotalValidDifficulty.Add(curPeriodData.TotalValidDifficulty, share.ShareDifficulty())
 		curPeriodData.updateAvgShareDifficulty(t)
 		curPeriodData.updateAvgEffHashrate(t)
 	} else if status == "rejected" {
 		fd.LastRejectedShare = &t
-		fd.TotalRejectedShare++
-		curPeriodData.TotalRejectedShare++
+		fd.RejectedShare++
+		curPeriodData.RejectedShare++
 	} else if status == "fullsolution" {
 		fd.LastBlock = &t
-		fd.LastAcceptedShare = &t
-		fd.TotalAcceptedShare++
-		fd.TotalAcceptedDifficulty.Add(fd.TotalAcceptedDifficulty, share.ShareDifficulty())
-		fd.TotalBlockFound++
+		fd.LastValidShare = &t
+		fd.ValidShare++
+		fd.TotalValidDifficulty.Add(fd.TotalValidDifficulty, share.ShareDifficulty())
+		fd.BlockFound++
 		fd.updateAvgShareDifficulty(t)
 		fd.updateAvgEffHashrate(t)
-		curPeriodData.TotalAcceptedShare++
-		curPeriodData.TotalAcceptedDifficulty.Add(curPeriodData.TotalAcceptedDifficulty, share.ShareDifficulty())
+		fd.PendingShare++
+		curPeriodData.ValidShare++
+		curPeriodData.TotalValidDifficulty.Add(curPeriodData.TotalValidDifficulty, share.ShareDifficulty())
 		curPeriodData.updateAvgShareDifficulty(t)
 		curPeriodData.updateAvgEffHashrate(t)
-		curPeriodData.TotalBlockFound++
+		curPeriodData.BlockFound++
 	}
 }
 
@@ -174,16 +177,17 @@ func (fd *FarmData) AddClaim(status string, claim smartpool.Claim, t time.Time) 
 	}
 	if status == "submitted" {
 		fd.LastSubmittedClaim = &t
-		fd.TotalSubmittedClaim++
-		curPeriodData.TotalSubmittedClaim++
+		fd.SubmittedClaim++
+		fd.PendingShare -= claim.NumShares().Uint64()
+		curPeriodData.SubmittedClaim++
 	} else if status == "accepted" {
 		fd.LastAcceptedClaim = &t
-		fd.TotalAcceptedClaim++
-		curPeriodData.TotalAcceptedClaim++
+		fd.AcceptedClaim++
+		curPeriodData.AcceptedClaim++
 	} else if status == "rejected" {
 		fd.LastRejectedClaim = &t
-		fd.TotalRejectedClaim++
-		curPeriodData.TotalRejectedClaim++
+		fd.RejectedClaim++
+		curPeriodData.RejectedClaim++
 	}
 }
 
@@ -216,17 +220,17 @@ func (fd *FarmData) updateAvgEffHashrate(t time.Time) {
 	duration := int64(t.Sub(*fd.StartTime).Seconds())
 	if duration > 0 {
 		fd.AverageEffectiveHashrate.Div(
-			fd.TotalAcceptedDifficulty,
+			fd.TotalValidDifficulty,
 			big.NewInt(duration),
 		)
 	}
 }
 
 func (fd *FarmData) updateAvgShareDifficulty(t time.Time) {
-	if fd.TotalAcceptedShare > 0 {
+	if fd.ValidShare > 0 {
 		fd.AverageShareDifficulty.Div(
-			fd.TotalAcceptedDifficulty,
-			big.NewInt(int64(fd.TotalAcceptedShare)),
+			fd.TotalValidDifficulty,
+			big.NewInt(int64(fd.ValidShare)),
 		)
 	}
 }

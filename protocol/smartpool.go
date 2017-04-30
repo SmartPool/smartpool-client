@@ -46,6 +46,7 @@ type SmartPool struct {
 	runMu             sync.Mutex
 	SubmitterStopped  chan bool
 	stopSubmitterChan chan bool
+	Input             smartpool.UserInput
 }
 
 // Register registers miner address to the contract.
@@ -288,7 +289,7 @@ func NewSmartPool(
 	nc smartpool.NetworkClient, cr ClaimRepo, ps PersistentStorage,
 	co smartpool.Contract, stat smartpool.StatRecorder, ca common.Address,
 	ma common.Address, ed string, interval time.Duration, threshold int,
-	hotStop bool) *SmartPool {
+	hotStop bool, input smartpool.UserInput) *SmartPool {
 	counter, err := ps.LoadLatestCounter()
 	if err != nil {
 		smartpool.Output.Printf("Couldn't load counter from storage. Initialize it to 0.\n")
@@ -314,5 +315,6 @@ func NewSmartPool(
 		runMu:             sync.Mutex{},
 		SubmitterStopped:  make(chan bool, 1),
 		stopSubmitterChan: make(chan bool, 1),
+		Input:             input,
 	}
 }
