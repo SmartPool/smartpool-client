@@ -111,8 +111,13 @@ type PoolMonitor interface {
 	ContractAddress() common.Address
 }
 
-type EventRecorder interface {
-	Record(eventName string, rig Rig, datas ...interface{})
-	FarmStats(start *big.Int, end *big.Int) interface{}
-	RigStats(rig Rig, start *big.Int, end *big.Int) interface{}
+type StatRecorder interface {
+	RecordShare(status string, share Share, rig Rig)
+	RecordClaim(status string, claim Claim)
+	RecordHashrate(hashrate hexutil.Uint64, id common.Hash, rig Rig)
+
+	OverallFarmStat() interface{}
+	FarmStat(start uint64, end uint64) interface{}
+	OverallRigStat(rig Rig) interface{}
+	RigStat(rig Rig, start uint64, end uint64) interface{}
 }

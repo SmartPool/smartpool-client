@@ -169,7 +169,7 @@ func Run(c *cli.Context) error {
 		input.ExtraData(), input.SubmitInterval(),
 		input.ShareThreshold(), input.HotStop(),
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)

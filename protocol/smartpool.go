@@ -30,7 +30,7 @@ type SmartPool struct {
 	ShareReceiver     smartpool.ShareReceiver
 	NetworkClient     smartpool.NetworkClient
 	Contract          smartpool.Contract
-	EventRecorder     smartpool.EventRecorder
+	StatRecorder      smartpool.StatRecorder
 	ClaimRepo         ClaimRepo
 	Storage           PersistentStorage
 	LatestCounter     *big.Int
@@ -82,6 +82,7 @@ func (sp *SmartPool) GetWork(rig smartpool.Rig) smartpool.Work {
 }
 
 func (sp *SmartPool) SubmitHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash) bool {
+	sp.StatRecorder.RecordHashrate(hashrate, id, rig)
 	return sp.NetworkClient.SubmitHashrate(hashrate, id)
 }
 
@@ -98,17 +99,23 @@ func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) boo
 		smartpool.Output.Printf("-->Yay! We found potential block!<--\n")
 		sp.NetworkClient.SubmitSolution(s)
 	}
-	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
-		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
-	}
 	if share == nil || share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		smartpool.Output.Printf("Share is discarded.\n")
+		if share != nil && share.Counter().Cmp(sp.LatestCounter) <= 0 {
+			smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
+		}
+		go sp.StatRecorder.RecordShare("rejected", share, rig)
 		return false
 	}
 	err := sp.ClaimRepo.AddShare(share)
 	if err != nil {
 		smartpool.Output.Printf("Discarded duplicated share.\n")
 		return false
+	}
+	if share.FullSolution() {
+		go sp.StatRecorder.RecordShare("fullsolution", share, rig)
+	} else {
+		go sp.StatRecorder.RecordShare("accepted", share, rig)
 	}
 	smartpool.Output.Printf(".")
 	return true
@@ -153,6 +160,7 @@ func (sp *SmartPool) Submit() (bool, error) {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		return false, subErr
 	}
+	sp.StatRecorder.RecordClaim("submitted", claim)
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
 	smartpool.Output.Printf("Waiting for verification index...")
 	index := sp.GetVerificationIndex(claim)
@@ -160,9 +168,11 @@ func (sp *SmartPool) Submit() (bool, error) {
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		smartpool.Output.Printf("%s\n", verErr)
+		sp.StatRecorder.RecordClaim("rejected", claim)
 		return false, verErr
 	}
 	smartpool.Output.Printf("Claim is successfully verified.\n")
+	sp.StatRecorder.RecordClaim("accepted", claim)
 	return true, nil
 }
 
@@ -276,7 +286,7 @@ func (sp *SmartPool) Run() bool {
 func NewSmartPool(
 	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
 	nc smartpool.NetworkClient, cr ClaimRepo, ps PersistentStorage,
-	co smartpool.Contract, er smartpool.EventRecorder, ca common.Address,
+	co smartpool.Contract, stat smartpool.StatRecorder, ca common.Address,
 	ma common.Address, ed string, interval time.Duration, threshold int,
 	hotStop bool) *SmartPool {
 	counter, err := ps.LoadLatestCounter()
@@ -291,7 +301,7 @@ func NewSmartPool(
 		ClaimRepo:         cr,
 		Storage:           ps,
 		Contract:          co,
-		EventRecorder:     er,
+		StatRecorder:      stat,
 		ContractAddress:   ca,
 		MinerAddress:      ma,
 		ExtraData:         ed,
