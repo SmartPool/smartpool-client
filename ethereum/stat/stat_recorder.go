@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const STATRECORDER_FILE string = "stat_recorder"
+
 type StatRecorder struct {
 	mu sync.Mutex
 
@@ -15,12 +17,35 @@ type StatRecorder struct {
 	FarmData *FarmData
 }
 
-func NewStatRecorder() *StatRecorder {
-	return &StatRecorder{
+func loadStatRecorder(storage smartpool.PersistentStorage) (*StatRecorder, error) {
+	result := &StatRecorder{
 		mu:       sync.Mutex{},
 		RigDatas: map[string]*RigData{},
 		FarmData: NewFarmData(),
 	}
+	loadedStats, err := storage.Load(result, STATRECORDER_FILE)
+	result = loadedStats.(*StatRecorder)
+	return result, err
+}
+
+func NewStatRecorder(storage smartpool.PersistentStorage) *StatRecorder {
+	statRecorder, err := loadStatRecorder(storage)
+	if err != nil {
+		smartpool.Output.Printf("Couldn't load stat from last session. Initialize with fresh stat recorder.\n")
+	}
+	smartpool.Output.Printf("Stat persister is running...\n")
+	return statRecorder
+}
+
+func (sr *StatRecorder) Persist(storage smartpool.PersistentStorage) error {
+	smartpool.Output.Printf("Saving stats to disk...")
+	err := storage.Persist(sr, STATRECORDER_FILE)
+	if err == nil {
+		smartpool.Output.Printf("Done.\n")
+	} else {
+		smartpool.Output.Printf("Failed. (%s)\n", err.Error())
+	}
+	return err
 }
 
 func (sr *StatRecorder) getRigData(rig smartpool.Rig) *RigData {
@@ -86,34 +111,3 @@ func (sr *StatRecorder) RigStat(rig smartpool.Rig, start, end uint64) interface{
 	}
 	return result
 }
-
-// func (er *EventRecorder) FarmStats(start uint64, end uint64) interface{} {
-// 	accShareStats := er.accShareEvents.FarmStats(start, end)
-// 	rejShareStats := er.rejShareEvents.FarmStats(start, end)
-// 	hashrateStats := er.hashrateEvents.FarmStats(start, end)
-// 	totalShareStats := merge(accShareStats, rejShareStats)
-// 	result := map[string]interface{}{}
-// 	result["accepted_share"] = accShareStats
-// 	result["rejected_share"] = rejShareStats
-// 	result["total_share"] = totalShareStats
-// 	result["hashrate"] = hashrateStats
-// 	result["online_rig"] = er.hashrateEvents.OnlineRigs()
-// 	result["start"] = start
-// 	result["end"] = end
-// }
-//
-// func (er *EventRecorder) RigStats(rig Rig, start uint64, end uint64) interface{} {
-// 	accShareStats := er.accShareEvents.RigStats(rig, start, end)
-// 	rejShareStats := er.rejShareEvents.RigStats(rig, start, end)
-// 	hashrateStats := er.hashrateEvents.RigStats(rig, start, end)
-// 	totalShareStats := merge(accShareStats, rejShareStats)
-// 	result := map[string]interface{}{}
-// 	result["accepted_share"] = accShareStats
-// 	result["rejected_share"] = rejShareStats
-// 	result["total_share"] = totalShareStats
-// 	result["hashrate"] = hashrateStats
-// 	result["rig"] = rig
-// 	result["start"] = start
-// 	result["end"] = end
-// 	return result
-// }

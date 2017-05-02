@@ -9,18 +9,18 @@ import (
 )
 
 type PeriodRigData struct {
-	MinedShare               uint64     `json:"mined_share"`
-	ValidShare               uint64     `json:"valid_share"`
-	TotalValidDifficulty     *big.Int   `json:"-"`
-	AverageShareDifficulty   *big.Int   `json:"average_share_difficulty"`
-	RejectedShare            uint64     `json:"rejected_share"`
-	TotalHashrate            *big.Int   `json:"-"`
-	NoHashrateSubmission     uint64     `json:"-"`
-	AverageReportedHashrate  *big.Int   `json:"reported_hashrate"`
-	AverageEffectiveHashrate *big.Int   `json:"effective_hashrate"`
-	BlockFound               uint64     `json:"block_found"`
-	TimePeriod               uint64     `json:"time_period"`
-	StartTime                *time.Time `json:"start_time"`
+	MinedShare               uint64    `json:"mined_share"`
+	ValidShare               uint64    `json:"valid_share"`
+	TotalValidDifficulty     *big.Int  `json:"-"`
+	AverageShareDifficulty   *big.Int  `json:"average_share_difficulty"`
+	RejectedShare            uint64    `json:"rejected_share"`
+	TotalHashrate            *big.Int  `json:"-"`
+	NoHashrateSubmission     uint64    `json:"-"`
+	AverageReportedHashrate  *big.Int  `json:"reported_hashrate"`
+	AverageEffectiveHashrate *big.Int  `json:"effective_hashrate"`
+	BlockFound               uint64    `json:"block_found"`
+	TimePeriod               uint64    `json:"time_period"`
+	StartTime                time.Time `json:"start_time"`
 }
 
 func NewPeriodRigData(timePeriod uint64) *PeriodRigData {
@@ -44,7 +44,7 @@ func (prd *PeriodRigData) updateAvgHashrate(t time.Time) {
 }
 
 func (prd *PeriodRigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(*prd.StartTime).Seconds())
+	duration := int64(t.Sub(prd.StartTime).Seconds())
 	if duration > 0 {
 		prd.AverageEffectiveHashrate.Div(
 			prd.TotalValidDifficulty,
@@ -63,21 +63,21 @@ func (prd *PeriodRigData) updateAvgShareDifficulty(t time.Time) {
 }
 
 type OverallRigData struct {
-	LastMinedShare           *time.Time `json:"last_mined_share"`
-	LastValidShare           *time.Time `json:"last_valid_share"`
-	LastRejectedShare        *time.Time `json:"last_rejected_share"`
-	LastBlock                *time.Time `json:"last_block"`
-	MinedShare               uint64     `json:"total_submitted_share"`
-	ValidShare               uint64     `json:"total_accepted_share"`
-	TotalValidDifficulty     *big.Int   `json:"total_accepted_difficulty"`
-	AverageShareDifficulty   *big.Int   `json:"average_share_difficulty"`
-	RejectedShare            uint64     `json:"total_rejected_share"`
-	TotalHashrate            *big.Int   `json:"total_hashrate"`
-	NoHashrateSubmission     uint64     `json:"no_hashrate_submission"`
-	AverageReportedHashrate  *big.Int   `json:"average_reported_hashrate"`
-	AverageEffectiveHashrate *big.Int   `json:"average_effective_hashrate"`
-	BlockFound               uint64     `json:"total_block_found"`
-	StartTime                *time.Time `json:"start_time"`
+	LastMinedShare           time.Time `json:"last_mined_share"`
+	LastValidShare           time.Time `json:"last_valid_share"`
+	LastRejectedShare        time.Time `json:"last_rejected_share"`
+	LastBlock                time.Time `json:"last_block"`
+	MinedShare               uint64    `json:"total_submitted_share"`
+	ValidShare               uint64    `json:"total_accepted_share"`
+	TotalValidDifficulty     *big.Int  `json:"total_accepted_difficulty"`
+	AverageShareDifficulty   *big.Int  `json:"average_share_difficulty"`
+	RejectedShare            uint64    `json:"total_rejected_share"`
+	TotalHashrate            *big.Int  `json:"total_hashrate"`
+	NoHashrateSubmission     uint64    `json:"no_hashrate_submission"`
+	AverageReportedHashrate  *big.Int  `json:"average_reported_hashrate"`
+	AverageEffectiveHashrate *big.Int  `json:"average_effective_hashrate"`
+	BlockFound               uint64    `json:"total_block_found"`
+	StartTime                time.Time `json:"start_time"`
 }
 
 type RigData struct {
@@ -109,18 +109,19 @@ func (rd *RigData) getData(t time.Time) *PeriodRigData {
 }
 
 func (rd *RigData) AddShare(status string, share smartpool.Share, t time.Time) {
-	if rd.StartTime == nil {
-		rd.StartTime = &t
+	if rd.StartTime.IsZero() {
+		rd.StartTime = t
 	}
-	rd.LastMinedShare = &t
-	rd.MinedShare++
 	curPeriodData := rd.getData(t)
-	if curPeriodData.StartTime == nil {
-		curPeriodData.StartTime = &t
+	if curPeriodData.StartTime.IsZero() {
+		curPeriodData.StartTime = t
 	}
-	curPeriodData.MinedShare++
-	if status == "accepted" {
-		rd.LastValidShare = &t
+	if status == "submitted" {
+		rd.LastMinedShare = t
+		rd.MinedShare++
+		curPeriodData.MinedShare++
+	} else if status == "accepted" {
+		rd.LastValidShare = t
 		rd.ValidShare++
 		rd.TotalValidDifficulty.Add(rd.TotalValidDifficulty, share.ShareDifficulty())
 		rd.updateAvgShareDifficulty(t)
@@ -130,12 +131,12 @@ func (rd *RigData) AddShare(status string, share smartpool.Share, t time.Time) {
 		curPeriodData.updateAvgShareDifficulty(t)
 		curPeriodData.updateAvgEffHashrate(t)
 	} else if status == "rejected" {
-		rd.LastRejectedShare = &t
+		rd.LastRejectedShare = t
 		rd.RejectedShare++
 		curPeriodData.RejectedShare++
 	} else if status == "fullsolution" {
-		rd.LastBlock = &t
-		rd.LastValidShare = &t
+		rd.LastBlock = t
+		rd.LastValidShare = t
 		rd.ValidShare++
 		rd.TotalValidDifficulty.Add(rd.TotalValidDifficulty, share.ShareDifficulty())
 		rd.updateAvgShareDifficulty(t)
@@ -150,12 +151,12 @@ func (rd *RigData) AddShare(status string, share smartpool.Share, t time.Time) {
 }
 
 func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.Time) {
-	if rd.StartTime == nil {
-		rd.StartTime = &t
+	if rd.StartTime.IsZero() {
+		rd.StartTime = t
 	}
 	curPeriodData := rd.getData(t)
-	if curPeriodData.StartTime == nil {
-		curPeriodData.StartTime = &t
+	if curPeriodData.StartTime.IsZero() {
+		curPeriodData.StartTime = t
 	}
 	rd.TotalHashrate.Add(rd.TotalHashrate, big.NewInt(int64(hashrate)))
 	rd.NoHashrateSubmission++
@@ -175,7 +176,7 @@ func (rd *RigData) updateAvgHashrate(t time.Time) {
 }
 
 func (rd *RigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(*rd.StartTime).Seconds())
+	duration := int64(t.Sub(rd.StartTime).Seconds())
 	if duration > 0 {
 		rd.AverageEffectiveHashrate.Div(
 			rd.TotalValidDifficulty,

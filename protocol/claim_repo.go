@@ -15,4 +15,5 @@ type ClaimRepo interface {
 	// GetCurrentClaim returns nil when there are not enough shares in the claim
 	// as compared to the threshold.
 	GetCurrentClaim(threshold int) smartpool.Claim
+	Persist(storage smartpool.PersistentStorage) error
 }

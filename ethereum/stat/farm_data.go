@@ -24,7 +24,7 @@ type PeriodFarmData struct {
 	Rigs                     map[string]bool `json:"rigs"`
 	BlockFound               uint64          `json:"block_found"`
 	TimePeriod               uint64          `json:"time_period"`
-	StartTime                *time.Time      `json:"start_time"`
+	StartTime                time.Time       `json:"start_time"`
 }
 
 func NewPeriodFarmData(timePeriod uint64) *PeriodFarmData {
@@ -49,7 +49,7 @@ func (pfd *PeriodFarmData) updateAvgHashrate(t time.Time) {
 }
 
 func (pfd *PeriodFarmData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(*pfd.StartTime).Seconds())
+	duration := int64(t.Sub(pfd.StartTime).Seconds())
 	if duration > 0 {
 		pfd.AverageEffectiveHashrate.Div(
 			pfd.TotalValidDifficulty,
@@ -68,18 +68,18 @@ func (pfd *PeriodFarmData) updateAvgShareDifficulty(t time.Time) {
 }
 
 type OverallFarmData struct {
-	LastMinedShare           *time.Time      `json:"last_mined_share"`
-	LastValidShare           *time.Time      `json:"last_valid_share"`
-	LastRejectedShare        *time.Time      `json:"last_rejected_share"`
-	LastBlock                *time.Time      `json:"last_block"`
+	LastMinedShare           time.Time       `json:"last_mined_share"`
+	LastValidShare           time.Time       `json:"last_valid_share"`
+	LastRejectedShare        time.Time       `json:"last_rejected_share"`
+	LastBlock                time.Time       `json:"last_block"`
 	MinedShare               uint64          `json:"mined_share"`
 	ValidShare               uint64          `json:"valid_share"`
 	TotalValidDifficulty     *big.Int        `json:"-"`
 	AverageShareDifficulty   *big.Int        `json:"average_share_difficulty"`
 	RejectedShare            uint64          `json:"rejected_share"`
-	LastSubmittedClaim       *time.Time      `json:"last_submitted_claim"`
-	LastAcceptedClaim        *time.Time      `json:"last_accepted_claim"`
-	LastRejectedClaim        *time.Time      `json:"last_rejected_claim"`
+	LastSubmittedClaim       time.Time       `json:"last_submitted_claim"`
+	LastAcceptedClaim        time.Time       `json:"last_accepted_claim"`
+	LastRejectedClaim        time.Time       `json:"last_rejected_claim"`
 	SubmittedClaim           uint64          `json:"total_submitted_claim"`
 	AcceptedClaim            uint64          `json:"total_accepted_claim"`
 	RejectedClaim            uint64          `json:"total_rejected_claim"`
@@ -90,7 +90,7 @@ type OverallFarmData struct {
 	Rigs                     map[string]bool `json:"rigs"`
 	BlockFound               uint64          `json:"total_block_found"`
 	PendingShare             uint64          `json:"pending_share"`
-	StartTime                *time.Time      `json:"start_time"`
+	StartTime                time.Time       `json:"start_time"`
 }
 
 type FarmData struct {
@@ -123,20 +123,23 @@ func (fd *FarmData) getData(t time.Time) *PeriodFarmData {
 }
 
 func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.Share, t time.Time) {
-	if fd.StartTime == nil {
-		fd.StartTime = &t
+	if fd.StartTime.IsZero() {
+		fd.StartTime = t
 	}
 	fd.Rigs[rig.ID()] = true
-	fd.LastMinedShare = &t
-	fd.MinedShare++
 	curPeriodData := fd.getData(t)
-	if curPeriodData.StartTime == nil {
-		curPeriodData.StartTime = &t
+	if curPeriodData.StartTime.IsZero() {
+		curPeriodData.StartTime = t
 	}
-	curPeriodData.MinedShare++
 	curPeriodData.Rigs[rig.ID()] = true
-	if status == "accepted" {
-		fd.LastValidShare = &t
+	if status == "recover_failed" {
+		fd.PendingShare--
+	} else if status == "submitted" {
+		fd.LastMinedShare = t
+		fd.MinedShare++
+		curPeriodData.MinedShare++
+	} else if status == "accepted" {
+		fd.LastValidShare = t
 		fd.ValidShare++
 		fd.TotalValidDifficulty.Add(fd.TotalValidDifficulty, share.ShareDifficulty())
 		fd.updateAvgShareDifficulty(t)
@@ -147,12 +150,12 @@ func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.S
 		curPeriodData.updateAvgShareDifficulty(t)
 		curPeriodData.updateAvgEffHashrate(t)
 	} else if status == "rejected" {
-		fd.LastRejectedShare = &t
+		fd.LastRejectedShare = t
 		fd.RejectedShare++
 		curPeriodData.RejectedShare++
 	} else if status == "fullsolution" {
-		fd.LastBlock = &t
-		fd.LastValidShare = &t
+		fd.LastBlock = t
+		fd.LastValidShare = t
 		fd.ValidShare++
 		fd.TotalValidDifficulty.Add(fd.TotalValidDifficulty, share.ShareDifficulty())
 		fd.BlockFound++
@@ -168,36 +171,36 @@ func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.S
 }
 
 func (fd *FarmData) AddClaim(status string, claim smartpool.Claim, t time.Time) {
-	if fd.StartTime == nil {
-		fd.StartTime = &t
+	if fd.StartTime.IsZero() {
+		fd.StartTime = t
 	}
 	curPeriodData := fd.getData(t)
-	if curPeriodData.StartTime == nil {
-		curPeriodData.StartTime = &t
+	if curPeriodData.StartTime.IsZero() {
+		curPeriodData.StartTime = t
 	}
 	if status == "submitted" {
-		fd.LastSubmittedClaim = &t
+		fd.LastSubmittedClaim = t
 		fd.SubmittedClaim++
 		fd.PendingShare -= claim.NumShares().Uint64()
 		curPeriodData.SubmittedClaim++
 	} else if status == "accepted" {
-		fd.LastAcceptedClaim = &t
+		fd.LastAcceptedClaim = t
 		fd.AcceptedClaim++
 		curPeriodData.AcceptedClaim++
 	} else if status == "rejected" {
-		fd.LastRejectedClaim = &t
+		fd.LastRejectedClaim = t
 		fd.RejectedClaim++
 		curPeriodData.RejectedClaim++
 	}
 }
 
 func (fd *FarmData) AddHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash, t time.Time) {
-	if fd.StartTime == nil {
-		fd.StartTime = &t
+	if fd.StartTime.IsZero() {
+		fd.StartTime = t
 	}
 	curPeriodData := fd.getData(t)
-	if curPeriodData.StartTime == nil {
-		curPeriodData.StartTime = &t
+	if curPeriodData.StartTime.IsZero() {
+		curPeriodData.StartTime = t
 	}
 	fd.TotalHashrate.Add(fd.TotalHashrate, big.NewInt(int64(hashrate)))
 	fd.NoHashrateSubmission++
@@ -217,7 +220,7 @@ func (fd *FarmData) updateAvgHashrate(t time.Time) {
 }
 
 func (fd *FarmData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(*fd.StartTime).Seconds())
+	duration := int64(t.Sub(fd.StartTime).Seconds())
 	if duration > 0 {
 		fd.AverageEffectiveHashrate.Div(
 			fd.TotalValidDifficulty,

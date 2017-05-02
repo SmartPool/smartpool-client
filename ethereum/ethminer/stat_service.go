@@ -3,7 +3,7 @@ package ethminer
 import (
 	"encoding/json"
 	"github.com/SmartPool/smartpool-client/ethereum"
-	"github.com/SmartPool/smartpool-client/stat"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"net/http"
 	"time"
 )

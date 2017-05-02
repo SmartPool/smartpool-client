@@ -6,11 +6,13 @@ import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/protocol"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"os"
 	"sync"
-	"time"
 )
+
+const ACTIVE_SHARE_FILE string = "active_shares"
 
 // TimestampClaimRepo only select shares that don't have most recent timestamp
 // in order to make sure coming shares' counters are greater than selected
@@ -21,14 +23,13 @@ type TimestampClaimRepo struct {
 	noShares        uint64
 	noRecentShares  uint64
 	mu              sync.Mutex
-	storage         *FileStorage
+	storage         smartpool.PersistentStorage
 	diff            *big.Int
 	miner           string
 }
 
-func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string) *TimestampClaimRepo {
-	storage := NewFileStorage()
-	shares, err := storage.LoadActiveShares()
+func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartpool.PersistentStorage) *TimestampClaimRepo {
+	shares, err := loadActiveShares(storage)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't load active shares from last session (%s). Initialize with empty share pool.\n", err)
 	}
@@ -132,20 +133,65 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string) *TimestampClai
 	smartpool.Output.Printf("Loaded %d valid shares\n", noShares)
 	smartpool.Output.Printf("Loaded timestamp: 0x%s\n", currentTimestamp.Text(16))
 	smartpool.Output.Printf("Loaded %d shares with current timestamp\n", noRecentShares)
-	go func() {
-		for {
-			time.Sleep(1 * time.Minute)
-			smartpool.Output.Printf("Saving active shares to disk...")
-			err = cr.Persist()
-			smartpool.Output.Printf("Done. (%s)\n", err)
-		}
-	}()
-	smartpool.Output.Printf("Share persister is running...\n")
 	return &cr
 }
 
-func (cr *TimestampClaimRepo) Persist() error {
-	return cr.storage.PersistActiveShares(cr.activeShares)
+type gobShare struct {
+	BlockHeader     *types.Header
+	Nonce           types.BlockNonce
+	MixDigest       common.Hash
+	ShareDifficulty *big.Int
+	MinerAddress    string
+	SolutionState   int
+}
+
+func loadActiveShares(storage smartpool.PersistentStorage) (map[string]*Share, error) {
+	shares := map[string]*Share{}
+	gobShares := map[string]gobShare{}
+	loadedGobShares, err := storage.Load(&gobShares, ACTIVE_SHARE_FILE)
+	gobShares = *loadedGobShares.(*map[string]gobShare)
+	if err != nil {
+		return shares, err
+	}
+	for k, gobShare := range gobShares {
+		shares[k] = &Share{
+			gobShare.BlockHeader,
+			gobShare.Nonce,
+			gobShare.MixDigest,
+			gobShare.ShareDifficulty,
+			gobShare.MinerAddress,
+			gobShare.SolutionState,
+			nil,
+		}
+	}
+	return shares, nil
+}
+
+func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error {
+	gobShares := map[string]gobShare{}
+	var shareID string
+	for _, s := range cr.activeShares {
+		shareID = fmt.Sprintf(
+			"%s-%s",
+			s.BlockHeader().Hash().Hex(),
+			s.Nonce())
+		gobShares[shareID] = gobShare{
+			s.BlockHeader(),
+			s.nonce,
+			s.mixDigest,
+			s.shareDifficulty,
+			s.minerAddress,
+			s.SolutionState,
+		}
+	}
+	smartpool.Output.Printf("Saving active shares to disk...")
+	err := storage.Persist(&gobShares, ACTIVE_SHARE_FILE)
+	if err == nil {
+		smartpool.Output.Printf("Done.\n")
+	} else {
+		smartpool.Output.Printf("Failed. (%s)\n", err.Error())
+	}
+	return err
 }
 
 func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
@@ -198,6 +244,6 @@ func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	}
 	cr.activeShares = newActiveShares
 	cr.noShares = 0
-	cr.Persist()
+	cr.Persist(cr.storage)
 	return c
 }

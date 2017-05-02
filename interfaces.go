@@ -43,6 +43,15 @@ type UserOutput interface {
 	Printf(format string, a ...interface{}) (n int, err error)
 }
 
+// PersistentStorage is the gateway for smartpool to interact with external
+// persistent storage such as a file system, a database or even a cloud based
+// service.
+// Smartpool should only persist something via this interface.
+type PersistentStorage interface {
+	Persist(data interface{}, id string) error
+	Load(data interface{}, id string) (interface{}, error)
+}
+
 // Contract is the interface for smartpool to interact with contract side of
 // SmartPool protocol.
 // Contract can be used for only one caller (Ethereum account) per
@@ -120,4 +129,6 @@ type StatRecorder interface {
 	FarmStat(start uint64, end uint64) interface{}
 	OverallRigStat(rig Rig) interface{}
 	RigStat(rig Rig, start uint64, end uint64) interface{}
+
+	Persist(storage PersistentStorage) error
 }
