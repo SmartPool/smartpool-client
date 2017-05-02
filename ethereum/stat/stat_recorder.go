@@ -57,6 +57,12 @@ func (sr *StatRecorder) getRigData(rig smartpool.Rig) *RigData {
 	return data
 }
 
+func (sr *StatRecorder) ShareRestored(noShares uint64) {
+	sr.mu.Lock()
+	defer sr.mu.Unlock()
+	sr.FarmData.ShareRestored(noShares)
+}
+
 func (sr *StatRecorder) RecordShare(status string, share smartpool.Share, rig smartpool.Rig) {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()

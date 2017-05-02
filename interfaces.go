@@ -124,6 +124,9 @@ type StatRecorder interface {
 	RecordShare(status string, share Share, rig Rig)
 	RecordClaim(status string, claim Claim)
 	RecordHashrate(hashrate hexutil.Uint64, id common.Hash, rig Rig)
+	// Notify StatRecorder how many share were restored from last session
+	// so StatRecorder can track number of abandoned shares
+	ShareRestored(noshares uint64)
 
 	OverallFarmStat() interface{}
 	FarmStat(start uint64, end uint64) interface{}

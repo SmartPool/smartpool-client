@@ -167,6 +167,10 @@ func loadActiveShares(storage smartpool.PersistentStorage) (map[string]*Share, e
 	return shares, nil
 }
 
+func (cr *TimestampClaimRepo) NoActiveShares() uint64 {
+	return cr.noShares + cr.noRecentShares
+}
+
 func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error {
 	gobShares := map[string]gobShare{}
 	var shareID string

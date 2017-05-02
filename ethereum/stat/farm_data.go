@@ -89,8 +89,15 @@ type OverallFarmData struct {
 	AverageEffectiveHashrate *big.Int        `json:"effective_hashrate"`
 	Rigs                     map[string]bool `json:"rigs"`
 	BlockFound               uint64          `json:"total_block_found"`
-	PendingShare             uint64          `json:"pending_share"`
-	StartTime                time.Time       `json:"start_time"`
+	// A share is pending when it is not included in any claim
+	PendingShare uint64 `json:"pending_share"`
+	// A share is considered as abandoned when the claim it belongs to was
+	// rejected by the contract or it is discarded while being restored
+	// from last running session because of configuration changes
+	AbandonedShare      uint64    `json:"abandoned_share"`
+	BeingValidatedShare uint64    `json:"being_validated_share"`
+	VerifiedShare       uint64    `json:"verified_share"`
+	StartTime           time.Time `json:"start_time"`
 }
 
 type FarmData struct {
@@ -132,9 +139,7 @@ func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.S
 		curPeriodData.StartTime = t
 	}
 	curPeriodData.Rigs[rig.ID()] = true
-	if status == "recover_failed" {
-		fd.PendingShare--
-	} else if status == "submitted" {
+	if status == "submitted" {
 		fd.LastMinedShare = t
 		fd.MinedShare++
 		curPeriodData.MinedShare++
@@ -182,16 +187,27 @@ func (fd *FarmData) AddClaim(status string, claim smartpool.Claim, t time.Time) 
 		fd.LastSubmittedClaim = t
 		fd.SubmittedClaim++
 		fd.PendingShare -= claim.NumShares().Uint64()
+		fd.BeingValidatedShare += claim.NumShares().Uint64()
 		curPeriodData.SubmittedClaim++
 	} else if status == "accepted" {
 		fd.LastAcceptedClaim = t
 		fd.AcceptedClaim++
+		fd.VerifiedShare += claim.NumShares().Uint64()
+		fd.BeingValidatedShare -= claim.NumShares().Uint64()
 		curPeriodData.AcceptedClaim++
 	} else if status == "rejected" {
 		fd.LastRejectedClaim = t
 		fd.RejectedClaim++
+		fd.BeingValidatedShare -= claim.NumShares().Uint64()
+		fd.AbandonedShare += claim.NumShares().Uint64()
 		curPeriodData.RejectedClaim++
 	}
+}
+
+func (fd *FarmData) ShareRestored(noShares uint64) {
+	numAbandoned := fd.PendingShare - noShares
+	fd.PendingShare -= numAbandoned
+	fd.AbandonedShare += numAbandoned
 }
 
 func (fd *FarmData) AddHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash, t time.Time) {

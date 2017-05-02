@@ -160,14 +160,15 @@ func Run(c *cli.Context) error {
 		}
 	}
 	fileStorage := storage.NewGobFileStorage()
+	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
 		input.MinerAddress(),
 		input.ContractAddress(),
 		fileStorage,
 	)
+	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
 		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,

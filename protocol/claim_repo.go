@@ -16,4 +16,5 @@ type ClaimRepo interface {
 	// as compared to the threshold.
 	GetCurrentClaim(threshold int) smartpool.Claim
 	Persist(storage smartpool.PersistentStorage) error
+	NoActiveShares() uint64
 }

@@ -28,6 +28,11 @@ func (cr *InMemClaimRepo) Persist(storage smartpool.PersistentStorage) error {
 	return nil
 }
 
+func (cr *InMemClaimRepo) NoActiveShares() uint64 {
+	c := cr.GetClaim(cr.cClaimNumber)
+	return c.NumShares().Uint64()
+}
+
 func (cr *InMemClaimRepo) AddShare(s smartpool.Share) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
