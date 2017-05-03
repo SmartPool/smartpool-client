@@ -1,6 +1,7 @@
 package stat
 
 import (
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -91,12 +92,15 @@ type OverallFarmData struct {
 	BlockFound               uint64          `json:"total_block_found"`
 	// A share is pending when it is not included in any claim
 	PendingShare uint64 `json:"pending_share"`
-	// A share is considered as abandoned when the claim it belongs to was
-	// rejected by the contract or it is discarded while being restored
-	// from last running session because of configuration changes
+	// A share is considered as abandoned when it is discarded while being
+	// restored from last running session because of configuration changes
+	// In case when the client was shutdown while waiting to verify a claim,
+	// its shares will also be abandoned and will be counted to
+	// AbandonedShare too.
 	AbandonedShare      uint64    `json:"abandoned_share"`
 	BeingValidatedShare uint64    `json:"being_validated_share"`
 	VerifiedShare       uint64    `json:"verified_share"`
+	BadShare            uint64    `json:"bad_share"`
 	StartTime           time.Time `json:"start_time"`
 }
 
@@ -127,6 +131,19 @@ func (fd *FarmData) getData(t time.Time) *PeriodFarmData {
 		fd.Datas[timePeriod] = data
 	}
 	return data
+}
+
+func (fd *FarmData) TruncateData(storage smartpool.PersistentStorage) error {
+	curPeriod := TimeToPeriod(time.Now())
+	var err error
+	for period, farmData := range fd.Datas {
+		if int64(curPeriod-period) > LongWindow/BaseTimePeriod {
+			if err = storage.Persist(farmData, fmt.Sprintf("farm-data-%d", period)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.Share, t time.Time) {
@@ -199,7 +216,7 @@ func (fd *FarmData) AddClaim(status string, claim smartpool.Claim, t time.Time) 
 		fd.LastRejectedClaim = t
 		fd.RejectedClaim++
 		fd.BeingValidatedShare -= claim.NumShares().Uint64()
-		fd.AbandonedShare += claim.NumShares().Uint64()
+		fd.BadShare += claim.NumShares().Uint64()
 		curPeriodData.RejectedClaim++
 	}
 }
@@ -208,6 +225,23 @@ func (fd *FarmData) ShareRestored(noShares uint64) {
 	numAbandoned := fd.PendingShare - noShares
 	fd.PendingShare -= numAbandoned
 	fd.AbandonedShare += numAbandoned
+	// TODO: We currently discard last unverified claim
+	// on client startup.
+	// So we increase RejectedClaim and consider all its shares
+	// as AbandonedShare
+	// NOTE: There is a case that the verification tx was
+	// already sent out. It would be likely to be mined and the
+	// claim is actually verified and its share shouldn't be
+	// consider as abandoned.
+	// SOLUTION:
+	// 1. Recover claim which is waiting to verify
+	// 2. Prevent the client from shutting down when its waiting
+	// to verify last claim
+	if fd.BeingValidatedShare != 0 {
+		fd.RejectedClaim++
+	}
+	fd.AbandonedShare += fd.BeingValidatedShare
+	fd.BeingValidatedShare = 0
 }
 
 func (fd *FarmData) AddHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash, t time.Time) {

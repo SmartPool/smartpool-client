@@ -15,16 +15,16 @@ func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	method := r.URL.Query().Get(":method")
 	t := time.Now()
 	curPeriod := stat.TimeToPeriod(t)
-	anHourAgo := stat.TimeToPeriod(t.Add(-time.Hour))
-	threeHourAgo := stat.TimeToPeriod(t.Add(-3 * time.Hour))
+	shortWindow := stat.TimeToPeriod(t.Add(-time.Duration(stat.ShortWindow) * time.Second))
+	longWindow := stat.TimeToPeriod(t.Add(-time.Duration(stat.LongWindow) * time.Second))
 	if method == "farm" {
 		overall := SmartPool.StatRecorder.OverallFarmStat()
-		hourAgo := SmartPool.StatRecorder.FarmStat(anHourAgo, curPeriod)
-		threeHourAgo := SmartPool.StatRecorder.FarmStat(threeHourAgo, curPeriod)
+		shortWindowStat := SmartPool.StatRecorder.FarmStat(shortWindow, curPeriod)
+		longWindowStat := SmartPool.StatRecorder.FarmStat(longWindow, curPeriod)
 		result := map[string]interface{}{
 			"overall":         overall,
-			"last_1_hour":     hourAgo,
-			"last_3_hours":    threeHourAgo,
+			"last_1_hour":     shortWindowStat,
+			"last_3_hours":    longWindowStat,
 			"period_duration": stat.BaseTimePeriod,
 		}
 		encoder := json.NewEncoder(w)
@@ -33,12 +33,12 @@ func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		rigID := r.URL.Query().Get(":rig")
 		rig := ethereum.NewRig(rigID)
 		overall := SmartPool.StatRecorder.OverallRigStat(rig)
-		hourAgo := SmartPool.StatRecorder.RigStat(rig, anHourAgo, curPeriod)
-		threeHourAgo := SmartPool.StatRecorder.RigStat(rig, threeHourAgo, curPeriod)
+		shortWindowStat := SmartPool.StatRecorder.RigStat(rig, shortWindow, curPeriod)
+		longWindowStat := SmartPool.StatRecorder.RigStat(rig, longWindow, curPeriod)
 		result := map[string]interface{}{
 			"overall":         overall,
-			"last_1_hour":     hourAgo,
-			"last_3_hours":    threeHourAgo,
+			"last_1_hour":     shortWindowStat,
+			"last_3_hours":    longWindowStat,
 			"period_duration": stat.BaseTimePeriod,
 		}
 		encoder := json.NewEncoder(w)
