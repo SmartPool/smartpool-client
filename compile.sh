@@ -9,6 +9,7 @@ mustrun() {
 echo "Install dependencies..."
 mustrun build/env.sh go get -v golang.org/x/crypto/ssh/terminal
 mustrun build/env.sh go get -v gopkg.in/urfave/cli.v1
+mustrun build/env.sh go get -v github.com/bmizerany/pat
 mustrun build/env.sh go get -v github.com/mitchellh/go-homedir
 mustrun build/env.sh go get -v golang.org/x/net/context
 echo "Compiling SmartPool client..."

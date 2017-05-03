@@ -6,11 +6,17 @@ package protocol
 import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
+	"os"
+	"os/signal"
 	"runtime/debug"
 	"sync"
+	"syscall"
 	"time"
 )
+
+const COUNTER_FILE string = "counter"
 
 // SmartPool represent smartpool protocol which interacts smartpool high level
 // interfaces and types together to do following procedures:
@@ -29,8 +35,9 @@ type SmartPool struct {
 	ShareReceiver     smartpool.ShareReceiver
 	NetworkClient     smartpool.NetworkClient
 	Contract          smartpool.Contract
+	StatRecorder      smartpool.StatRecorder
 	ClaimRepo         ClaimRepo
-	Storage           PersistentStorage
+	Storage           smartpool.PersistentStorage
 	LatestCounter     *big.Int
 	ContractAddress   common.Address
 	MinerAddress      common.Address
@@ -44,6 +51,8 @@ type SmartPool struct {
 	runMu             sync.Mutex
 	SubmitterStopped  chan bool
 	stopSubmitterChan chan bool
+	signal            chan os.Signal
+	Input             smartpool.UserInput
 }
 
 // Register registers miner address to the contract.
@@ -75,8 +84,13 @@ func (sp *SmartPool) Register(addr common.Address) bool {
 }
 
 // GetWork returns miner work
-func (sp *SmartPool) GetWork() smartpool.Work {
+func (sp *SmartPool) GetWork(rig smartpool.Rig) smartpool.Work {
 	return sp.NetworkClient.GetWork()
+}
+
+func (sp *SmartPool) SubmitHashrate(rig smartpool.Rig, hashrate hexutil.Uint64, id common.Hash) bool {
+	sp.StatRecorder.RecordHashrate(hashrate, id, rig)
+	return sp.NetworkClient.SubmitHashrate(hashrate, id)
 }
 
 // AcceptSolution accepts solutions from miners and construct corresponding
@@ -84,7 +98,7 @@ func (sp *SmartPool) GetWork() smartpool.Work {
 // successfully added, false otherwise.
 // A share can only be added when it's counter is greater than the maximum
 // counter of the last verified claim
-func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
+func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) bool {
 	share := sp.ShareReceiver.AcceptSolution(s)
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
@@ -92,20 +106,38 @@ func (sp *SmartPool) AcceptSolution(s smartpool.Solution) bool {
 		smartpool.Output.Printf("-->Yay! We found potential block!<--\n")
 		sp.NetworkClient.SubmitSolution(s)
 	}
-	if share.Counter().Cmp(sp.LatestCounter) <= 0 {
-		smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
-	}
+	var success bool
 	if share == nil || share.Counter().Cmp(sp.LatestCounter) <= 0 {
 		smartpool.Output.Printf("Share is discarded.\n")
-		return false
+		if share != nil && share.Counter().Cmp(sp.LatestCounter) <= 0 {
+			smartpool.Output.Printf("Share's counter (0x%s) is lower than last claim max counter (0x%s)\n", share.Counter().Text(16), sp.LatestCounter.Text(16))
+		}
+		success = false
+	} else {
+		err := sp.ClaimRepo.AddShare(share)
+		if err != nil {
+			smartpool.Output.Printf("Discarded duplicated share.\n")
+			success = false
+		} else {
+			smartpool.Output.Printf(".")
+			success = true
+		}
 	}
-	err := sp.ClaimRepo.AddShare(share)
-	if err != nil {
-		smartpool.Output.Printf("Discarded duplicated share.\n")
-		return false
-	}
-	smartpool.Output.Printf(".")
-	return true
+
+	go func() {
+		sp.StatRecorder.RecordShare("submitted", share, rig)
+		if success {
+			if share.FullSolution() {
+				sp.StatRecorder.RecordShare("fullsolution", share, rig)
+			} else {
+				sp.StatRecorder.RecordShare("accepted", share, rig)
+			}
+		} else {
+			sp.StatRecorder.RecordShare("rejected", share, rig)
+		}
+	}()
+
+	return success
 }
 
 // GetCurrentClaim returns new claim containing unsubmitted shares. If there
@@ -126,10 +158,14 @@ func (sp *SmartPool) SealClaim() smartpool.Claim {
 		sp.LatestCounter = claim.Max()
 		smartpool.Output.Printf("Set Latest Counter to 0x%s.\n", sp.LatestCounter.Text(16))
 		smartpool.Output.Printf("Persisting Latest Counter to storage...")
-		sp.Storage.PersistLatestCounter(sp.LatestCounter)
+		persistLatestCounter(sp.Storage, sp.LatestCounter)
 		smartpool.Output.Printf("Done.\n")
 	}
 	return claim
+}
+
+func persistLatestCounter(ps smartpool.PersistentStorage, counter *big.Int) error {
+	return ps.Persist(counter, COUNTER_FILE)
 }
 
 // Submit does all the protocol that communicates with the contract to submit
@@ -147,6 +183,7 @@ func (sp *SmartPool) Submit() (bool, error) {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		return false, subErr
 	}
+	sp.StatRecorder.RecordClaim("submitted", claim)
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
 	smartpool.Output.Printf("Waiting for verification index...")
 	index := sp.GetVerificationIndex(claim)
@@ -154,9 +191,11 @@ func (sp *SmartPool) Submit() (bool, error) {
 	verErr := sp.Contract.VerifyClaim(index, claim)
 	if verErr != nil {
 		smartpool.Output.Printf("%s\n", verErr)
+		sp.StatRecorder.RecordClaim("rejected", claim)
 		return false, verErr
 	}
 	smartpool.Output.Printf("Claim is successfully verified.\n")
+	sp.StatRecorder.RecordClaim("accepted", claim)
 	return true, nil
 }
 
@@ -205,6 +244,18 @@ func (sp *SmartPool) shouldStop(err error) bool {
 	}
 }
 
+func (sp *SmartPool) runPersister() {
+	for {
+		sp.persist()
+		time.Sleep(time.Minute)
+	}
+}
+
+func (sp *SmartPool) persist() {
+	sp.ClaimRepo.Persist(sp.Storage)
+	sp.StatRecorder.Persist(sp.Storage)
+}
+
 func (sp *SmartPool) actOnTick() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -226,6 +277,13 @@ Loop:
 			break Loop
 		}
 	}
+	sp.Exit()
+}
+
+func (sp *SmartPool) Exit() {
+	smartpool.Output.Printf("Persisting current state to disk...\n")
+	sp.persist()
+	smartpool.Output.Printf("Gracefully stopped SmartPool.\n")
 	sp.SubmitterStopped <- true
 }
 
@@ -254,8 +312,11 @@ func (sp *SmartPool) Run() bool {
 				sp.ticker = time.Tick(sp.SubmitInterval)
 				go sp.monitor()
 				go sp.actOnTick()
+				smartpool.Output.Printf("Share collector is running...\n")
+				go sp.runPersister()
+				smartpool.Output.Printf("Share persister and stat persister are running...\n")
+				go sp.handleSignal()
 				sp.loopStarted = true
-				smartpool.Output.Printf("Share collector is running...")
 				break
 			}
 			smartpool.Output.Printf("The network is not ready for mining yet. Retry in 10s...\n")
@@ -267,16 +328,32 @@ func (sp *SmartPool) Run() bool {
 	}
 }
 
+func (sp *SmartPool) handleSignal() {
+	<-sp.signal
+	smartpool.Output.Printf("Got shutdown signal:\n")
+	sp.Exit()
+}
+
+func loadLatestCounter(ps smartpool.PersistentStorage) (*big.Int, error) {
+	counter := big.NewInt(0)
+	loadedCounter, err := ps.Load(counter, COUNTER_FILE)
+	counter = loadedCounter.(*big.Int)
+	return counter, err
+}
+
 func NewSmartPool(
 	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
-	nc smartpool.NetworkClient, cr ClaimRepo, ps PersistentStorage,
-	co smartpool.Contract, ca common.Address, ma common.Address, ed string,
-	interval time.Duration, threshold int, hotStop bool) *SmartPool {
-	counter, err := ps.LoadLatestCounter()
+	nc smartpool.NetworkClient, cr ClaimRepo, ps smartpool.PersistentStorage,
+	co smartpool.Contract, stat smartpool.StatRecorder, ca common.Address,
+	ma common.Address, ed string, interval time.Duration, threshold int,
+	hotStop bool, input smartpool.UserInput) *SmartPool {
+	counter, err := loadLatestCounter(ps)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't load counter from storage. Initialize it to 0.\n")
 		counter = big.NewInt(0)
 	}
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	return &SmartPool{
 		PoolMonitor:       pm,
 		ShareReceiver:     sr,
@@ -284,6 +361,7 @@ func NewSmartPool(
 		ClaimRepo:         cr,
 		Storage:           ps,
 		Contract:          co,
+		StatRecorder:      stat,
 		ContractAddress:   ca,
 		MinerAddress:      ma,
 		ExtraData:         ed,
@@ -296,5 +374,7 @@ func NewSmartPool(
 		runMu:             sync.Mutex{},
 		SubmitterStopped:  make(chan bool, 1),
 		stopSubmitterChan: make(chan bool, 1),
+		Input:             input,
+		signal:            sig,
 	}
 }

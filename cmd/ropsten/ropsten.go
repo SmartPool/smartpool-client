@@ -7,7 +7,9 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
 	"github.com/SmartPool/smartpool-client/ethereum/geth"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"github.com/SmartPool/smartpool-client/protocol"
+	"github.com/SmartPool/smartpool-client/storage"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
@@ -157,23 +159,25 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
+	fileStorage := storage.NewGobFileStorage()
+	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
 		input.MinerAddress(),
 		input.ContractAddress(),
+		fileStorage,
 	)
+	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	fileStorage := ethereum.NewFileStorage()
 	ethminer.SmartPool = protocol.NewSmartPool(
-		ethereumPoolMonitor,
-		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, fileStorage, ethereumContract,
+		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
+		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.HotStop(), input,
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)
