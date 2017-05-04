@@ -102,7 +102,7 @@ func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) boo
 	share := sp.ShareReceiver.AcceptSolution(s)
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
-	if share.FullSolution() {
+	if share != nil && share.FullSolution() {
 		smartpool.Output.Printf("-->Yay! We found potential block!<--\n")
 		sp.NetworkClient.SubmitSolution(s)
 	}

@@ -26,9 +26,9 @@ func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 		return nil
 	}
 	share := work.AcceptSolution(s).(*Share)
-	if share.SolutionState == FullBlockSolution {
-		delete(wp, s.WorkID())
-	}
+	// if share.SolutionState == FullBlockSolution {
+	// delete(wp, s.WorkID())
+	// }
 	if share.SolutionState == InvalidShare {
 		smartpool.Output.Printf("Solution (%v) is invalid\n", s)
 		return nil
