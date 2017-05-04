@@ -1,0 +1,107 @@
+﻿<div class="farm-dashboard">
+    
+
+<h1>Farm dashboard</h1>
+<h2>General information</h2>
+<div class="farm-general">
+    <div class="row hidden-xs hidden-sm">
+        <div class="col-md-4 text-center">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Hashrates</h3></div>
+                <div class="panel-body">
+                    <h4>
+                    <span popover-trigger="'mouseenter'" class="just_span" uib-popover="This is the hashrate as reported by your miner to the pool.">
+                        {{vm.farm.reported_hashrate}}
+                    </span>
+                    <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Your effective current hashrate. It is calculated according your submitted shares using a 60 minute window. It will take up to 2 hours till the displayed hashrate is accurate. Deviations from your local hashrate are normal.">
+                        {{vm.farm.effective_hashrate}}
+                    </span>
+                    </h4>
+                </div>
+            </div>
+        </div>
+       <!--  <div class="col-md-2 text-center">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Unpaid Balance</h3></div>
+                <div class="panel-body">
+                    <h4>2.28773 ETH</h4>
+                    <div style="height:15px; margin:10px -15px -15px -15px" data-toggle="tooltip" data-placement="bottom" title="" class="progress" data-original-title="45.8% of your 5 ETH payout limit reached">
+                        <div style="width:45.8%" class="progress-bar progress-bar-info progress-bar-striped"></div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="col-md-4 text-center">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Active Workers</h3></div>
+                <div class="panel-body">
+                    <h4>{{vm.farm.active_workers}}</h4></div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shares (Last 1h)</h3></div>
+                <div class="panel-body">
+                    <h4> 
+                    <span popover-trigger="'mouseenter'" uib-popover="Mined">{{vm.farm.mined_share}}
+                    </span>
+                    <span popover-trigger="'mouseenter'" uib-popover="Valid"> / {{vm.farm.valid_share}}</span>
+                    <span popover-trigger="'mouseenter'" uib-popover="Reject"> / {{vm.farm.rejected_share}}
+                    </span>
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row hidden-md hidden-lg">
+        <div class="col-md-12">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Hashrates</th>
+                        <td>
+                            <span popover-trigger="'mouseenter'" uib-popover="This is the hashrate as reported by your miner to the pool.">
+                         {{vm.farm.reported_hashrate}} / </span>
+                            <span popover-trigger="'mouseenter'" duib-popover="Your effective current hashrate. It is calculated according your submitted shares using a 60 minute window. It will take up to 2 hours till the displayed hashrate is accurate. Deviations from your local hashrate are normal."> {{vm.farm.effective_hashrate}}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Unpaid Balance</th>
+                        <td>2.28773 ETH</td>
+                    </tr>
+                    <tr>
+                        <th>Active Workers</th>
+                        <td>{{vm.farm.active_workers}}</td>
+                    </tr>
+                    <tr>
+                        <th>Shares (Last 1h)</th>
+                        <td>
+                            <span popover-trigger="'mouseenter'" uib-popover="Mined">{{vm.farm.mined_share}}
+                        </span>
+                            <span popover-trigger="'mouseenter'" uib-popover="Valid"> / {{vm.farm.valid_share}}
+                        </span>
+                            <span popover-trigger="'mouseenter'" uib-popover="Reject"> / {{vm.farm.rejected_share}}
+                        </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<h2>Hashrate, Shares & Workers in last 1 hour</h2>
+<div>
+    <div id="hashChart"></div>
+    <div id="sharesChart"></div>
+    <div id="activeWorkers"></div>
+</div>
+<div>
+    <h2>Workers ({{vm.farm.active_workers}} active)</h2>
+    <table id="worker_table" class="table table-borderless"></table>
+</div>
+
+</div>
