@@ -238,7 +238,7 @@ func NewGethContractClient(
 		return nil, err
 	}
 	// TODO: make gas price one command line flag
-	auth.GasPrice = big.NewInt(20000000000)
+	auth.GasPrice = big.NewInt(10000000000)
 	smartpool.Output.Printf("Done.\n")
 	return &GethContractClient{pool, auth, node, miner}, nil
 }
