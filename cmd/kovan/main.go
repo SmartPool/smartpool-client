@@ -133,7 +133,7 @@ func Run(c *cli.Context) error {
 			gethContractClient, err = geth.NewGethContractClient(
 				common.HexToAddress(input.ContractAddress()), kovanRPC,
 				common.HexToAddress(input.MinerAddress()),
-				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				input.RPCEndpoint(), input.KeystorePath(), passphrase, 0,
 			)
 			if gethContractClient != nil {
 				break
