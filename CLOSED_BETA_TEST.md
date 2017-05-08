@@ -1,10 +1,11 @@
 ## Architecture for a mining farm to use SmartPool
 In traditional mining pools, every rig must be connected to the pool and submit shares to the pool directly, as shown in this figure.
 
-[TODO: some pic that I will add later]
+![Centralized Pool's Architecture](smartpool-client/miscs/normalpool-farm.png?raw=true "Centralized Pool's Architecture")
 
 When using SmartPool, because the pool is maintained by a smart contract, only a few shares are needed to submit to the pool, so mining rigs won't submit the share to contract directly. Instead, they submit shares to a local server/ machine that acts as the gateway between the mining rigs and the SmartPool contract. The new structure for a farm is shown in this figure
-[TODO: some other pic that I will add later]
+
+![SmartPool's Architecture for a mining farm](smartpool-client/miscs/smartpool-farm.png?raw=true "SmartPool's Architecture for a mining farm")
 
 In SmartPool, the local server will need to install an Ethereum client (either Geth or Parity) and a SmartPool client. The SmartPool client will interact with the mining rigs to collect all the shares. It also submit a few share to the SmartPool contract via the Ethereum client. Details on how to install these components are in the next section.
 
