@@ -112,6 +112,7 @@ type NetworkClient interface {
 // miners.
 type ShareReceiver interface {
 	AcceptSolution(s Solution) Share
+	Persist(storage PersistentStorage) error
 }
 
 type PoolMonitor interface {

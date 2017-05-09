@@ -38,10 +38,12 @@ func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		shortWindowStat := SmartPool.StatRecorder.RigStat(rig, shortWindow, curPeriod)
 		longWindowStat := SmartPool.StatRecorder.RigStat(rig, longWindow, curPeriod)
 		result := map[string]interface{}{
-			"overall":         overall,
-			"last_1_hour":     shortWindowStat,
-			"last_3_hours":    longWindowStat,
-			"period_duration": stat.BaseTimePeriod,
+			"overall":               overall,
+			"short_window_sample":   shortWindowStat,
+			"short_window_duration": stat.ShortWindow,
+			"long_window_sample":    longWindowStat,
+			"long_window_duration":  stat.LongWindow,
+			"period_duration":       stat.BaseTimePeriod,
 		}
 		encoder := json.NewEncoder(w)
 		encoder.Encode(&result)

@@ -26,6 +26,7 @@ type TimestampClaimRepo struct {
 	storage         smartpool.PersistentStorage
 	diff            *big.Int
 	miner           string
+	coinbase        string
 }
 
 func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartpool.PersistentStorage) *TimestampClaimRepo {
@@ -129,6 +130,7 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartp
 		storage,
 		diff,
 		miner,
+		coinbase,
 	}
 	smartpool.Output.Printf("Loaded %d valid shares\n", noShares)
 	smartpool.Output.Printf("Loaded timestamp: 0x%s\n", currentTimestamp.Text(16))
@@ -206,6 +208,13 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 		"%s-%s",
 		share.BlockHeader().Hash().Hex(),
 		share.Nonce())
+	if share.BlockHeader().Coinbase.Hex() != cr.coinbase {
+		return errors.New("inconsistent coinbase address")
+	}
+	if share.ShareDifficulty().Cmp(cr.diff) != 0 {
+		return errors.New(
+			fmt.Sprintf("inconsistent difficulty (expected 0x%s, got 0x%s)", cr.diff.Text(16), share.ShareDifficulty().Text(16)))
+	}
 	if cr.activeShares[shareID] != nil {
 		return errors.New("duplicated share")
 	} else {
