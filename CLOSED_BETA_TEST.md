@@ -38,7 +38,7 @@ The last command will create `smartpool` executable file in your current directo
 ## Running SmartPool for your farm
 
 Before running SmartPool-client on your local server, you need to start the Etherem client and get it to sync with the latest Ethereum blockchain. You also need to enable several apis in your client. Specifically, you need to run: 
-`parity--jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
+`parity --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
 if you use Parity, or 
 `geth --rpc --rpcapi "db,eth,net,web3,miner,personal"`
 if you use Geth. 
@@ -50,7 +50,7 @@ At your smartpool-client folder, run
 All the values for the parameters will be provided by us before you launch. SmartPool0client binds its rpc server address at 0.0.0.0:1633 for the mining rigs to submit shares.
 
 ### Connect your rigs to SmartPool-client
-SmartPool-cient will serve work and accept shares at `0.0.0.0:1633/<rig_or_worker_name>/`. The trailing `/` is a required. `rig_or_worker_name` must be different to `farm` and `rig`. They are reserved for collecting and showing statistics of the farm and the rigs.
+SmartPool-cient will serve work and accept shares at `0.0.0.0:1633/<rig_or_worker_name>/`. The trailing `/` is a required. `rig_or_worker_name` must be different to `farm`, `rig` and `status`. They are reserved for collecting and showing statistics of the farm and the rigs.
 
 For example:
 
