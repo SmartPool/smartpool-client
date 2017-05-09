@@ -1,6 +1,7 @@
 package stat
 
 import (
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -81,12 +82,14 @@ type OverallRigData struct {
 }
 
 type RigData struct {
+	RigID string
 	Datas map[uint64]*PeriodRigData
 	*OverallRigData
 }
 
-func NewRigData() *RigData {
+func NewRigData(rigID string) *RigData {
 	return &RigData{
+		RigID: rigID,
 		Datas: map[uint64]*PeriodRigData{},
 		OverallRigData: &OverallRigData{
 			TotalHashrate:            big.NewInt(0),
@@ -96,6 +99,19 @@ func NewRigData() *RigData {
 			AverageEffectiveHashrate: big.NewInt(0),
 		},
 	}
+}
+
+func (rd *RigData) TruncateData(storage smartpool.PersistentStorage) error {
+	curPeriod := TimeToPeriod(time.Now())
+	var err error
+	for period, rigData := range rd.Datas {
+		if int64(curPeriod-period) > LongWindow/BaseTimePeriod {
+			if err = storage.Persist(rigData, fmt.Sprintf("rig-%s-data-%d", rd.RigID, period)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (rd *RigData) getData(t time.Time) *PeriodRigData {

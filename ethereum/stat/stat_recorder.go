@@ -34,6 +34,19 @@ func NewStatRecorder(storage smartpool.PersistentStorage) *StatRecorder {
 		smartpool.Output.Printf("Couldn't load stat from last session. Initialize with fresh stat recorder.\n")
 	}
 	smartpool.Output.Printf("Stat persister is running...\n")
+	go func(sr *StatRecorder, storage smartpool.PersistentStorage) {
+		for {
+			smartpool.Output.Printf("Truncating stat datas...\n")
+			err := sr.truncateData(storage)
+			if err == nil {
+				smartpool.Output.Printf("Done truncating stat.\n")
+			} else {
+				smartpool.Output.Printf("Failed truncating stat. (%s)\n", err.Error())
+			}
+			time.Sleep(time.Minute)
+		}
+	}(statRecorder, storage)
+	smartpool.Output.Printf("Stat truncator is running...\n")
 	return statRecorder
 }
 
@@ -48,10 +61,23 @@ func (sr *StatRecorder) Persist(storage smartpool.PersistentStorage) error {
 	return err
 }
 
+func (sr *StatRecorder) truncateData(storage smartpool.PersistentStorage) error {
+	var err error
+	if err = sr.FarmData.TruncateData(storage); err != nil {
+		return err
+	}
+	for _, rigData := range sr.RigDatas {
+		if err = rigData.TruncateData(storage); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (sr *StatRecorder) getRigData(rig smartpool.Rig) *RigData {
 	data := sr.RigDatas[rig.ID()]
 	if data == nil {
-		data = NewRigData()
+		data = NewRigData(rig.ID())
 		sr.RigDatas[rig.ID()] = data
 	}
 	return data

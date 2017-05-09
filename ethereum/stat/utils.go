@@ -4,7 +4,11 @@ import (
 	"time"
 )
 
-var BaseTimePeriod int64 = 60
+const (
+	BaseTimePeriod int64 = 60
+	ShortWindow    int64 = 3 * BaseTimePeriod
+	LongWindow     int64 = 6 * BaseTimePeriod
+)
 
 func TimeToPeriod(t time.Time) uint64 {
 	return uint64(t.Unix() / BaseTimePeriod)
