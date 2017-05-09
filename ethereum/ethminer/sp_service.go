@@ -19,10 +19,10 @@ func (sps *SmartPoolService) GetWork() ([3]string, error) {
 	var res [3]string
 	w := SmartPool.GetWork(sps.rig).(*ethereum.Work)
 	res[0] = w.PoWHash().Hex()
-	res[1] = w.SeedHash()
+	res[1] = w.SeedHash
 	n := big.NewInt(1)
 	n.Lsh(n, 255)
-	n.Div(n, w.ShareDifficulty())
+	n.Div(n, w.ShareDifficulty)
 	n.Lsh(n, 1)
 	res[2] = common.BytesToHash(n.Bytes()).Hex()
 	return res, nil
