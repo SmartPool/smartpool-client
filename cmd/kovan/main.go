@@ -18,15 +18,6 @@ import (
 	"time"
 )
 
-func buildExtraData(address common.Address, diff *big.Int) string {
-	// id = address % (26+26+10)**11
-	base := big.NewInt(0)
-	base.Exp(big.NewInt(62), big.NewInt(11), nil)
-	id := big.NewInt(0)
-	id.Mod(address.Big(), base)
-	return fmt.Sprintf("SmartPool-%s%s", smartpool.BigToBase62(id), smartpool.BigToBase62(diff))
-}
-
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
 	// rpcEndPoint := "http://localhost:8545"
@@ -91,7 +82,7 @@ func Run(c *cli.Context) error {
 	}
 	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
-	input.SetExtraData(buildExtraData(
+	input.SetExtraData(ethereum.BuildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	kovanRPC, _ := geth.NewKovanRPC(
@@ -133,7 +124,7 @@ func Run(c *cli.Context) error {
 			gethContractClient, err = geth.NewGethContractClient(
 				common.HexToAddress(input.ContractAddress()), kovanRPC,
 				common.HexToAddress(input.MinerAddress()),
-				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				input.RPCEndpoint(), input.KeystorePath(), passphrase, 0,
 			)
 			if gethContractClient != nil {
 				break

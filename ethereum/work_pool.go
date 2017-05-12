@@ -11,9 +11,10 @@ import (
 type WorkPool map[string]*Work
 
 const (
-	FullBlockSolution int = 2
-	ValidShare        int = 1
-	InvalidShare      int = 0
+	WORKPOOL_FILE     string = "workpool"
+	FullBlockSolution int    = 2
+	ValidShare        int    = 1
+	InvalidShare      int    = 0
 )
 
 // AcceptSolution takes solution and find corresponding work and return
@@ -26,9 +27,6 @@ func (wp WorkPool) AcceptSolution(s smartpool.Solution) smartpool.Share {
 		return nil
 	}
 	share := work.AcceptSolution(s).(*Share)
-	if share.SolutionState == FullBlockSolution {
-		delete(wp, s.WorkID())
-	}
 	if share.SolutionState == InvalidShare {
 		smartpool.Output.Printf("Solution (%v) is invalid\n", s)
 		return nil
@@ -52,7 +50,7 @@ func (wp WorkPool) Cleanning() {
 	for _ = range ticker {
 		count := 0
 		for hash, work := range wp {
-			if time.Since(work.createdAt) > 7*(12*time.Second) {
+			if time.Since(work.CreatedAt) > 7*(12*time.Second) {
 				delete(wp, hash)
 				count += 1
 			}
@@ -61,4 +59,34 @@ func (wp WorkPool) Cleanning() {
 			smartpool.Output.Printf("Cleaned %d old works.\n", count)
 		}
 	}
+}
+
+func (wp *WorkPool) Persist(storage smartpool.PersistentStorage) error {
+	smartpool.Output.Printf("Saving workpool to disk...")
+	err := storage.Persist(wp, WORKPOOL_FILE)
+	if err == nil {
+		smartpool.Output.Printf("Done.\n")
+	} else {
+		smartpool.Output.Printf("Failed. (%s)\n", err.Error())
+	}
+	return err
+}
+
+func NewWorkPool(storage smartpool.PersistentStorage) *WorkPool {
+	wp, err := loadWorkPool(storage)
+	if err != nil {
+		smartpool.Output.Printf("Couldn't load workpool from last session (%s). Initialize with empty workpool.\n", err)
+	}
+	smartpool.Output.Printf("Loaded %d works from last session.\n", len(*wp))
+	return wp
+}
+
+func loadWorkPool(storage smartpool.PersistentStorage) (*WorkPool, error) {
+	wp := &WorkPool{}
+	loadedWP, err := storage.Load(wp, WORKPOOL_FILE)
+	if err != nil {
+		return wp, err
+	}
+	wp = loadedWP.(*WorkPool)
+	return wp, err
 }

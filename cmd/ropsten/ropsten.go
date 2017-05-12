@@ -19,15 +19,6 @@ import (
 	"time"
 )
 
-func buildExtraData(address common.Address, diff *big.Int) string {
-	// id = address % (26+26+10)**11
-	base := big.NewInt(0)
-	base.Exp(big.NewInt(62), big.NewInt(11), nil)
-	id := big.NewInt(0)
-	id.Mod(address.Big(), base)
-	return fmt.Sprintf("SmartPool-%s%s", smartpool.BigToBase62(id), smartpool.BigToBase62(diff))
-}
-
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
 	rpcEndPoint := c.String("rpc")
@@ -71,8 +62,10 @@ func Run(c *cli.Context) error {
 		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
 		return nil
 	}
+	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
-	ethereumWorkPool := &ethereum.WorkPool{}
+	fileStorage := storage.NewGobFileStorage()
+	ethereumWorkPool := ethereum.NewWorkPool(fileStorage)
 	go ethereumWorkPool.Cleanning()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
@@ -85,7 +78,7 @@ func Run(c *cli.Context) error {
 	}
 	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
-	input.SetExtraData(buildExtraData(
+	input.SetExtraData(ethereum.BuildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	gethRPC, _ := geth.NewGethRPC(
@@ -133,6 +126,7 @@ func Run(c *cli.Context) error {
 				common.HexToAddress(input.ContractAddress()), gethRPC,
 				common.HexToAddress(input.MinerAddress()),
 				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				uint64(gasprice),
 			)
 			if gethContractClient != nil {
 				break
@@ -159,7 +153,6 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
-	fileStorage := storage.NewGobFileStorage()
 	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
@@ -210,6 +203,11 @@ func BuildAppCommandLine() *cli.App {
 			Name:  "diff",
 			Value: 1000000,
 			Usage: "Difficulty of a share.",
+		},
+		cli.UintFlag{
+			Name:  "gasprice",
+			Value: 5,
+			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.StringFlag{
 			Name:  "spcontract",

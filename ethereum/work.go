@@ -16,49 +16,33 @@ import (
 
 // Work represents Ethereum pow work
 type Work struct {
-	blockHeader     *types.Header
-	powHash         string
-	seedHash        string
-	shareDifficulty *big.Int
-	minerAddress    string
-	createdAt       time.Time
+	BlockHeader     *types.Header
+	Hash            string
+	SeedHash        string
+	ShareDifficulty *big.Int
+	MinerAddress    string
+	CreatedAt       time.Time
 }
 
 func (w *Work) ID() string {
-	return w.powHash
-}
-
-func (w *Work) CreatedAt() time.Time {
-	return w.createdAt
+	return w.Hash
 }
 
 func (w *Work) AcceptSolution(sol smartpool.Solution) smartpool.Share {
 	solution := sol.(*Solution)
 	s := &Share{
-		blockHeader:     w.blockHeader,
+		blockHeader:     w.BlockHeader,
 		nonce:           solution.Nonce,
 		mixDigest:       solution.MixDigest,
-		shareDifficulty: w.ShareDifficulty(),
-		minerAddress:    w.minerAddress,
+		shareDifficulty: w.ShareDifficulty,
+		minerAddress:    w.MinerAddress,
 	}
-	s.SolutionState = ethash.Instance.SolutionState(s, w.ShareDifficulty())
+	s.SolutionState = ethash.Instance.SolutionState(s, w.ShareDifficulty)
 	return s
 }
 
 func (w *Work) PoWHash() common.Hash {
-	return common.HexToHash(w.powHash)
-}
-
-func (w Work) SeedHash() string {
-	return w.seedHash
-}
-
-func (w Work) ShareDifficulty() *big.Int {
-	return w.shareDifficulty
-}
-
-func (w Work) BlockHeader() *types.Header {
-	return w.blockHeader
+	return common.HexToHash(w.Hash)
 }
 
 func NewWork(h *types.Header, ph string, sh string, diff *big.Int, miner string) *Work {

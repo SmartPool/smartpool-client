@@ -102,7 +102,7 @@ func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) boo
 	share := sp.ShareReceiver.AcceptSolution(s)
 	sp.counterMu.RLock()
 	defer sp.counterMu.RUnlock()
-	if share.FullSolution() {
+	if share != nil && share.FullSolution() {
 		smartpool.Output.Printf("-->Yay! We found potential block!<--\n")
 		sp.NetworkClient.SubmitSolution(s)
 	}
@@ -116,7 +116,7 @@ func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) boo
 	} else {
 		err := sp.ClaimRepo.AddShare(share)
 		if err != nil {
-			smartpool.Output.Printf("Discarded duplicated share.\n")
+			smartpool.Output.Printf("Discarded because of %s.\n", err.Error())
 			success = false
 		} else {
 			smartpool.Output.Printf(".")
@@ -254,6 +254,7 @@ func (sp *SmartPool) runPersister() {
 func (sp *SmartPool) persist() {
 	sp.ClaimRepo.Persist(sp.Storage)
 	sp.StatRecorder.Persist(sp.Storage)
+	sp.ShareReceiver.Persist(sp.Storage)
 }
 
 func (sp *SmartPool) actOnTick() {

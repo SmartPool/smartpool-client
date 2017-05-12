@@ -210,7 +210,7 @@ func getClient(rpc string) (*ethclient.Client, error) {
 
 func NewGethContractClient(
 	contractAddr common.Address, node ethereum.RPCClient, miner common.Address,
-	ipc, keystorePath, passphrase string) (*GethContractClient, error) {
+	ipc, keystorePath, passphrase string, gasprice uint64) (*GethContractClient, error) {
 	client, err := getClient(ipc)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't connect to Geth via IPC file. Error: %s\n", err)
@@ -238,7 +238,10 @@ func NewGethContractClient(
 		return nil, err
 	}
 	// TODO: make gas price one command line flag
-	auth.GasPrice = big.NewInt(20000000000)
+	if gasprice != 0 {
+		auth.GasPrice = big.NewInt(int64(gasprice * 1000000000))
+		smartpool.Output.Printf("Gas price is set to: %s wei.\n", auth.GasPrice.Text(10))
+	}
 	smartpool.Output.Printf("Done.\n")
 	return &GethContractClient{pool, auth, node, miner}, nil
 }
