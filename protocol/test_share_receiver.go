@@ -11,3 +11,7 @@ func (spc *testShareReceiver) AcceptSolution(s smartpool.Solution) smartpool.Sha
 	sol := s.(*testSolution)
 	return &testShare{c: sol.Counter}
 }
+
+func (spc *testShareReceiver) Persist(storage smartpool.PersistentStorage) error {
+	return nil
+}
