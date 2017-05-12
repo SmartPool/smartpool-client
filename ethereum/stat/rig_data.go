@@ -166,6 +166,16 @@ func (rd *RigData) AddShare(status string, share smartpool.Share, t time.Time) {
 	}
 }
 
+func (rd *RigData) PeriodReportedHashrate(t time.Time) *big.Int {
+	curPeriodData := rd.getData(t)
+	return curPeriodData.AverageReportedHashrate
+}
+
+func (rd *RigData) PeriodEffectiveHashrate(t time.Time) *big.Int {
+	curPeriodData := rd.getData(t)
+	return curPeriodData.AverageEffectiveHashrate
+}
+
 func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.Time) {
 	if rd.StartTime.IsZero() {
 		rd.StartTime = t
