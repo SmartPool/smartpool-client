@@ -1,3 +1,5 @@
+The instructions below apply for running SmartPool on both Ethereum and Ethereum Classic
+
 ## Architecture for a mining farm to use SmartPool
 In traditional mining pools, every rig must be connected to the pool and submit shares to the pool directly, as shown in this figure.
 
