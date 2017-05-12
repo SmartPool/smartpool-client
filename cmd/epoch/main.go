@@ -59,6 +59,7 @@ func Run(c *cli.Context) error {
 		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
 		return nil
 	}
+	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath,
@@ -108,6 +109,7 @@ func Run(c *cli.Context) error {
 				common.HexToAddress(input.ContractAddr), gethRPC,
 				common.HexToAddress(input.MinerAddr),
 				input.RpcEndPoint, input.KeystorePath, passphrase,
+				uint64(gasprice),
 			)
 			if gethContractClient != nil {
 				break
@@ -171,6 +173,11 @@ func BuildAppCommandLine() *cli.App {
 			Name:  "gateway",
 			Value: "0x79A09eab4Cb39A43115cF34D9DDCD26AD73e03ea",
 			Usage: "Gateway address. Its default value is the official gateway maintained by SmartPool team",
+		},
+		cli.UintFlag{
+			Name:  "gasprice",
+			Value: 5,
+			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.UintFlag{
 			Name:  "from",

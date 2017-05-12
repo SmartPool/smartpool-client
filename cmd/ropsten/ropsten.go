@@ -66,7 +66,7 @@ func Run(c *cli.Context) error {
 	smartpool.Output = &smartpool.StdOut{}
 	fileStorage := storage.NewGobFileStorage()
 	ethereumWorkPool := ethereum.NewWorkPool(fileStorage)
-	go ethereumWorkPool.Cleanning()
+	go ethereumWorkPool.RunCleaner()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
