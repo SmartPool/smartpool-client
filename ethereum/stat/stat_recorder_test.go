@@ -1,11 +1,13 @@
 package stat
 
 import (
+	"fmt"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"sync"
 	"testing"
+	"time"
 )
 
 var rig *ethereum.Rig = ethereum.NewRig("testrig")
@@ -57,8 +59,20 @@ func TestRecordHashrateFromMultipleRigs(t *testing.T) {
 	if overall.Rigs[rig2.ID()].ReportedHashrate.Uint64() != 400 {
 		t.Fail()
 	}
-	rig2 := recorder.OverallRigStat(rig2).(*OverallRigData)
-	if rig2.AverageReportedHashrate.Uint64() != 400 {
+	period := TimeToPeriod(time.Now())
+	periodStats := recorder.FarmStat(period, period).(map[uint64]*PeriodFarmData)
+	periodData := periodStats[period]
+	if periodData.ReportedHashrate.Uint64() != 550 {
+		fmt.Printf("got: %d, expected: %d\n", periodData.ReportedHashrate.Uint64(), 550)
+		t.Fail()
+	}
+	rig2Stat := recorder.OverallRigStat(rig2).(*OverallRigData)
+	if rig2Stat.AverageReportedHashrate.Uint64() != 400 {
+		t.Fail()
+	}
+	periodRigStats := recorder.RigStat(rig2, period, period).(map[uint64]*PeriodRigData)
+	periodRigData := periodRigStats[period]
+	if periodRigData.AverageReportedHashrate.Uint64() != 400 {
 		t.Fail()
 	}
 }

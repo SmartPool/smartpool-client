@@ -8,14 +8,12 @@ import (
 )
 
 type RigHashrate struct {
-	ReportedHashrate  *big.Int
-	EffectiveHashrate *big.Int
+	ReportedHashrate *big.Int
 }
 
 func NewRigHashrate() *RigHashrate {
 	return &RigHashrate{
-		ReportedHashrate:  big.NewInt(0),
-		EffectiveHashrate: big.NewInt(0),
+		ReportedHashrate: big.NewInt(0),
 	}
 }
 
@@ -261,20 +259,21 @@ func (fd *FarmData) UpdateRigHashrate(
 	if curPeriodData.StartTime.IsZero() {
 		curPeriodData.StartTime = t
 	}
+
 	rigHashrate := fd.getRigHashrate(rig.ID())
-	// fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
+	fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
 	changedReportedHashrate := big.NewInt(0).Sub(reportedHashrate, rigHashrate.ReportedHashrate)
-	// fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
+	fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
 	rigHashrate.ReportedHashrate = big.NewInt(0).Set(reportedHashrate)
-	// fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
-	changedEffectiveHashrate := big.NewInt(0).Sub(effectiveHashrate, rigHashrate.EffectiveHashrate)
 	fd.ReportedHashrate.Add(fd.ReportedHashrate, changedReportedHashrate)
-	fd.EffectiveHashrate.Add(fd.EffectiveHashrate, changedEffectiveHashrate)
+	fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
+
 	rigHashrate = curPeriodData.getRigHashrate(rig.ID())
+	fmt.Printf("rig hashrate struct in period sample: %v\n", rigHashrate)
 	changedReportedHashrate = big.NewInt(0).Sub(periodReportedHashrate, rigHashrate.ReportedHashrate)
+	fmt.Printf("changed reported hashrate in period sample: %d\n", changedReportedHashrate.Uint64())
+	rigHashrate.ReportedHashrate = big.NewInt(0).Set(periodReportedHashrate)
 	curPeriodData.ReportedHashrate.Add(curPeriodData.ReportedHashrate, changedReportedHashrate)
-	changedEffectiveHashrate = big.NewInt(0).Sub(periodEffectiveHashrate, rigHashrate.EffectiveHashrate)
-	curPeriodData.EffectiveHashrate.Add(curPeriodData.EffectiveHashrate, changedEffectiveHashrate)
 }
 
 func (fd *FarmData) getRigHashrate(id string) *RigHashrate {
