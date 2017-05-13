@@ -187,8 +187,8 @@ func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.T
 	rd.TotalHashrate.Add(rd.TotalHashrate, big.NewInt(int64(hashrate)))
 	rd.NoHashrateSubmission++
 	rd.updateAvgHashrate(t)
-	fmt.Printf("Updated total hashrate: %d\n", rd.TotalHashrate.Uint64())
-	fmt.Printf("Updated reported hashrate: %d\n", rd.AverageReportedHashrate.Uint64())
+	// fmt.Printf("Updated total hashrate: %d\n", rd.TotalHashrate.Uint64())
+	// fmt.Printf("Updated reported hashrate: %d\n", rd.AverageReportedHashrate.Uint64())
 	curPeriodData.TotalHashrate.Add(curPeriodData.TotalHashrate, big.NewInt(int64(hashrate)))
 	curPeriodData.NoHashrateSubmission++
 	curPeriodData.updateAvgHashrate(t)
