@@ -111,7 +111,7 @@ func NewWorkPool(storage smartpool.PersistentStorage) *WorkPool {
 }
 
 func loadWorkPool(storage smartpool.PersistentStorage) (*WorkPool, error) {
-	wp := &WorkPool{}
+	wp := &WorkPool{sync.RWMutex{}, map[string]*Work{}}
 	works := map[string]*Work{}
 	loadedWorks, err := storage.Load(works, WORKPOOL_FILE)
 	if err != nil {
