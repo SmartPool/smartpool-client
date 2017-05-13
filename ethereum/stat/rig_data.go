@@ -75,8 +75,8 @@ type OverallRigData struct {
 	RejectedShare            uint64    `json:"total_rejected_share"`
 	TotalHashrate            *big.Int  `json:"total_hashrate"`
 	NoHashrateSubmission     uint64    `json:"no_hashrate_submission"`
-	AverageReportedHashrate  *big.Int  `json:"average_reported_hashrate"`
-	AverageEffectiveHashrate *big.Int  `json:"average_effective_hashrate"`
+	AverageReportedHashrate  *big.Int  `json:"reported_hashrate"`
+	AverageEffectiveHashrate *big.Int  `json:"effective_hashrate"`
 	BlockFound               uint64    `json:"total_block_found"`
 	StartTime                time.Time `json:"start_time"`
 }
@@ -187,6 +187,8 @@ func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.T
 	rd.TotalHashrate.Add(rd.TotalHashrate, big.NewInt(int64(hashrate)))
 	rd.NoHashrateSubmission++
 	rd.updateAvgHashrate(t)
+	fmt.Printf("Updated total hashrate: %d\n", rd.TotalHashrate.Uint64())
+	fmt.Printf("Updated reported hashrate: %d\n", rd.AverageReportedHashrate.Uint64())
 	curPeriodData.TotalHashrate.Add(curPeriodData.TotalHashrate, big.NewInt(int64(hashrate)))
 	curPeriodData.NoHashrateSubmission++
 	curPeriodData.updateAvgHashrate(t)

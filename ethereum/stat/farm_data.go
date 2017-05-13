@@ -262,15 +262,18 @@ func (fd *FarmData) UpdateRigHashrate(
 		curPeriodData.StartTime = t
 	}
 	rigHashrate := fd.getRigHashrate(rig.ID())
-	changedReportedHashrate := reportedHashrate.Sub(reportedHashrate, rigHashrate.ReportedHashrate)
-	rigHashrate.ReportedHashrate = reportedHashrate
-	changedEffectiveHashrate := effectiveHashrate.Sub(effectiveHashrate, rigHashrate.EffectiveHashrate)
+	fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
+	changedReportedHashrate := big.NewInt(0).Sub(reportedHashrate, rigHashrate.ReportedHashrate)
+	fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
+	rigHashrate.ReportedHashrate = big.NewInt(0).Set(reportedHashrate)
+	fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
+	changedEffectiveHashrate := big.NewInt(0).Sub(effectiveHashrate, rigHashrate.EffectiveHashrate)
 	fd.ReportedHashrate.Add(fd.ReportedHashrate, changedReportedHashrate)
 	fd.EffectiveHashrate.Add(fd.EffectiveHashrate, changedEffectiveHashrate)
 	rigHashrate = curPeriodData.getRigHashrate(rig.ID())
-	changedReportedHashrate = periodReportedHashrate.Sub(periodReportedHashrate, rigHashrate.ReportedHashrate)
+	changedReportedHashrate = big.NewInt(0).Sub(periodReportedHashrate, rigHashrate.ReportedHashrate)
 	curPeriodData.ReportedHashrate.Add(curPeriodData.ReportedHashrate, changedReportedHashrate)
-	changedEffectiveHashrate = periodEffectiveHashrate.Sub(periodEffectiveHashrate, rigHashrate.EffectiveHashrate)
+	changedEffectiveHashrate = big.NewInt(0).Sub(periodEffectiveHashrate, rigHashrate.EffectiveHashrate)
 	curPeriodData.EffectiveHashrate.Add(curPeriodData.EffectiveHashrate, changedEffectiveHashrate)
 }
 
