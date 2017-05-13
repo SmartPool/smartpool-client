@@ -92,7 +92,7 @@ func (wp *WorkPool) Persist(storage smartpool.PersistentStorage) error {
 	wp.mu.RLock()
 	defer wp.mu.RUnlock()
 	smartpool.Output.Printf("Saving workpool to disk...")
-	err := storage.Persist(wp.works, WORKPOOL_FILE)
+	err := storage.Persist(&wp.works, WORKPOOL_FILE)
 	if err == nil {
 		smartpool.Output.Printf("Done.\n")
 	} else {
@@ -113,10 +113,10 @@ func NewWorkPool(storage smartpool.PersistentStorage) *WorkPool {
 func loadWorkPool(storage smartpool.PersistentStorage) (*WorkPool, error) {
 	wp := &WorkPool{sync.RWMutex{}, map[string]*Work{}}
 	works := map[string]*Work{}
-	loadedWorks, err := storage.Load(works, WORKPOOL_FILE)
+	loadedWorks, err := storage.Load(&works, WORKPOOL_FILE)
 	if err != nil {
 		return wp, err
 	}
-	wp.works = loadedWorks.(map[string]*Work)
+	wp.works = *loadedWorks.(*map[string]*Work)
 	return wp, err
 }
