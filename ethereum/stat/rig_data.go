@@ -45,13 +45,10 @@ func (prd *PeriodRigData) updateAvgHashrate(t time.Time) {
 }
 
 func (prd *PeriodRigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(prd.StartTime).Seconds())
-	if duration > 0 {
-		prd.AverageEffectiveHashrate.Div(
-			prd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	prd.AverageEffectiveHashrate.Div(
+		prd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (prd *PeriodRigData) updateAvgShareDifficulty(t time.Time) {
@@ -204,13 +201,10 @@ func (rd *RigData) updateAvgHashrate(t time.Time) {
 }
 
 func (rd *RigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(rd.StartTime).Seconds())
-	if duration > 0 {
-		rd.AverageEffectiveHashrate.Div(
-			rd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	rd.AverageEffectiveHashrate.Div(
+		rd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (rd *RigData) updateAvgShareDifficulty(t time.Time) {

@@ -1,7 +1,6 @@
 package stat
 
 import (
-	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

@@ -20,7 +20,7 @@ func NewRigHashrate() *RigHashrate {
 type PeriodFarmData struct {
 	MinedShare             uint64                  `json:"mined_share"`
 	ValidShare             uint64                  `json:"valid_share"`
-	TotalValidDifficulty   *big.Int                `json:"-"`
+	TotalValidDifficulty   *big.Int                `json:"total_valid_difficulty"`
 	AverageShareDifficulty *big.Int                `json:"average_share_difficulty"`
 	RejectedShare          uint64                  `json:"rejected_share"`
 	SubmittedClaim         uint64                  `json:"submitted_claim"`
@@ -46,13 +46,10 @@ func NewPeriodFarmData(timePeriod uint64) *PeriodFarmData {
 }
 
 func (pfd *PeriodFarmData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(pfd.StartTime).Seconds())
-	if duration > 0 {
-		pfd.EffectiveHashrate.Div(
-			pfd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	pfd.EffectiveHashrate.Div(
+		pfd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (pfd *PeriodFarmData) updateAvgShareDifficulty(t time.Time) {
@@ -78,7 +75,7 @@ type OverallFarmData struct {
 	LastBlock              time.Time               `json:"last_block"`
 	MinedShare             uint64                  `json:"mined_share"`
 	ValidShare             uint64                  `json:"valid_share"`
-	TotalValidDifficulty   *big.Int                `json:"-"`
+	TotalValidDifficulty   *big.Int                `json:"total_valid_difficulty"`
 	AverageShareDifficulty *big.Int                `json:"average_share_difficulty"`
 	RejectedShare          uint64                  `json:"rejected_share"`
 	LastSubmittedClaim     time.Time               `json:"last_submitted_claim"`
@@ -284,13 +281,10 @@ func (fd *FarmData) getRigHashrate(id string) *RigHashrate {
 }
 
 func (fd *FarmData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(fd.StartTime).Seconds())
-	if duration > 0 {
-		fd.EffectiveHashrate.Div(
-			fd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	fd.EffectiveHashrate.Div(
+		fd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (fd *FarmData) updateAvgShareDifficulty(t time.Time) {
