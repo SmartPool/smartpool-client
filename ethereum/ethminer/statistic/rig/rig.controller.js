@@ -3,12 +3,13 @@
 
     angular
         .module('app')
-        .controller('DashboardController', DashboardController);
+        .controller('RigController', RigController);
 
-    DashboardController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService'];
+    RigController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService','$routeParams'];
 
-    function DashboardController($location, $rootScope, $http, $scope, EthminerService) {
+    function RigController($location, $rootScope, $http, $scope, EthminerService,$routeParams) {
         var vm = this;
+        vm.rigId = $routeParams.rigId;
         vm.roundHashRate = roundHashRate;
         vm.roundShares = roundShares;
         vm.applyShortPeriod = applyShortPeriod;
@@ -61,62 +62,7 @@
             },
             "overall": {
 
-            },
-            "worker": {
-                "active_count": 0,
-                "worker_list": [
-                    ["cuong", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34]
-                ]
             }
-
-            //     }
-            // "hash_rate": {
-            //     "short_duration": {
-            //         "effective_hashrate_avarage": 0,
-            //         "reported_hashrate_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Reported Hashrate', 30, 200, 100, 400, 150, 250],
-            //             ['Effective Hashrate', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     },
-            //     "long_duration": {
-            //         "effective_hashrate_avarage": 0,
-            //         "reported_hashrate_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Reported Hashrate', 30, 200, 100, 400, 150, 250],
-            //             ['Effective Hashrate', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     },
-            //     "life_time": {
-
-            //     }
-            // },
-            // "shares": {
-            //     "short_duration": {
-            //         "mined_share_avarage": 0,
-            //         "valid_share_avarage": 0,
-            //         "rejected_share_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Mined shares', 30, 200, 100, 400, 150, 250],
-            //             ['Valid shares', 50, 20, 10, 40, 15, 25],
-            //             ['Rejected shares', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     }
-            // }
         };
         vm.shortHashrateChart = c3.generate({
             bindto: '#shortHashChart',
@@ -226,37 +172,11 @@
                 }
             }
         });
-        vm.tableWorker = $("#worker_table").DataTable({
-            paging: false,
-            info: false,
-            stateSave: true,
-            data: vm.farm.worker.worker_list,
-            columns: [
-                { title: "Worker" },
-                { title: "Reported Hashrate" },
-                { title: "Current Hashrate" },
-                { title: "Average Hashrate" },
-                { title: "Mined Shares (1h)" },
-                { title: "Valid Shares (1h)" },
-                { title: "Rejected Shares (1h)" }
-            ],
-            columnDefs: [{
-                    // The `data` parameter refers to the data for the cell (defined by the
-                    // `data` option, which defaults to the column being worked with, in
-                    // this case `data: 0`.
-                    "render": function(data, type, row) {
-                        return '<a href="/#!/rig/' + data + '" rel="workerChart" class="btn btn-default btn-xs">' + data + '</a>';
-                    },
-                    "targets": 0
-                },
-                // { "visible": false,  "targets": [ 3 ] }
-            ]
-        });
 
         if (window.WebSocket === undefined) {
             console.log("windows is not support websocket");
         } else {
-            var socket = new WebSocket("ws://" + $location.$$host + ":" + $location.$$port + "/ws/farm");
+            var socket = new WebSocket("ws://" + $location.$$host + ":" + $location.$$port + "/ws/rig");
 
             socket.onopen = function() {
                 console.log("Socket is open");

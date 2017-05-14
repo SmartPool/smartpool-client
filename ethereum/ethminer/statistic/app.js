@@ -19,6 +19,11 @@
                 templateUrl: 'dashboard/dashboard.view.html',
                 controllerAs: 'vm'
             })
+            .when('/rig/:rigId', {
+                controller: 'RigController',
+                templateUrl: 'rig/rig.view.html',
+                controllerAs: 'vm'
+            })
         // .when('/submitMessage', {
         //     controller: 'SubmitMessageController',
         //     templateUrl: 'submitMessage/submitMessage.view.html',

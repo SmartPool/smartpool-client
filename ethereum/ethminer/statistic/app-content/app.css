@@ -1,29 +1,37 @@
 ﻿a {
     cursor: pointer;
 }
-*{
+
+* {
     word-wrap: break-word;
 }
-.popover-content{
-	display: inline-block;
+
+.popover-content {
+    display: inline-block;
 }
-.popover{
-	max-width: 100%;
-	display:inline-block;
+
+.popover {
+    max-width: 100%;
+    display: inline-block;
 }
-.popover{
-	background-color: #4e5d6c;
+
+.popover {
+    background-color: #4e5d6c;
 }
-.popover .arrow:after{
-	border-right-color: #4e5d6c !important;
+
+.popover .arrow:after {
+    border-right-color: #4e5d6c !important;
 }
-body{
-	background-color: #2b3e50;
-	color: #ebebeb;
+
+body {
+    background-color: #2b3e50;
+    color: #ebebeb;
 }
-.farm-dashboard h1{
-	text-align: center;
+
+.farm-dashboard h1 {
+    text-align: center;
 }
+
 
 /*.panel-warning>.panel-heading {
     color: #ebebeb;
@@ -32,60 +40,127 @@ body{
 }*/
 
 .farm-general .panel-body {
-	background-color: #4e5d6c;
-
-}
-.farm-general .panel,.farm-general .panel-heading{
-	border-radius: 0px;
-	border:none;
-	color: #ebebeb;
+    background-color: #4e5d6c;
 }
 
-.farm-general .panel-warning .panel-heading{
-	background-color: #f0ad4e;
+.farm-general .panel,
+.farm-general .panel-heading {
+    border-radius: 0px;
+    border: none;
+    color: #ebebeb;
 }
 
-.farm-general .panel-success .panel-heading{
-	background-color: #5cb85c;
-}
-.farm-general .panel-danger .panel-heading{
-	background-color: #d9534f;
+.farm-general .panel-warning .panel-heading {
+    background-color: #f0ad4e;
 }
 
-.c3-axis-y, .c3-axis-y2 text {
-   fill: white;
-   font-size:12px;
+.farm-general .panel-success .panel-heading {
+    background-color: #5cb85c;
 }
+
+.farm-general .panel-danger .panel-heading {
+    background-color: #d9534f;
+}
+
+.c3-axis-y,
+.c3-axis-y2 text {
+    fill: white;
+    font-size: 12px;
+}
+
 .c3-axis-x text {
-    font-size:12px;
-    fill:white;
+    font-size: 12px;
+    fill: white;
 }
 
-.c3 path, .c3 line {
-  stroke: #8c8c8c;
+.c3 path,
+.c3 line {
+    stroke: #8c8c8c;
 }
 
 .c3-chart-arc text {
     fill: black;
 }
 
-.c3-tooltip{
-   color: black;
+.c3-tooltip {
+    color: black;
 }
 
-.c3-legend-item{
-   fill: white;
+.c3-legend-item {
+    fill: white;
 }
 
 .c3-line {
-  stroke-width: 2px;
+    stroke-width: 2px;
 }
-.table-borderless *{
-	border:none !important;
+
+.table-borderless * {
+    border: none !important;
 }
-#worker_table{
-	border: 1px solid #ebebeb;
+
+#worker_table {
+    border: 1px solid #ebebeb;
 }
-#worker_table thead th, #worker_table tbody tr td{
-	text-align: center;
+
+#worker_table thead th,
+#worker_table tbody tr td {
+    text-align: center;
+}
+
+.hash_item h3 {
+    margin: 0px;
+    font-size: 12px;
+    padding: 5px;
+}
+.hash_item{
+
+}
+.hash_item span{
+    font-size: 18px;
+}
+.farm-dashboard .compare_table table *{
+    text-align: center;
+}
+/*.config_info >div >div{
+    border: 1px solid;
+}
+.config_info label{
+ 
+    padding: 8px;
+}
+.config_info label,.config_info span{
+    display: block;    
+   
+}
+.config_info span{
+    font-size: 15px;
+    padding: 15px 8px;
+     text-align: center;
+}*/
+
+.config-table{
+    border: 1px solid;
+}
+.advance_info h3 a{
+    color: inherit;
+}
+
+.hash_chart, .shares_chart{
+    height: 200px;
+}
+h3{
+    margin-top: 20px;
+}
+.hashrate_charts, .worker_tables{
+    margin-top: 50px;
+}
+
+h1 a{
+ color: inherit;   
+}
+h1 a:hover{
+ color: inherit;      
+}
+h1 i.fa{
+    font-size: 70%;
 }

@@ -1,9 +1,187 @@
 ﻿<div class="farm-dashboard">
-    
-
-<h1>Farm dashboard</h1>
-<h2>General information</h2>
-<div class="farm-general">
+    <h1>Farm dashboard</h1>
+    <div class="compare_table">
+        <h3>Average information of hashrate & shares</h3>
+        <table class="table table-bordered">
+            <thead>
+                <th></th>
+                <th>Effective Hashrate (MH/s)</th>
+                <th>Reported Hashrate (MH/s)</th>
+                <th>Mined shares</th>
+                <th>Valid shares</th>
+                <th>Rejected shares</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{vm.farm.short_duration.duration_in_hour}} hour ago</td>
+                    <td>{{vm.farm.short_duration.hash_rate.effective_hashrate_avarage}}</td>
+                    <td>{{vm.farm.short_duration.hash_rate.reported_hashrate_avarage}}</td>
+                    <td>{{vm.farm.short_duration.shares.mined_share_avarage}}</td>
+                    <td>{{vm.farm.short_duration.shares.valid_share_avarage}} ({{vm.farm.short_duration.shares.valid_share_percent}}%)</td>
+                    <td>{{vm.farm.short_duration.shares.rejected_share_avarage}} ({{vm.farm.short_duration.shares.rejected_share_percent}}%)</td>
+                </tr>
+                <tr>
+                    <td>{{vm.farm.long_duration.duration_in_hour}} hour ago</td>
+                    <td>{{vm.farm.long_duration.hash_rate.effective_hashrate_avarage}}</td>
+                    <td>{{vm.farm.long_duration.hash_rate.reported_hashrate_avarage}}</td>
+                    <td>{{vm.farm.long_duration.shares.mined_share_avarage}}</td>
+                    <td>{{vm.farm.long_duration.shares.valid_share_avarage}} ({{vm.farm.long_duration.shares.valid_share_percent}}%)</td>
+                    <td>{{vm.farm.long_duration.shares.rejected_share_avarage}} ({{vm.farm.long_duration.shares.rejected_share_percent}}%)</td>
+                </tr>
+                <tr>
+                    <td>Life time</td>
+                    <td>{{vm.farm.overall.effective_hashrate}}</td>
+                    <td>{{vm.farm.overall.reported_hashrate}}</td>
+                    <td>{{vm.farm.overall.mined_share}}</td>
+                    <td>
+                        <div>
+                            {{vm.farm.overall.valid_share}} ({{vm.farm.overall.valid_share_percent}}%)
+                        </div>
+                        <div>
+                            <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Verified share">    {{vm.farm.overall.verified_share}}
+                            </span> |
+                            <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Pending share">    {{vm.farm.overall.pending_share}}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        {{vm.farm.overall.rejected_share}} ({{vm.farm.overall.rejected_share_percent}}%)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="hashrate_charts">
+        <div>
+            <h3>Hashrate in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
+            <div id="shortHashChart" class="hash_chart"></div>
+        </div>
+        <div>
+            <h3>Hashrate in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
+            <div id="longHashChart" class="hash_chart"></div>
+        </div>
+    </div>
+    <div class="shares_charts">
+        <div>
+            <h3>Shares in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
+            <div id="shortSharesChart" class="shares_chart"></div>
+        </div>
+        <div>
+            <h3>Shares in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
+            <div id="longSharesChart" class="shares_chart"></div>
+        </div>
+    </div>
+    <div class="worker_tables">
+        <h3>Workers ({{vm.farm.worker.active_count}} active)</h3>
+        <table id="worker_table" class="table table-borderless"></table>
+    </div>
+    <div class="advance_info">
+        <h3 ng-click="vm.showAdvanceInfo()">
+        <a>Advance information <i class="fa fa-caret-down" ng-show="!vm.advance.flag" aria-hidden="true"></i> <i class="fa fa-caret-up" aria-hidden="true"  ng-show="vm.advance.flag"></i></a></h3>
+        <div id="advance_panel" ng-show="vm.advance.flag">
+            <table>
+                <thead>
+                    <th>x</th>
+                    <th>y</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{vm.advance.x}}</td>
+                        <td>{{vm.advance.y}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="config_info">
+        <h3>Config information</h3>
+        <table class="table table-borderless config-table">
+            <tbody>
+                <tr>
+                    <td>Share threshold</td>
+                    <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Share threshold</td>
+                    <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Share difficulty</td>
+                    <td>{{vm.config.share_difficulty}}</td>
+                </tr>
+                <tr>
+                    <td>Hotstop mode</td>
+                    <td>{{vm.config.hotstop_mode}}</td>
+                </tr>
+                <tr>
+                    <td>Contract address</td>
+                    <td>{{vm.config.contract_address}}</td>
+                </tr>
+                <tr>
+                    <td>Miner address</td>
+                    <td>{{vm.config.miner_address}}</td>
+                </tr>
+                <tr>
+                    <td>Share threshold</td>
+                    <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Extra address</td>
+                    <td>{{vm.config.extra_data}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+   <!--  <div class="config_info">
+        <h3>Config information</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <label>Share threshold </label>
+                <span>{{vm.config.share_threshold}}</span>
+            </div>
+            <div class="col-md-4">
+                <label>Share difficulty </label>
+                <span>{{vm.config.share_difficulty}}</span>
+            </div>
+            <div class="col-md-4">
+                <label>Hotstop mode </label>
+                <span>{{vm.config.hotstop_mode}}</span>
+            </div>
+            <div class="col-md-4">
+                <label>Contract address </label>
+                <span>{{vm.config.contract_address}}</span>
+            </div>
+            <div class="col-md-4">
+                <label>Miner address </label>
+                <span>{{vm.config.miner_address}}</span>
+            </div>
+            <div class="col-md-4">
+                <label>Extra address </label>
+                <span>{{vm.config.extra_data}}</span>
+            </div>
+            
+        </div>
+    </div> -->
+    <!-- <div class="row">
+        <div class="col-md-2">
+            <div class="hash_item hash_item_first">
+                <h3>Avarage effective hashrate</h3>
+                <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Your avarage effective current hashrate. It is calculated according your submitted shares using a 120 minute window. Deviations from your local hashrate are normal.">
+                        {{vm.farm.hash_rate.short_duration.effective_hashrate_avarage}}
+            </span>
+            </div>
+            <div class="hash_item hash_item_second">
+                <h3>Avarage reported hashrate</h3>
+                <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Your avarage reported current hashrate. It is calculated according your submitted shares using a 120 minute window.">
+                        {{vm.farm.hash_rate.short_duration.reported_hashrate_avarage}}
+            </span>
+            </div>
+        </div>
+        <div class="col-md-10">
+        </div>
+    </div> -->
+    <!-- <h2>General information</h2> -->
+    <!-- <div class="farm-general">
     <div class="row hidden-xs hidden-sm">
         <div class="col-md-4 text-center">
             <div class="panel panel-warning">
@@ -21,18 +199,6 @@
                 </div>
             </div>
         </div>
-       <!--  <div class="col-md-2 text-center">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Unpaid Balance</h3></div>
-                <div class="panel-body">
-                    <h4>2.28773 ETH</h4>
-                    <div style="height:15px; margin:10px -15px -15px -15px" data-toggle="tooltip" data-placement="bottom" title="" class="progress" data-original-title="45.8% of your 5 ETH payout limit reached">
-                        <div style="width:45.8%" class="progress-bar progress-bar-info progress-bar-striped"></div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="col-md-4 text-center">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -92,16 +258,15 @@
             </table>
         </div>
     </div>
-</div>
-<h2>Hashrate, Shares & Workers in last 1 hour</h2>
-<div>
-    <div id="hashChart"></div>
-    <div id="sharesChart"></div>
-    <div id="activeWorkers"></div>
-</div>
-<div>
-    <h2>Workers ({{vm.farm.active_workers}} active)</h2>
-    <table id="worker_table" class="table table-borderless"></table>
-</div>
-
+</div> -->
+    <!--     <h2>Hashrate, Shares & Workers in last 1 hour</h2>
+    <div>
+        <div id="hashChart"></div>
+        <div id="sharesChart"></div>
+        <div id="activeWorkers"></div>
+    </div>
+    <div>
+        <h2>Workers ({{vm.farm.active_workers}} active)</h2>
+        <table id="worker_table" class="table table-borderless"></table>
+    </div> -->
 </div>
