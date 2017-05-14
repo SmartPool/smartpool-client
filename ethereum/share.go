@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Share struct {
@@ -93,10 +94,16 @@ func (s *Share) Hash() (result smartpool.SPHash) {
 
 func processDuringRead(
 	datasetPath string, mt *mtree.DagTree) {
-
-	f, err := os.Open(datasetPath)
-	if err != nil {
-		log.Fatal(err)
+	var f *os.File
+	var err error
+	for {
+		f, err = os.Open(datasetPath)
+		if err == nil {
+			break
+		} else {
+			smartpool.Output.Printf("Reading DAG file %s failed with %s. Retry in 10s...\n", datasetPath, err.Error())
+			time.Sleep(10 * time.Second)
+		}
 	}
 	r := bufio.NewReader(f)
 	buf := [128]byte{}
