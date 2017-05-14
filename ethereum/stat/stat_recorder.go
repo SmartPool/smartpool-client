@@ -116,12 +116,12 @@ func (sr *StatRecorder) RecordHashrate(hashrate hexutil.Uint64, id common.Hash, 
 	t := time.Now()
 	rigData := sr.getRigData(rig)
 	rigData.AddHashrate(hashrate, id, t)
-	fmt.Printf("going to update rig hashrate:\n")
-	fmt.Printf("rig: %v\n", rig)
-	fmt.Printf("reported hashrate: %v\n", rigData.AverageReportedHashrate.Uint64())
-	fmt.Printf("effective hashrate: %v\n", rigData.AverageEffectiveHashrate.Uint64())
-	fmt.Printf("period reported hashrate: %v\n", rigData.PeriodReportedHashrate(t).Uint64())
-	fmt.Printf("period effective hashrate: %v\n", rigData.PeriodEffectiveHashrate(t).Uint64())
+	// fmt.Printf("going to update rig hashrate:\n")
+	// fmt.Printf("rig: %v\n", rig)
+	// fmt.Printf("reported hashrate: %v\n", rigData.AverageReportedHashrate.Uint64())
+	// fmt.Printf("effective hashrate: %v\n", rigData.AverageEffectiveHashrate.Uint64())
+	// fmt.Printf("period reported hashrate: %v\n", rigData.PeriodReportedHashrate(t).Uint64())
+	// fmt.Printf("period effective hashrate: %v\n", rigData.PeriodEffectiveHashrate(t).Uint64())
 	sr.FarmData.UpdateRigHashrate(
 		rig, rigData.AverageReportedHashrate, rigData.AverageEffectiveHashrate,
 		rigData.PeriodReportedHashrate(t), rigData.PeriodEffectiveHashrate(t),

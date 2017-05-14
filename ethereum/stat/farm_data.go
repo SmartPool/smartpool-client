@@ -261,17 +261,17 @@ func (fd *FarmData) UpdateRigHashrate(
 	}
 
 	rigHashrate := fd.getRigHashrate(rig.ID())
-	fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
+	// fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
 	changedReportedHashrate := big.NewInt(0).Sub(reportedHashrate, rigHashrate.ReportedHashrate)
-	fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
+	// fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
 	rigHashrate.ReportedHashrate = big.NewInt(0).Set(reportedHashrate)
 	fd.ReportedHashrate.Add(fd.ReportedHashrate, changedReportedHashrate)
-	fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
+	// fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
 
 	rigHashrate = curPeriodData.getRigHashrate(rig.ID())
-	fmt.Printf("rig hashrate struct in period sample: %v\n", rigHashrate)
+	// fmt.Printf("rig hashrate struct in period sample: %v\n", rigHashrate)
 	changedReportedHashrate = big.NewInt(0).Sub(periodReportedHashrate, rigHashrate.ReportedHashrate)
-	fmt.Printf("changed reported hashrate in period sample: %d\n", changedReportedHashrate.Uint64())
+	// fmt.Printf("changed reported hashrate in period sample: %d\n", changedReportedHashrate.Uint64())
 	rigHashrate.ReportedHashrate = big.NewInt(0).Set(periodReportedHashrate)
 	curPeriodData.ReportedHashrate.Add(curPeriodData.ReportedHashrate, changedReportedHashrate)
 }
