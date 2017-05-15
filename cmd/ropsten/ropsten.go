@@ -201,7 +201,7 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.UintFlag{
 			Name:  "diff",
-			Value: 1000000,
+			Value: 4000000000,
 			Usage: "Difficulty of a share.",
 		},
 		cli.UintFlag{

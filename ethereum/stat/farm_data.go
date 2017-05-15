@@ -281,10 +281,13 @@ func (fd *FarmData) getRigHashrate(id string) *RigHashrate {
 }
 
 func (fd *FarmData) updateAvgEffHashrate(t time.Time) {
-	fd.EffectiveHashrate.Div(
-		fd.TotalValidDifficulty,
-		big.NewInt(BaseTimePeriod),
-	)
+	duration := int64(t.Sub(fd.StartTime).Seconds())
+	if duration > 0 {
+		fd.EffectiveHashrate.Div(
+			fd.TotalValidDifficulty,
+			big.NewInt(duration),
+		)
+	}
 }
 
 func (fd *FarmData) updateAvgShareDifficulty(t time.Time) {
