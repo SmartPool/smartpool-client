@@ -6,6 +6,7 @@ import (
 	"github.com/bmizerany/pat"
 	"net/http"
 	"os"
+	"path"
 )
 
 const jsonrpcVersion = "2.0"
@@ -43,10 +44,13 @@ func NewServer(output smartpool.UserOutput, port uint16) *Server {
 	rpcService := NewRPCService()
 	statService := NewStatService()
 	statusService := NewStatusService()
+	webDir, _ := os.Executable()
+	statsDir := path.Join(path.Dir(webDir), "ethereum", "ethminer", "statistic")
+	mux.Get("/stats/", http.StripPrefix("/stats/", http.FileServer(http.Dir(statsDir))))
 	mux.Post("/:rig/", rpcService)
 	mux.Get("/status", statusService)
-	mux.Get("/:method/:rig", statService)
-	mux.Get("/:method", statService)
+	mux.Get("/:method/:scope/:rig", statService)
+	mux.Get("/:method/:scope", statService)
 	return &Server{port, rpcService, &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
 		Handler: mux,

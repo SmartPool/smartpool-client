@@ -12,6 +12,7 @@ mustrun build/env.sh go get -v gopkg.in/urfave/cli.v1
 mustrun build/env.sh go get -v github.com/bmizerany/pat
 mustrun build/env.sh go get -v github.com/mitchellh/go-homedir
 mustrun build/env.sh go get -v golang.org/x/net/context
+mustrun build/env.sh go get -v github.com/gorilla/websocket
 echo "Compiling SmartPool client..."
 mustrun build/env.sh go build -ldflags -s -o smartpool cmd/ropsten/ropsten.go
 echo "Done. You can run SmartPool by ./smartpool --help"

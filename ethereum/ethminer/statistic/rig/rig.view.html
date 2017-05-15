@@ -1,0 +1,128 @@
+﻿<div class="farm-dashboard">
+    <h1>
+    <a href="/">farm</a> <i class="fa fa-chevron-right" aria-hidden="true"></i> <a href="">{{vm.rigId}}</a>
+    </h1>
+    <div class="compare_table">
+        <h3>Average information of hashrate & shares</h3>
+        <table class="table table-bordered">
+            <thead>
+                <th></th>
+                <th>Effective Hashrate (MH/s)</th>
+                <th>Reported Hashrate (MH/s)</th>
+                <th>Mined shares</th>
+                <th>Valid shares</th>
+                <th>Rejected shares</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{vm.farm.short_duration.duration_in_hour}} hour ago</td>
+                    <td>{{vm.farm.short_duration.hash_rate.effective_hashrate_avarage}}</td>
+                    <td>{{vm.farm.short_duration.hash_rate.reported_hashrate_avarage}}</td>
+                    <td>{{vm.farm.short_duration.shares.mined_share_avarage}}</td>
+                    <td>{{vm.farm.short_duration.shares.valid_share_avarage}} ({{vm.farm.short_duration.shares.valid_share_percent}}%)</td>
+                    <td>{{vm.farm.short_duration.shares.rejected_share_avarage}} ({{vm.farm.short_duration.shares.rejected_share_percent}}%)</td>
+                </tr>
+                <tr>
+                    <td>{{vm.farm.long_duration.duration_in_hour}} hour ago</td>
+                    <td>{{vm.farm.long_duration.hash_rate.effective_hashrate_avarage}}</td>
+                    <td>{{vm.farm.long_duration.hash_rate.reported_hashrate_avarage}}</td>
+                    <td>{{vm.farm.long_duration.shares.mined_share_avarage}}</td>
+                    <td>{{vm.farm.long_duration.shares.valid_share_avarage}} ({{vm.farm.long_duration.shares.valid_share_percent}}%)</td>
+                    <td>{{vm.farm.long_duration.shares.rejected_share_avarage}} ({{vm.farm.long_duration.shares.rejected_share_percent}}%)</td>
+                </tr>
+                <tr>
+                    <td>Life time</td>
+                    <td>{{vm.farm.overall.effective_hashrate}}</td>
+                    <td>{{vm.farm.overall.reported_hashrate}}</td>
+                    <td>{{vm.farm.overall.mined_share}}</td>
+                    <td>
+                        <div>
+                            {{vm.farm.overall.valid_share}} ({{vm.farm.overall.valid_share_percent}}%)
+                        </div>
+                        <div>
+                            <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Verified share">    {{vm.farm.overall.verified_share}}
+                            </span> |
+                            <span popover-trigger="'mouseenter'" class="just_span" uib-popover="Pending share">    {{vm.farm.overall.pending_share}}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        {{vm.farm.overall.rejected_share}} ({{vm.farm.overall.rejected_share_percent}}%)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="hashrate_charts">
+        <div>
+            <h3>Hashrate in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
+            <div id="shortHashChart" class="hash_chart"></div>
+        </div>
+        <div>
+            <h3>Hashrate in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
+            <div id="longHashChart" class="hash_chart"></div>
+        </div>
+    </div>
+    <div class="shares_charts">
+        <div>
+            <h3>Shares in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
+            <div id="shortSharesChart" class="shares_chart"></div>
+        </div>
+        <div>
+            <h3>Shares in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
+            <div id="longSharesChart" class="shares_chart"></div>
+        </div>
+    </div>
+    <div class="advance_info">
+        <h3 ng-click="vm.showAdvanceInfo()"><a>Advance information <i class="fa fa-caret-down" ng-show="!vm.advance.flag" aria-hidden="true"></i> <i class="fa fa-caret-up" aria-hidden="true"  ng-show="vm.advance.flag"></i></a></h3>
+        <div id="advance_panel" ng-show="vm.advance.flag">
+             <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td>X</td>
+                        <td>{{vm.advance.x}}</td>
+                    </tr>
+                    <tr>
+                        <td>Y</td>
+                        <td>{{vm.advance.y}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="config_info">
+        <h3>Config information</h3>
+        <table class="table table-borderless config-table">
+            <tbody>
+                <tr>
+                    <td>Share threshold</td>
+                    <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Share threshold</td>
+                    <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Share difficulty</td>
+                    <td>{{vm.config.share_difficulty}}</td>
+                </tr>
+                <tr>
+                    <td>Hotstop mode</td>
+                    <td>{{vm.config.hotstop_mode}}</td>
+                </tr>
+                <tr>
+                    <td>Contract address</td>
+                    <td>{{vm.config.contract_address}}</td>
+                </tr>
+                <tr>
+                    <td>Miner address</td>
+                    <td>{{vm.config.miner_address}}</td>
+                </tr>
+                <tr>
+                    <td>Extra address</td>
+                    <td>{{vm.config.extra_data}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
