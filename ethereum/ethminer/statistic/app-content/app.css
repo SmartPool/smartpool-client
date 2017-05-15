@@ -19,7 +19,10 @@
     background-color: #4e5d6c;
 }
 
-.popover .arrow:after {
+.popover.top .arrow:after {
+    border-top-color: #4e5d6c !important;
+}
+.popover.right .arrow:after {
     border-right-color: #4e5d6c !important;
 }
 

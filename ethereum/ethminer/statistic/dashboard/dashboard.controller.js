@@ -65,15 +65,13 @@
             "worker": {
                 "active_count": 0,
                 "worker_list": [
-                    ["cuong", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34],
-                    ["vu", 123, 21, 234, 43, 23, 34]
+                    ["cuong", 123, 21, 234, 43],
+                    ["vu", 123, 21, 234, 43],
+                    ["vu", 123, 21, 234, 43],
+                    ["vu", 123, 21, 234, 43],
+                    ["vu", 123, 21, 234, 43],
+                    ["vu", 123, 21, 234, 43]
+                    
                 ]
             }
 
@@ -233,12 +231,9 @@
             data: vm.farm.worker.worker_list,
             columns: [
                 { title: "Worker" },
-                { title: "Reported Hashrate" },
-                { title: "Current Hashrate" },
-                { title: "Average Hashrate" },
-                { title: "Mined Shares (1h)" },
-                { title: "Valid Shares (1h)" },
-                { title: "Rejected Shares (1h)" }
+                { title: vm.farm.short_duration.duration_in_hour + " ago"   },
+                { title: vm.farm.long_duration.duration_in_hour + " ago"   },
+                { title: "Overall"},
             ],
             columnDefs: [{
                     // The `data` parameter refers to the data for the cell (defined by the
@@ -249,7 +244,6 @@
                     },
                     "targets": 0
                 },
-                // { "visible": false,  "targets": [ 3 ] }
             ]
         });
 
@@ -296,6 +290,8 @@
             var rejectedChart = ['Rejected Shares'];
 
             var xChart = ['x'];
+            vm.farm.worker.active_count = 0;
+            vm.farm.worker.worker_list = [];
             $.each(response.short_window_sample, function(key, val) {
                 xChart.push(key * response.period_duration * 1000);
 
@@ -310,6 +306,23 @@
                 totalMinedShare += val.mined_share;
                 totalValidShare += val.valid_share;
                 totalRejectedShare += val.rejected_share;
+
+                //calculate short hashrate and active worker
+                 $.each(val.rigs, function(rigName, rigVal) {
+                    var check = false;
+                    for(var i = 0; i < vm.farm.worker.worker_list.length;i++){
+                        if (rigName === vm.farm.worker.worker_list[i][0]){
+                            check = true;
+                            break;
+                        }
+                    }
+                    if(check){
+                        vm.farm.worker.worker_list[i][1] += rigVal.reported_hashrate?rigVal.reported_hashrate:0;
+                    }else{
+                        vm.farm.worker.active_count += 1;
+                        vm.farm.worker.worker_list.push([rigName, rigVal.reported_hashrate?rigVal.reported_hashrate:0, 0 , 0])
+                    }
+                 })
             })
             vm.farm.short_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.short_duration.hash_rate.effective_hashrate_avarage = vm.roundHashRate(totalEffectiveHashRate / pointTotal / 1000000);
@@ -362,6 +375,20 @@
                 totalMinedShare += val.mined_share;
                 totalValidShare += val.valid_share;
                 totalRejectedShare += val.rejected_share;
+
+                //calculate hashrate
+                $.each(val.rigs, function(rigName, rigVal) {
+                    var check = false;
+                    for(var i = 0; i < vm.farm.worker.worker_list.length;i++){
+                        if (rigName === vm.farm.worker.worker_list[i][0]){
+                            check = true;
+                            break;
+                        }
+                    }
+                    if(check){
+                        vm.farm.worker.worker_list[i][2] += rigVal.reported_hashrate?rigVal.reported_hashrate:0;
+                    }
+                 })
             })
             vm.farm.long_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.long_duration.hash_rate.effective_hashrate_avarage = vm.roundHashRate(totalEffectiveHashRate / pointTotal / 1000000);
@@ -396,11 +423,38 @@
                 vm.farm.overall.valid_share_percent = vm.roundShares(vm.farm.overall.valid_share / vm.farm.overall.mined_share * 100);
                 vm.farm.overall.rejected_share_percent = vm.roundShares(vm.farm.overall.rejected_share / vm.farm.overall.mined_share * 100);
             }
+            //calculate hashrate
+            for(var i = 0; i < vm.farm.worker.worker_list.length;i++){
+                var rigName = vm.farm.worker.worker_list[i][0];
+                if(response.overall.rigs[rigName]){
+                    vm.farm.worker.worker_list[i][3] = response.overall.rigs[rigName].reported_hashrate?response.overall.rigs[rigName].reported_hashrate:0;
+                }
+            }
         }
         function applyWorker(response) {
-            $.each(response.short_window_sample, function(key, val) {
-
-            })
+            $('#worker_table').dataTable().fnDestroy();
+            vm.tableWorker = $("#worker_table").DataTable({
+                paging: false,
+                info: false,
+                stateSave: true,
+                data: vm.farm.worker.worker_list,
+                columns: [
+                    { title: "Worker" },
+                    { title: vm.farm.short_duration.duration_in_hour + " ago"   },
+                    { title: vm.farm.long_duration.duration_in_hour + " ago"   },
+                    { title: "Overall"},
+                ],
+                columnDefs: [{
+                        // The `data` parameter refers to the data for the cell (defined by the
+                        // `data` option, which defaults to the column being worked with, in
+                        // this case `data: 0`.
+                        "render": function(data, type, row) {
+                            return '<a href="/#!/rig/' + data + '" rel="workerChart" class="btn btn-default btn-xs">' + data + '</a>';
+                        },
+                        "targets": 0
+                    },
+                ]
+            });
         }
 
         function showAdvanceInfo() {
