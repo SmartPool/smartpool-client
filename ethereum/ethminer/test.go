@@ -48,7 +48,7 @@ func wsHandlerFarm(w http.ResponseWriter, r *http.Request) {
 	}
 	farmData := getData()
 	conn.WriteJSON(farmData)
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(1000 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {

@@ -78,15 +78,15 @@
     <div class="advance_info">
         <h3 ng-click="vm.showAdvanceInfo()">
         <a>Advance information <i class="fa fa-caret-down" ng-show="!vm.advance.flag" aria-hidden="true"></i> <i class="fa fa-caret-up" aria-hidden="true"  ng-show="vm.advance.flag"></i></a></h3>
-        <div id="advance_panel" ng-show="vm.advance.flag">
-            <table>
-                <thead>
-                    <th>x</th>
-                    <th>y</th>
-                </thead>
+        <div id="advance_panel" ng-show="vm.advance.flag" class="advance_info">
+            <table class="table table-borderless">
                 <tbody>
                     <tr>
+                        <td>X</td>
                         <td>{{vm.advance.x}}</td>
+                    </tr>
+                    <tr>
+                        <td>Y</td>
                         <td>{{vm.advance.y}}</td>
                     </tr>
                 </tbody>
@@ -120,10 +120,6 @@
                 <tr>
                     <td>Miner address</td>
                     <td>{{vm.config.miner_address}}</td>
-                </tr>
-                <tr>
-                    <td>Share threshold</td>
-                    <td>{{vm.config.share_threshold}}</td>
                 </tr>
                 <tr>
                     <td>Extra address</td>
