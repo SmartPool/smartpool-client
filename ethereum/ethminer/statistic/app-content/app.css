@@ -22,6 +22,7 @@
 .popover.top .arrow:after {
     border-top-color: #4e5d6c !important;
 }
+
 .popover.right .arrow:after {
     border-right-color: #4e5d6c !important;
 }
@@ -33,6 +34,15 @@ body {
 
 .farm-dashboard h1 {
     text-align: center;
+}
+
+.farm-dashboard h3 {
+    text-transform: uppercase;
+    font-size: 15px;
+}
+
+.farm-dashboard h3 * {
+    text-transform: inherit;
 }
 
 
@@ -109,61 +119,62 @@ body {
 #worker_table tbody tr td {
     text-align: center;
 }
+#worker_table tbody tr td {
+    padding-right: 25px;
+}
 
 .hash_item h3 {
     margin: 0px;
     font-size: 12px;
     padding: 5px;
 }
-.hash_item{
 
-}
-.hash_item span{
+.hash_item {}
+
+.hash_item span {
     font-size: 18px;
 }
-.farm-dashboard .compare_table table *{
+
+.farm-dashboard .compare_table table * {
     text-align: center;
 }
-/*.config_info >div >div{
-    border: 1px solid;
-}
-.config_info label{
- 
-    padding: 8px;
-}
-.config_info label,.config_info span{
-    display: block;    
-   
-}
-.config_info span{
-    font-size: 15px;
-    padding: 15px 8px;
-     text-align: center;
-}*/
 
-.config-table{
-    border: 1px solid;
+.advance_info table,.config_info table{
+    /*border: 1px solid;*/
+    color: #ebebeb;
+    background-color: #4e5d6c;
 }
-.advance_info h3 a{
+.advance_info h3 a {
     color: inherit;
 }
 
-.hash_chart, .shares_chart{
+.hash_chart,
+.shares_chart {
     height: 200px;
 }
-h3{
+
+h3 {
     margin-top: 20px;
 }
-.hashrate_charts, .worker_tables{
+
+.hashrate_charts,
+.worker_tables {
     margin-top: 50px;
 }
 
-h1 a{
- color: inherit;   
+h1 a {
+    color: inherit;
 }
-h1 a:hover{
- color: inherit;      
+
+h1 a:hover {
+    color: inherit;
 }
-h1 i.fa{
+
+h1 i.fa {
     font-size: 70%;
+}
+
+#worker_table_filter input {
+    height: 25px;
+    border-radius: 0px;
 }
