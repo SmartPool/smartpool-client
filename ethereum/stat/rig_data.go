@@ -45,13 +45,10 @@ func (prd *PeriodRigData) updateAvgHashrate(t time.Time) {
 }
 
 func (prd *PeriodRigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(prd.StartTime).Seconds())
-	if duration > 0 {
-		prd.AverageEffectiveHashrate.Div(
-			prd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	prd.AverageEffectiveHashrate.Div(
+		prd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (prd *PeriodRigData) updateAvgShareDifficulty(t time.Time) {
@@ -75,8 +72,8 @@ type OverallRigData struct {
 	RejectedShare            uint64    `json:"total_rejected_share"`
 	TotalHashrate            *big.Int  `json:"total_hashrate"`
 	NoHashrateSubmission     uint64    `json:"no_hashrate_submission"`
-	AverageReportedHashrate  *big.Int  `json:"average_reported_hashrate"`
-	AverageEffectiveHashrate *big.Int  `json:"average_effective_hashrate"`
+	AverageReportedHashrate  *big.Int  `json:"reported_hashrate"`
+	AverageEffectiveHashrate *big.Int  `json:"effective_hashrate"`
 	BlockFound               uint64    `json:"total_block_found"`
 	StartTime                time.Time `json:"start_time"`
 }
@@ -166,6 +163,16 @@ func (rd *RigData) AddShare(status string, share smartpool.Share, t time.Time) {
 	}
 }
 
+func (rd *RigData) PeriodReportedHashrate(t time.Time) *big.Int {
+	curPeriodData := rd.getData(t)
+	return curPeriodData.AverageReportedHashrate
+}
+
+func (rd *RigData) PeriodEffectiveHashrate(t time.Time) *big.Int {
+	curPeriodData := rd.getData(t)
+	return curPeriodData.AverageEffectiveHashrate
+}
+
 func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.Time) {
 	if rd.StartTime.IsZero() {
 		rd.StartTime = t
@@ -177,6 +184,8 @@ func (rd *RigData) AddHashrate(hashrate hexutil.Uint64, id common.Hash, t time.T
 	rd.TotalHashrate.Add(rd.TotalHashrate, big.NewInt(int64(hashrate)))
 	rd.NoHashrateSubmission++
 	rd.updateAvgHashrate(t)
+	// fmt.Printf("Updated total hashrate: %d\n", rd.TotalHashrate.Uint64())
+	// fmt.Printf("Updated reported hashrate: %d\n", rd.AverageReportedHashrate.Uint64())
 	curPeriodData.TotalHashrate.Add(curPeriodData.TotalHashrate, big.NewInt(int64(hashrate)))
 	curPeriodData.NoHashrateSubmission++
 	curPeriodData.updateAvgHashrate(t)
@@ -192,13 +201,10 @@ func (rd *RigData) updateAvgHashrate(t time.Time) {
 }
 
 func (rd *RigData) updateAvgEffHashrate(t time.Time) {
-	duration := int64(t.Sub(rd.StartTime).Seconds())
-	if duration > 0 {
-		rd.AverageEffectiveHashrate.Div(
-			rd.TotalValidDifficulty,
-			big.NewInt(duration),
-		)
-	}
+	rd.AverageEffectiveHashrate.Div(
+		rd.TotalValidDifficulty,
+		big.NewInt(BaseTimePeriod),
+	)
 }
 
 func (rd *RigData) updateAvgShareDifficulty(t time.Time) {

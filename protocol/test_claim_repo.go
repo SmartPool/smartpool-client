@@ -25,3 +25,11 @@ func (cr *testClaimRepo) AddShare(s smartpool.Share) error {
 	cr.c = append(cr.c, s)
 	return nil
 }
+
+func (cr *testClaimRepo) NoActiveShares() uint64 {
+	return 0
+}
+
+func (cr *testClaimRepo) Persist(storage smartpool.PersistentStorage) error {
+	return nil
+}

@@ -3,6 +3,7 @@ package protocol
 import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 type testNetworkClient struct {
@@ -14,6 +15,10 @@ func (n *testNetworkClient) GetWork() smartpool.Work {
 }
 
 func (n *testNetworkClient) SubmitSolution(s smartpool.Solution) bool {
+	return true
+}
+
+func (n *testNetworkClient) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
 	return true
 }
 

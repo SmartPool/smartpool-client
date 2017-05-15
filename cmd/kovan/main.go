@@ -70,7 +70,7 @@ func Run(c *cli.Context) error {
 	}
 	smartpool.Output = &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
-	go ethereumWorkPool.Cleanning()
+	go ethereumWorkPool.RunCleaner()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
