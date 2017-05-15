@@ -176,13 +176,13 @@
         if (window.WebSocket === undefined) {
             console.log("windows is not support websocket");
         } else {
-            var socket = new WebSocket("ws://" + $location.$$host + ":" + $location.$$port + "/ws/rig");
+          var socket = new WebSocket("ws://" + $location.$$host + ":" + $location.$$port + "/ws/rig/" + this.rigId);
 
             socket.onopen = function() {
                 console.log("Socket is open");
             };
             socket.onmessage = function(message) {
-                var response = JSON.parse(JSON.parse(message.data));
+                var response = JSON.parse(message.data);
                 //reperate data
                 //vm.$apply(function() {
                 $scope.$apply(function() {

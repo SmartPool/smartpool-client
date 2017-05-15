@@ -8,7 +8,7 @@
     EthminerService.$inject = ['$http'];
     function EthminerService($http) {
         var service = {};
-        
+
         service.GetAdvanceInfo = GetAdvanceInfo;
         service.GetConfigInfo = GetConfigInfo;
 
@@ -18,7 +18,7 @@
             return $http.post('/api/ethminer/advanceinfo').then(handleSuccess, handleError('Error get information'));
         }
         function GetConfigInfo() {
-            return $http.post('/api/ethminer/configinfo').then(handleSuccess, handleError('Error get information'));
+            return $http.get('/status').then(handleSuccess, handleError('Error get information'));
         }
 
 
@@ -33,7 +33,5 @@
                 return { success: false, message: error };
             };
         }
-        
     }
-
 })();

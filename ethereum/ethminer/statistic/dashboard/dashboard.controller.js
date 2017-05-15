@@ -71,7 +71,6 @@
                     ["vu", 123, 21, 234, 43],
                     ["vu", 123, 21, 234, 43],
                     ["vu", 123, 21, 234, 43]
-                    
                 ]
             }
 
@@ -256,7 +255,7 @@
                 console.log("Socket is open");
             };
             socket.onmessage = function(message) {
-                var response = JSON.parse(JSON.parse(message.data));
+                var response = JSON.parse(message.data);
                 //reperate data
                 //vm.$apply(function() {
                 $scope.$apply(function() {
