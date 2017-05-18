@@ -20,23 +20,21 @@
         vm.showAdvanceInfo = showAdvanceInfo;
         vm.getAnchorPointShort = getAnchorPointShort;
         vm.getAnchorPointLong = getAnchorPointLong;
-        vm.convertHashrate  = convertHashrate;
+        vm.convertHashrate = convertHashrate;
         vm.advance = {
             "load": false,
             "flag": true,
-            "total_block_found":1,
-            "start_time":"2017-05-07T19:32:07.530342074Z",
         }
         vm.config = {};
 
         vm.farm = {
             "short_duration": {
-                "duration_in_hour": 1,
-                "point_number":1,
+                "duration_in_hour": 0,
+                "point_number": 1,
                 "hash_rate": {
                     "effective_hashrate_avarage": 0,
                     "reported_hashrate_avarage": 0,
-                    "effective_hashrate_percent" : 0,
+                    "effective_hashrate_percent": 0,
                     "chart": [
 
                     ],
@@ -51,12 +49,12 @@
                 }
             },
             "long_duration": {
-                "duration_in_hour": 1,
-                "point_number":1,
+                "duration_in_hour": 0,
+                "point_number": 1,
                 "hash_rate": {
                     "effective_hashrate_avarage": 0,
                     "reported_hashrate_avarage": 0,
-                    "effective_hashrate_percent" : 0,
+                    "effective_hashrate_percent": 0,
                     "chart": [
 
                     ],
@@ -69,7 +67,7 @@
 
                     ],
                 },
-                "rigs":{
+                "rigs": {
                     "chart": [
                         // ['x', 30, 50, 100, 230, 300, 310],
                         // ['Active Workers', 30, 200, 100, 400, 150, 250],                       
@@ -77,17 +75,20 @@
                 }
             },
             "overall": {
-                "effective_hashrate_percent" : 0,
+                "effective_hashrate": 0,
+                "reported_hashrate": 0,
+                "mined_share": 0,
+                "valid_share": 0,
+                "rejected_share":0,
+                "verified_share":0,
+                "pending_share":0,
+                "valid_share_percent":0,
+                "reject_share_percent":0,
+                "effective_hashrate_percent": 0,
             },
             "worker": {
                 "active_count": 0,
                 "worker_list": [
-                    ["cuong", 123, 21, 234, 43],
-                    ["vu", 123, 21, 234, 43],
-                    ["vu", 123, 21, 234, 43],
-                    ["vu", 123, 21, 234, 43],
-                    ["vu", 123, 21, 234, 43],
-                    ["vu", 123, 21, 234, 43]
                 ]
             }
 
@@ -429,7 +430,7 @@
                     totalRejectedShare += val.rejected_share;
 
                     //for workers
-                    
+
                     activeWorker = 0;
                     //calculate hashrate
                     $.each(val.rigs, function(rigName, rigVal) {
@@ -443,7 +444,7 @@
                         if (check) {
                             vm.farm.worker.worker_list[i][2] += rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0;
                         }
-                        if(rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)){
+                        if (rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)) {
                             activeWorker++;
                         }
                     })
@@ -470,7 +471,7 @@
             vm.farm.long_duration.shares.mined_share_avarage = vm.roundShares(totalMinedShare / pointTotal);
             vm.farm.long_duration.shares.valid_share_avarage = vm.roundShares(totalValidShare / pointTotal);
             vm.farm.long_duration.shares.rejected_share_avarage = vm.roundShares(totalRejectedShare / pointTotal);
-                //calculate percent
+            //calculate percent
             vm.farm.long_duration.shares.valid_share_percent = vm.roundShares(vm.farm.long_duration.shares.valid_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
             vm.farm.long_duration.shares.rejected_share_percent = vm.roundShares(vm.farm.long_duration.shares.rejected_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
 
@@ -484,7 +485,7 @@
             vm.longSharesChart.load({
                 columns: vm.farm.long_duration.shares.chart
             });
-             vm.longRigChart.load({
+            vm.longRigChart.load({
                 columns: vm.farm.long_duration.rigs.chart
             });
         }
@@ -516,14 +517,14 @@
             if (vm.tableWorker) {
                 $('#worker_table').dataTable().fnDestroy();
             }
-            for(var i = 0 ; i < vm.farm.worker.worker_list.length; i ++){
-                if(vm.farm.short_duration.point_number > 0){
-                    vm.farm.worker.worker_list[i][1] = vm.convertHashrate(vm.farm.worker.worker_list[i][1]/vm.farm.short_duration.point_number);    
+            for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
+                if (vm.farm.short_duration.point_number > 0) {
+                    vm.farm.worker.worker_list[i][1] = vm.convertHashrate(vm.farm.worker.worker_list[i][1] / vm.farm.short_duration.point_number);
                 }
-                if(vm.farm.long_duration.point_number > 0){
-                    vm.farm.worker.worker_list[i][2] = vm.convertHashrate(vm.farm.worker.worker_list[i][2]/vm.farm.long_duration.point_number);    
+                if (vm.farm.long_duration.point_number > 0) {
+                    vm.farm.worker.worker_list[i][2] = vm.convertHashrate(vm.farm.worker.worker_list[i][2] / vm.farm.long_duration.point_number);
                 }
-                vm.farm.worker.worker_list[i][3] = vm.convertHashrate(vm.farm.worker.worker_list[i][3])                                
+                vm.farm.worker.worker_list[i][3] = vm.convertHashrate(vm.farm.worker.worker_list[i][3])
             }
             vm.tableWorker = $("#worker_table").DataTable({
                 paging: false,
@@ -552,12 +553,13 @@
             });
         }
 
-        function applyAdvanceInfo(response){
+        function applyAdvanceInfo(response) {
             vm.advance.total_block_found = response.overall.total_block_found;
             vm.advance.start_time = response.overall.start_time;
             vm.advance.last_block = response.overall.last_block;
             vm.advance.last_valid_share = response.overall.last_valid_share;
         }
+
         function showAdvanceInfo() {
             vm.advance.flag = !vm.advance.flag;
             // if (vm.advance.load) {
@@ -587,14 +589,15 @@
             return Math.round(shares * 100) / 100;
         }
 
-        function convertHashrate(hashRate){
+        function convertHashrate(hashRate) {
             //convert to Mhz
             return Math.round(hashRate / 1000000 * 100) / 100;
         }
+
         function getAnchorPointShort(response) {
             var point = 99999999;
             $.each(response.short_window_sample, function(key, val) {
-                var keyInt = parseInt(key,10);
+                var keyInt = parseInt(key, 10);
                 if (keyInt < point) {
                     point = keyInt;
                 }
@@ -606,7 +609,7 @@
         function getAnchorPointLong(response) {
             var point = 99999999;
             $.each(response.long_window_sample, function(key, val) {
-                var keyInt = parseInt(key,10);
+                var keyInt = parseInt(key, 10);
                 if (keyInt < point) {
                     point = keyInt;
                 }

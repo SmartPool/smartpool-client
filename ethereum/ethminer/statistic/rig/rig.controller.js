@@ -24,14 +24,12 @@
         vm.advance = {
             "load": false,
             "flag": true,
-            "total_block_found":1,
-            "start_time":"2017-05-07T19:32:07.530342074Z",
         }
         vm.config = {};
 
         vm.farm = {
             "short_duration": {
-                "duration_in_hour": 1,
+                "duration_in_hour": 0,
                 "point_number":1,
                 "hash_rate": {
                     "effective_hashrate_avarage": 0,
@@ -51,7 +49,7 @@
                 }
             },
             "long_duration": {
-                "duration_in_hour": 1,
+                "duration_in_hour": 0,
                 "point_number":1,
                 "hash_rate": {
                     "effective_hashrate_avarage": 0,
@@ -71,7 +69,16 @@
                 }
             },
             "overall": {
-                "effective_hashrate_percent" : 0,
+                "effective_hashrate": 0,
+                "reported_hashrate": 0,
+                "mined_share": 0,
+                "valid_share": 0,
+                "rejected_share":0,
+                "verified_share":0,
+                "pending_share":0,
+                "valid_share_percent":0,
+                "reject_share_percent":0,
+                "effective_hashrate_percent": 0,
             }
 
             //     }
