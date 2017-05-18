@@ -93,12 +93,10 @@ func (server *StatService) handleMessages(conn *websocket.Conn) {
 		m := make(map[string]string)
 		err := conn.ReadJSON(&m)
 		if err == nil {
+			startTime = time.Now()
 			if m["action"] == "getFarmInfo" {
-				startTime = time.Now()
 				conn.WriteJSON(farmStat())
-			}
-			if m["action"] == "getRigInfo" {
-				startTime = time.Now()
+			} else if m["action"] == "getRigInfo" {
 				rigID := m["rigId"]
 				rig := ethereum.NewRig(rigID)
 				conn.WriteJSON(rigStat(rig))
