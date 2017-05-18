@@ -5,9 +5,9 @@
         .module('app')
         .controller('DashboardController', DashboardController);
 
-    DashboardController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService'];
+    DashboardController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService','appConstants','$timeout'];
 
-    function DashboardController($location, $rootScope, $http, $scope, EthminerService) {
+    function DashboardController($location, $rootScope, $http, $scope, EthminerService,appConstants,$timeout) {
         var vm = this;
         vm.roundHashRate = roundHashRate;
         vm.roundShares = roundShares;
@@ -270,6 +270,10 @@
             }
         });
 
+        vm.cancelSocker = false;
+        $rootScope.$on('$locationChangeSuccess',function(){
+            vm.cancelSocker = true;   
+        });
         if (window.WebSocket === undefined) {
             console.log("windows is not support websocket");
         } else {
@@ -277,6 +281,22 @@
 
             socket.onopen = function() {
                 console.log("Socket is open");
+                //get info after interval time
+                (function refreshData(){
+                    if (vm.cancelSocker){
+                        return;
+                    }
+                    console.log("farm");
+                     socket.send(JSON.stringify({
+                          action: "getFarmInfo"
+                        }));
+                       //return sendWsMessage;
+                     $timeout(refreshData,appConstants.CONST_FRESH_FARM_DATA)
+                }());
+
+                // $interval(function sendWsMessage() {
+                  
+                //   }(), appConstants.CONST_FRESH_FARM_DATA);
             };
             socket.onmessage = function(message) {
                 var response = JSON.parse(message.data);

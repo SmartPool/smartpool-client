@@ -15,7 +15,7 @@ func main() {
 
 	//http.Handle("/stats", http.FileServer(http.Dir("./statistic")))
 	http.HandleFunc("/ws/farm", wsHandlerFarm)
-	http.HandleFunc("/ws/rig/his7chan", wsHandlerRig)
+	//http.HandleFunc("/ws/rig/his7chan", wsHandlerRig)
 	http.HandleFunc("/api/ethminer/advanceinfo", getAdvanceInfo)
 	//http.HandleFunc("/api/ethminer/configinfo", getConfigInfo)
 	http.HandleFunc("/status", getConfigInfo)
@@ -50,50 +50,62 @@ func wsHandlerFarm(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
 	}
-	farmData := getData()
-	conn.WriteMessage(1, []byte(farmData))
-	//conn.WriteJSON(farmData)
-	ticker := time.NewTicker(1000 * time.Second)
-	quit := make(chan struct{})
+
 	go func() {
+		startTime := time.Now()
 		for {
-			select {
-			case <-ticker.C:
-				farmData = getData()
-				conn.WriteMessage(1, []byte(farmData))
-			case <-quit:
-				ticker.Stop()
+			if time.Since(startTime).Seconds() > 100 {
+				return
+			}
+			m := make(map[string]string)
+			err := conn.ReadJSON(&m)
+			if err == nil {
+				if m["action"] == "getFarmInfo" {
+					fmt.Println(m["action"])
+					startTime = time.Now()
+					farmData := getData()
+					conn.WriteMessage(1, []byte(farmData))
+				}
+				if m["action"] == "getRigInfo" {
+					fmt.Println(m["rigId"])
+					startTime = time.Now()
+					rigData := getData()
+					conn.WriteMessage(1, []byte(rigData))
+				}
+			} else {
+				fmt.Println(err)
 				return
 			}
 		}
 	}()
 }
-func wsHandlerRig(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Origin") != "http://"+r.Host {
-		http.Error(w, "Origin not allowed", 403)
-		return
-	}
-	conn, err := websocket.Upgrade(w, r, w.Header(), 1024, 1024)
-	if err != nil {
-		http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
-	}
-	farmData := getData()
-	conn.WriteMessage(1, []byte(farmData))
-	ticker := time.NewTicker(1000 * time.Second)
-	quit := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				farmData = getData()
-				conn.WriteMessage(1, []byte(farmData))
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-}
+
+// func wsHandlerRig(w http.ResponseWriter, r *http.Request) {
+// 	if r.Header.Get("Origin") != "http://"+r.Host {
+// 		http.Error(w, "Origin not allowed", 403)
+// 		return
+// 	}
+// 	conn, err := websocket.Upgrade(w, r, w.Header(), 1024, 1024)
+// 	if err != nil {
+// 		http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
+// 	}
+// 	farmData := getData()
+// 	conn.WriteMessage(1, []byte(farmData))
+// 	ticker := time.NewTicker(1000 * time.Second)
+// 	quit := make(chan struct{})
+// 	go func() {
+// 		for {
+// 			select {
+// 			case <-ticker.C:
+// 				farmData = getData()
+// 				conn.WriteMessage(1, []byte(farmData))
+// 			case <-quit:
+// 				ticker.Stop()
+// 				return
+// 			}
+// 		}
+// 	}()
+// }
 
 func getData() string {
 	return `
