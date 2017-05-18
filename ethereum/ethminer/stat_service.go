@@ -77,52 +77,36 @@ func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
 		}
-		scope := r.URL.Query().Get(":scope")
-		wsQuit := make(chan struct{})
-		fmt.Printf("scope: %s\n", scope)
-		if scope == "farm" {
-			server.handleWSForFarm(conn, wsQuit)
-		} else if scope == "rig" {
-			rigID := r.URL.Query().Get(":rig")
-			rig := ethereum.NewRig(rigID)
-			server.handleWSForRig(conn, rig, wsQuit)
-		}
+		defer conn.Close()
+		server.handleMessages(conn)
 	} else {
 		http.Error(w, "Only /farm and /rig/:id are supported", 404)
 	}
 }
 
-func (server *StatService) handleWSForFarm(conn *websocket.Conn, quit chan struct{}) {
-	conn.WriteJSON(farmStat())
-	ticker := time.NewTicker(10 * time.Second)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
+func (server *StatService) handleMessages(conn *websocket.Conn) {
+	startTime := time.Now()
+	for {
+		if time.Since(startTime).Seconds() > 600 {
+			break
+		}
+		m := make(map[string]string)
+		err := conn.ReadJSON(&m)
+		if err == nil {
+			if m["action"] == "getFarmInfo" {
+				startTime = time.Now()
 				conn.WriteJSON(farmStat())
-			case <-quit:
-				ticker.Stop()
-				break
 			}
-		}
-	}()
-}
-
-func (server *StatService) handleWSForRig(conn *websocket.Conn, rig smartpool.Rig, quit chan struct{}) {
-	conn.WriteJSON(rigStat(rig))
-	ticker := time.NewTicker(10 * time.Second)
-	fmt.Printf("handle for rig\n")
-	go func(rig smartpool.Rig) {
-		for {
-			select {
-			case <-ticker.C:
+			if m["action"] == "getRigInfo" {
+				startTime = time.Now()
+				rigID := m["rigId"]
+				rig := ethereum.NewRig(rigID)
 				conn.WriteJSON(rigStat(rig))
-			case <-quit:
-				ticker.Stop()
-				break
 			}
+		} else {
+			break
 		}
-	}(rig)
+	}
 }
 
 func NewStatService() *StatService {

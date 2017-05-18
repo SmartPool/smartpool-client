@@ -49,7 +49,6 @@ func NewServer(output smartpool.UserOutput, port uint16) *Server {
 	mux.Get("/stats/", http.StripPrefix("/stats/", http.FileServer(http.Dir(statsDir))))
 	mux.Post("/:rig/", rpcService)
 	mux.Get("/status", statusService)
-	mux.Get("/:method/:scope/:rig", statService)
 	mux.Get("/:method/:scope", statService)
 	return &Server{port, rpcService, &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
