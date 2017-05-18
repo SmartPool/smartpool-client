@@ -5,9 +5,9 @@
         .module('app')
         .controller('RigController', RigController);
 
-    RigController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService','$routeParams'];
+    RigController.$inject = ['$location', '$rootScope', '$http', '$scope', 'EthminerService','$routeParams','$window'];
 
-    function RigController($location, $rootScope, $http, $scope, EthminerService,$routeParams) {
+    function RigController($location, $rootScope, $http, $scope, EthminerService,$routeParams,$window) {
         var vm = this;
         vm.rigId = $routeParams.rigId;
         vm.roundHashRate = roundHashRate;
@@ -23,7 +23,7 @@
         vm.convertHashrate  = convertHashrate;
         vm.advance = {
             "load": false,
-            "flag": false,
+            "flag": true,
             "total_block_found":1,
             "start_time":"2017-05-07T19:32:07.530342074Z",
         }
@@ -116,33 +116,33 @@
             // }
         };
 
-        vm.shortHashrateChart = c3.generate({
-            bindto: '#shortHashChart',
-            data: {
-                x: 'x',
-                columns: vm.farm.short_duration.hash_rate.chart
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d %H:%M'
-                    },
-                    show: false
-                },
-                y: {
-                    label: {
-                        text: 'Hashrate [MH/s]',
-                        position: 'outer-middle'
-                    }
-                }
-            },
-            grid: {
-                y: {
-                    show: true
-                }
-            }
-        });
+        // vm.shortHashrateChart = c3.generate({
+        //     bindto: '#shortHashChart',
+        //     data: {
+        //         x: 'x',
+        //         columns: vm.farm.short_duration.hash_rate.chart
+        //     },
+        //     axis: {
+        //         x: {
+        //             type: 'timeseries',
+        //             tick: {
+        //                 format: '%Y-%m-%d %H:%M'
+        //             },
+        //             show: false
+        //         },
+        //         y: {
+        //             label: {
+        //                 text: 'Hashrate [MH/s]',
+        //                 position: 'outer-middle'
+        //             }
+        //         }
+        //     },
+        //     grid: {
+        //         y: {
+        //             show: true
+        //         }
+        //     }
+        // });
         vm.longHashrateChart = c3.generate({
             bindto: '#longHashChart',
             data: {
@@ -170,33 +170,33 @@
                 }
             }
         });
-        vm.shortSharesChart = c3.generate({
-            bindto: '#shortSharesChart',
-            data: {
-                x: 'x',
-                columns: vm.farm.short_duration.shares.chart
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d %H:%M'
-                    },
-                    show: false
-                },
-                y: {
-                    label: {
-                        text: 'Shares',
-                        position: 'outer-middle'
-                    }
-                }
-            },
-            grid: {
-                y: {
-                    show: true
-                }
-            }
-        });
+        // vm.shortSharesChart = c3.generate({
+        //     bindto: '#shortSharesChart',
+        //     data: {
+        //         x: 'x',
+        //         columns: vm.farm.short_duration.shares.chart
+        //     },
+        //     axis: {
+        //         x: {
+        //             type: 'timeseries',
+        //             tick: {
+        //                 format: '%Y-%m-%d %H:%M'
+        //             },
+        //             show: false
+        //         },
+        //         y: {
+        //             label: {
+        //                 text: 'Shares',
+        //                 position: 'outer-middle'
+        //             }
+        //         }
+        //     },
+        //     grid: {
+        //         y: {
+        //             show: true
+        //         }
+        //     }
+        // });
         vm.longSharesChart = c3.generate({
             bindto: '#longSharesChart',
             data: {
@@ -314,12 +314,12 @@
 
 
             //load chart
-            vm.shortHashrateChart.load({
-                columns: vm.farm.short_duration.hash_rate.chart
-            })
-            vm.shortSharesChart.load({
-                columns: vm.farm.short_duration.shares.chart
-            })
+            // vm.shortHashrateChart.load({
+            //     columns: vm.farm.short_duration.hash_rate.chart
+            // })
+            // vm.shortSharesChart.load({
+            //     columns: vm.farm.short_duration.shares.chart
+            // })
         }
 
         function applyLongPeriod(response) {
@@ -411,6 +411,8 @@
         function applyAdvanceInfo(response){
             vm.advance.total_block_found = response.overall.total_block_found;
             vm.advance.start_time = response.overall.start_time;
+            vm.advance.last_block = response.overall.last_block;
+            vm.advance.last_valid_share = response.overall.last_valid_share;
         }
         function showAdvanceInfo() {
             vm.advance.flag = !vm.advance.flag;
@@ -427,6 +429,7 @@
             //     });
         }
         (function initController() {
+            $window.scrollTo(0, 0);
             EthminerService.GetConfigInfo()
                 .then(function(response) {
                     vm.config = response;

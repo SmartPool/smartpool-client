@@ -23,7 +23,7 @@
         vm.convertHashrate  = convertHashrate;
         vm.advance = {
             "load": false,
-            "flag": false,
+            "flag": true,
             "total_block_found":1,
             "start_time":"2017-05-07T19:32:07.530342074Z",
         }
@@ -67,6 +67,12 @@
                     "rejected_share_avarage": 0,
                     "chart": [
 
+                    ],
+                },
+                "rigs":{
+                    "chart": [
+                        // ['x', 30, 50, 100, 230, 300, 310],
+                        // ['Active Workers', 30, 200, 100, 400, 150, 250],                       
                     ],
                 }
             },
@@ -127,33 +133,33 @@
             // }
         };
 
-        vm.shortHashrateChart = c3.generate({
-            bindto: '#shortHashChart',
-            data: {
-                x: 'x',
-                columns: vm.farm.short_duration.hash_rate.chart
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d %H:%M'
-                    },
-                    show: false
-                },
-                y: {
-                    label: {
-                        text: 'Hashrate [MH/s]',
-                        position: 'outer-middle'
-                    }
-                }
-            },
-            grid: {
-                y: {
-                    show: true
-                }
-            }
-        });
+        // vm.shortHashrateChart = c3.generate({
+        //     bindto: '#shortHashChart',
+        //     data: {
+        //         x: 'x',
+        //         columns: vm.farm.short_duration.hash_rate.chart
+        //     },
+        //     axis: {
+        //         x: {
+        //             type: 'timeseries',
+        //             tick: {
+        //                 format: '%Y-%m-%d %H:%M'
+        //             },
+        //             show: false
+        //         },
+        //         y: {
+        //             label: {
+        //                 text: 'Hashrate [MH/s]',
+        //                 position: 'outer-middle'
+        //             }
+        //         }
+        //     },
+        //     grid: {
+        //         y: {
+        //             show: true
+        //         }
+        //     }
+        // });
         vm.longHashrateChart = c3.generate({
             bindto: '#longHashChart',
             data: {
@@ -181,11 +187,38 @@
                 }
             }
         });
-        vm.shortSharesChart = c3.generate({
-            bindto: '#shortSharesChart',
+        // vm.shortSharesChart = c3.generate({
+        //     bindto: '#shortSharesChart',
+        //     data: {
+        //         x: 'x',
+        //         columns: vm.farm.short_duration.shares.chart
+        //     },
+        //     axis: {
+        //         x: {
+        //             type: 'timeseries',
+        //             tick: {
+        //                 format: '%Y-%m-%d %H:%M'
+        //             },
+        //             show: false
+        //         },
+        //         y: {
+        //             label: {
+        //                 text: 'Shares',
+        //                 position: 'outer-middle'
+        //             }
+        //         }
+        //     },
+        //     grid: {
+        //         y: {
+        //             show: true
+        //         }
+        //     }
+        // });
+        vm.longSharesChart = c3.generate({
+            bindto: '#longSharesChart',
             data: {
                 x: 'x',
-                columns: vm.farm.short_duration.shares.chart
+                columns: vm.farm.long_duration.shares.chart,
             },
             axis: {
                 x: {
@@ -206,13 +239,13 @@
                 y: {
                     show: true
                 }
-            }
+            },
         });
-        vm.longSharesChart = c3.generate({
-            bindto: '#longSharesChart',
+        vm.longRigChart = c3.generate({
+            bindto: '#longRigChart',
             data: {
                 x: 'x',
-                columns: vm.farm.long_duration.shares.chart
+                columns: vm.farm.long_duration.rigs.chart
             },
             axis: {
                 x: {
@@ -224,7 +257,7 @@
                 },
                 y: {
                     label: {
-                        text: 'Shares',
+                        text: 'Active workers',
                         position: 'outer-middle'
                     }
                 }
@@ -344,12 +377,12 @@
 
 
             //load chart
-            vm.shortHashrateChart.load({
-                columns: vm.farm.short_duration.hash_rate.chart
-            })
-            vm.shortSharesChart.load({
-                columns: vm.farm.short_duration.shares.chart
-            })
+            // vm.shortHashrateChart.load({
+            //     columns: vm.farm.short_duration.hash_rate.chart
+            // })
+            // vm.shortSharesChart.load({
+            //     columns: vm.farm.short_duration.shares.chart
+            // })
         }
 
         function applyLongPeriod(response) {
@@ -367,6 +400,8 @@
             var minedChart = ['Mined Shares'];
             var validChart = ['Valid Shares'];
             var rejectedChart = ['Rejected Shares'];
+            var workerChart = ['Active Workers'];
+            var activeWorker = 0;
 
             var xChart = ['x'];
 
@@ -378,11 +413,14 @@
                 if (response.long_window_sample[key]) {
                     val = response.long_window_sample[key];
                     xChart.push(key * response.period_duration * 1000);
+
+                    //for hashrate
                     reportedChart.push(vm.roundHashRate(val.reported_hashrate / 1000000));
                     effectiveChart.push(vm.roundHashRate(val.effective_hashrate / 1000000));
                     totalEffectiveHashRate += val.effective_hashrate;
                     totalReportedHashRate += val.reported_hashrate;
 
+                    //for share
                     minedChart.push(val.mined_share);
                     validChart.push(val.valid_share);
                     rejectedChart.push(val.rejected_share);
@@ -390,6 +428,9 @@
                     totalValidShare += val.valid_share;
                     totalRejectedShare += val.rejected_share;
 
+                    //for workers
+                    
+                    activeWorker = 0;
                     //calculate hashrate
                     $.each(val.rigs, function(rigName, rigVal) {
                         var check = false;
@@ -402,7 +443,11 @@
                         if (check) {
                             vm.farm.worker.worker_list[i][2] += rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0;
                         }
+                        if(rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)){
+                            activeWorker++;
+                        }
                     })
+                    workerChart.push(activeWorker);
                 } else {
                     xChart.push(key * response.period_duration * 1000);
                     reportedChart.push(0);
@@ -410,29 +455,38 @@
                     minedChart.push(0);
                     validChart.push(0);
                     rejectedChart.push(0);
+                    workerChart.push(0);
                 }
             }
+
+            //for hashrate
             vm.farm.long_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.long_duration.hash_rate.effective_hashrate_avarage = vm.convertHashrate(totalEffectiveHashRate / pointTotal);
             vm.farm.long_duration.hash_rate.reported_hashrate_avarage = vm.convertHashrate(totalReportedHashRate / pointTotal);
             vm.farm.long_duration.hash_rate.effective_hashrate_percent = vm.roundShares(vm.farm.long_duration.hash_rate.effective_hashrate_avarage / vm.farm.long_duration.hash_rate.reported_hashrate_avarage * 100);
 
+            //for share
             vm.farm.long_duration.shares.chart = [xChart, minedChart, validChart, rejectedChart];
             vm.farm.long_duration.shares.mined_share_avarage = vm.roundShares(totalMinedShare / pointTotal);
             vm.farm.long_duration.shares.valid_share_avarage = vm.roundShares(totalValidShare / pointTotal);
             vm.farm.long_duration.shares.rejected_share_avarage = vm.roundShares(totalRejectedShare / pointTotal);
-
-            //calculate percent
+                //calculate percent
             vm.farm.long_duration.shares.valid_share_percent = vm.roundShares(vm.farm.long_duration.shares.valid_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
             vm.farm.long_duration.shares.rejected_share_percent = vm.roundShares(vm.farm.long_duration.shares.rejected_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
+
+            //for active worker
+            vm.farm.long_duration.rigs.chart = [xChart, workerChart];
 
             //load chartl
             vm.longHashrateChart.load({
                 columns: vm.farm.long_duration.hash_rate.chart
-            })
+            });
             vm.longSharesChart.load({
                 columns: vm.farm.long_duration.shares.chart
-            })
+            });
+             vm.longRigChart.load({
+                columns: vm.farm.long_duration.rigs.chart
+            });
         }
 
         function applyOverall(response) {
@@ -501,6 +555,8 @@
         function applyAdvanceInfo(response){
             vm.advance.total_block_found = response.overall.total_block_found;
             vm.advance.start_time = response.overall.start_time;
+            vm.advance.last_block = response.overall.last_block;
+            vm.advance.last_valid_share = response.overall.last_valid_share;
         }
         function showAdvanceInfo() {
             vm.advance.flag = !vm.advance.flag;

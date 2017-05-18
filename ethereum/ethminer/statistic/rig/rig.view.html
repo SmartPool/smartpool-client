@@ -1,8 +1,12 @@
 ﻿
 <div class="farm-dashboard">
-    <h1>
+    <ol class="breadcrumb">
+      <li> <a href="/stats/#!/">Farm</a></li>
+      <li class="active">{{vm.rigId}}</li>
+    </ol>
+   <!--  <h1>
         <a href="/stats/#!/">farm</a> <i class="fa fa-chevron-right" aria-hidden="true"></i> <a href="">{{vm.rigId}}</a>
-    </h1>
+    </h1> -->
     <div class="compare_table">
         <h3>Average information of hashrate & shares</h3>
         <table class="table table-bordered">
@@ -54,7 +58,13 @@
             </tbody>
         </table>
     </div>
-    <div class="hashrate_charts">
+    <div class="hsw_chart">
+        <h3>Hashrate, Shares & Workers in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
+        <div id="longHashChart" class="hash_chart"></div>
+         <div id="longSharesChart" class="shares_chart"></div>
+         <!--  <div id="longRigChart" class="rig_chart"></div> -->
+    </div>
+   <!--  <div class="hashrate_charts">
         <div>
             <h3>Hashrate in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
             <div id="shortHashChart" class="hash_chart"></div>
@@ -73,7 +83,7 @@
             <h3>Shares in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
             <div id="longSharesChart" class="shares_chart"></div>
         </div>
-    </div>
+    </div> -->
 <!--     <div class="worker_tables">
         <h3>Average Reported hashrate (MH/s) of {{vm.farm.worker.active_count}} <span popover-trigger="'mouseenter'" uib-popover="Workers submit their hash rate in {{vm.farm.short_duration.duration_in_hour}} hour ago" popover-placement="right">active workers</span></h3>
         <table id="worker_table" class="table table-borderless"></table>
@@ -84,9 +94,17 @@
         <div id="advance_panel" ng-show="vm.advance.flag" class="advance_info">
             <table class="table table-borderless">
                 <tbody>
-                    <tr>
+                   <tr>
                         <td>Total block found</td>
                         <td>{{vm.advance.total_block_found}}</td>
+                    </tr>
+                    <tr>
+                        <td>Last block found</td>
+                        <td>{{vm.advance.last_block}}</td>
+                    </tr>
+                    <tr>
+                        <td>Last valid share</td>
+                        <td>{{vm.advance.last_valid_share}}</td>
                     </tr>
                     <tr>
                         <td>Start time</td>
