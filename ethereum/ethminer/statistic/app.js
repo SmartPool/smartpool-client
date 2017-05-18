@@ -4,8 +4,8 @@
     angular
         .module('app', ['ngRoute', 'ui.bootstrap'])
         .constant('appConstants', {
-            CONST_MAX_FILE_SIZE: 2000000,
-            CONST_MAX_PROOF_SIZE: 2000000
+            CONST_FRESH_FARM_DATA: 10000,
+            CONST_FRESH_RIG_DATA: 10000
         })
         .config(config)
         //.run(run)
