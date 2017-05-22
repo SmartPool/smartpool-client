@@ -1,6 +1,7 @@
 package ethereum
 
 import (
+	// "encoding/json"
 	"errors"
 	"fmt"
 	"github.com/SmartPool/smartpool-client"
@@ -22,7 +23,7 @@ type TimestampClaimRepo struct {
 	recentTimestamp *big.Int
 	noShares        uint64
 	noRecentShares  uint64
-	mu              sync.Mutex
+	mu              sync.RWMutex
 	storage         smartpool.PersistentStorage
 	diff            *big.Int
 	miner           string
@@ -126,7 +127,7 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartp
 		currentTimestamp,
 		uint64(noShares),
 		uint64(noRecentShares),
-		sync.Mutex{},
+		sync.RWMutex{},
 		storage,
 		diff,
 		miner,
@@ -139,12 +140,12 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartp
 }
 
 type gobShare struct {
-	BlockHeader     *types.Header
-	Nonce           types.BlockNonce
-	MixDigest       common.Hash
-	ShareDifficulty *big.Int
-	MinerAddress    string
-	SolutionState   int
+	BlockHeader     *types.Header    `json:"header"`
+	Nonce           types.BlockNonce `json:"nonce"`
+	MixDigest       common.Hash      `json:"mix"`
+	ShareDifficulty *big.Int         `json:"share_diff"`
+	MinerAddress    string           `json:"miner"`
+	SolutionState   int              `json:"state"`
 }
 
 func loadActiveShares(storage smartpool.PersistentStorage) (map[string]*Share, error) {
@@ -174,6 +175,8 @@ func (cr *TimestampClaimRepo) NoActiveShares() uint64 {
 }
 
 func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error {
+	cr.mu.RLock()
+	defer cr.mu.RUnlock()
 	gobShares := map[string]gobShare{}
 	var shareID string
 	for _, s := range cr.activeShares {
@@ -189,6 +192,8 @@ func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error
 			s.minerAddress,
 			s.SolutionState,
 		}
+		// shareJson, _ := json.Marshal(gobShares[shareID])
+		// fmt.Printf("share json: %s\n", shareJson)
 	}
 	smartpool.Output.Printf("Saving active shares to disk...")
 	err := storage.Persist(&gobShares, ACTIVE_SHARE_FILE)
