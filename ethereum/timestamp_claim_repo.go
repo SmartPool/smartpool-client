@@ -241,7 +241,6 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 func (cr *TimestampClaimRepo) getCurrentClaim(threshold int) smartpool.Claim {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
-	fmt.Printf("=============> inside getCurrentClaim. noShares: %d\n", cr.noShares)
 	smartpool.Output.Printf("Have %d valid shares\n", cr.noShares)
 	smartpool.Output.Printf("Current timestamp: 0x%s\n", cr.recentTimestamp.Text(16))
 	smartpool.Output.Printf("Shares with current timestamp: %d\n", cr.noRecentShares)

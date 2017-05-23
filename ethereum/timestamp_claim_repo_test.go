@@ -2,7 +2,6 @@ package ethereum
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
@@ -68,12 +67,10 @@ func endlessGetCurrentClaim(t *testing.T, repo *TimestampClaimRepo, stop chan bo
 		select {
 		case <-stop:
 			if claim == nil {
-				fmt.Printf("===========> never got a claim\n")
 				t.Fail()
 			}
 			return
 		default:
-			fmt.Printf("===========> getting claim\n")
 			claim = repo.GetCurrentClaim(2)
 			if claim != nil {
 				return
