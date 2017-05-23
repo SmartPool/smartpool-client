@@ -33,7 +33,10 @@ func (s *Server) Start() {
 		s.output.Printf("ethminer -F localhost:1633/:worker_name/\n")
 		s.output.Printf("Change :worker_name to whichever name you want.\n")
 		s.output.Printf("--------------------------\n")
-		s.server.ListenAndServe()
+		err := s.server.ListenAndServe()
+		if err != nil {
+			s.output.Printf("Stopped because of: %s\n", err.Error())
+		}
 	} else {
 		s.output.Printf("SmartPool couldn't run. Exit.\n")
 	}

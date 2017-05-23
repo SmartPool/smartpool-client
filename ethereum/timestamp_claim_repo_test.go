@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
@@ -35,13 +36,16 @@ func newTestShare() *Share {
 }
 
 func endlessAddShare(repo *TimestampClaimRepo, stop chan bool) {
+	var counter int64 = 0
 	for {
 		select {
 		case <-stop:
 			return
 		default:
+			counter++
 			s := newTestShare()
 			s.nonce = types.EncodeNonce(uint64(rand.Int63()))
+			s.blockHeader.Time.Add(s.blockHeader.Time, big.NewInt(counter))
 			repo.AddShare(s)
 		}
 	}
@@ -58,23 +62,38 @@ func endlessPersist(repo *TimestampClaimRepo, storage smartpool.PersistentStorag
 	}
 }
 
-func endlessGetCurrentClaim(repo *TimestampClaimRepo, stop chan bool) {
+func endlessGetCurrentClaim(t *testing.T, repo *TimestampClaimRepo, stop chan bool) {
+	var claim smartpool.Claim
 	for {
 		select {
 		case <-stop:
+			if claim == nil {
+				fmt.Printf("===========> never got a claim\n")
+				t.Fail()
+			}
 			return
 		default:
-			repo.GetCurrentClaim(100)
+			fmt.Printf("===========> getting claim\n")
+			claim = repo.GetCurrentClaim(2)
+			if claim != nil {
+				return
+			}
 		}
 	}
 }
 
-func TestPersistAndAddShareConcurrently(t *testing.T) {
+func TestPersistAndAddShareAndGetCurrentClaimConcurrently(t *testing.T) {
 	repo := newRepo()
 	storage := &testPersistentStorage{}
-	stop := make(chan bool, 1)
-	go endlessAddShare(repo, stop)
-	go endlessPersist(repo, storage, stop)
+	stopAddingShare := make(chan bool, 1)
+	stopPersisting := make(chan bool, 1)
+	stopGettingClaim := make(chan bool, 1)
+	go endlessAddShare(repo, stopAddingShare)
+	go endlessPersist(repo, storage, stopPersisting)
+	go endlessGetCurrentClaim(t, repo, stopGettingClaim)
 	time.Sleep(50 * time.Millisecond)
-	stop <- true
+	stopAddingShare <- true
+	stopPersisting <- true
+	stopGettingClaim <- true
+	time.Sleep(50 * time.Millisecond)
 }
