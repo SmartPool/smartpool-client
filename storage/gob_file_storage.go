@@ -23,6 +23,10 @@ func getFile(id string) string {
 	return filepath.Join(SmartPoolDir, id)
 }
 
+func getTempFile(id string) string {
+	return filepath.Join(SmartPoolDir, id+".temp")
+}
+
 func getRigDataFile() string {
 	return filepath.Join(SmartPoolDir, "rig_data")
 }
@@ -87,14 +91,17 @@ func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(getFile(id))
+	f, err := os.Create(getTempFile(id))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	gfs.register(data)
 	enc := gob.NewEncoder(f)
-	return enc.Encode(data)
+	if err = enc.Encode(data); err != nil {
+		return err
+	}
+	return os.Rename(getTempFile(id), getFile(id))
 }
 
 func (gfs *GobFileStorage) Load(data interface{}, id string) (interface{}, error) {
