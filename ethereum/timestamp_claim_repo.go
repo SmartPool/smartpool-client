@@ -175,6 +175,7 @@ func (cr *TimestampClaimRepo) NoActiveShares() uint64 {
 }
 
 func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error {
+	smartpool.Output.Printf("Saving active shares to disk...")
 	cr.mu.RLock()
 	defer cr.mu.RUnlock()
 	gobShares := map[string]gobShare{}
@@ -195,7 +196,6 @@ func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error
 		// shareJson, _ := json.Marshal(gobShares[shareID])
 		// fmt.Printf("share json: %s\n", shareJson)
 	}
-	smartpool.Output.Printf("Saving active shares to disk...")
 	err := storage.Persist(&gobShares, ACTIVE_SHARE_FILE)
 	if err == nil {
 		smartpool.Output.Printf("Done.\n")
@@ -238,9 +238,10 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 	return nil
 }
 
-func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
+func (cr *TimestampClaimRepo) getCurrentClaim(threshold int) smartpool.Claim {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
+	fmt.Printf("=============> inside getCurrentClaim. noShares: %d\n", cr.noShares)
 	smartpool.Output.Printf("Have %d valid shares\n", cr.noShares)
 	smartpool.Output.Printf("Current timestamp: 0x%s\n", cr.recentTimestamp.Text(16))
 	smartpool.Output.Printf("Shares with current timestamp: %d\n", cr.noRecentShares)
@@ -262,6 +263,11 @@ func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
 	}
 	cr.activeShares = newActiveShares
 	cr.noShares = 0
+	return c
+}
+
+func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {
+	c := cr.getCurrentClaim(threshold)
 	cr.Persist(cr.storage)
 	return c
 }
