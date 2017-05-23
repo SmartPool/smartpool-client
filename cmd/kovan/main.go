@@ -6,7 +6,9 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
 	"github.com/SmartPool/smartpool-client/ethereum/geth"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"github.com/SmartPool/smartpool-client/protocol"
+	"github.com/SmartPool/smartpool-client/storage"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
@@ -15,15 +17,6 @@ import (
 	"syscall"
 	"time"
 )
-
-func buildExtraData(address common.Address, diff *big.Int) string {
-	// id = address % (26+26+10)**11
-	base := big.NewInt(0)
-	base.Exp(big.NewInt(62), big.NewInt(11), nil)
-	id := big.NewInt(0)
-	id.Mod(address.Big(), base)
-	return fmt.Sprintf("SmartPool-%s%s", smartpool.BigToBase62(id), smartpool.BigToBase62(diff))
-}
 
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
@@ -77,7 +70,7 @@ func Run(c *cli.Context) error {
 	}
 	smartpool.Output = &smartpool.StdOut{}
 	ethereumWorkPool := &ethereum.WorkPool{}
-	go ethereumWorkPool.Cleanning()
+	go ethereumWorkPool.RunCleaner()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
@@ -89,7 +82,7 @@ func Run(c *cli.Context) error {
 	}
 	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
-	input.SetExtraData(buildExtraData(
+	input.SetExtraData(ethereum.BuildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	kovanRPC, _ := geth.NewKovanRPC(
@@ -131,7 +124,7 @@ func Run(c *cli.Context) error {
 			gethContractClient, err = geth.NewGethContractClient(
 				common.HexToAddress(input.ContractAddress()), kovanRPC,
 				common.HexToAddress(input.MinerAddress()),
-				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				input.RPCEndpoint(), input.KeystorePath(), passphrase, 0,
 			)
 			if gethContractClient != nil {
 				break
@@ -159,17 +152,18 @@ func Run(c *cli.Context) error {
 		}
 	}
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	fileStorage := ethereum.NewFileStorage()
+	fileStorage := storage.NewGobFileStorage()
+	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumPoolMonitor,
 		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, fileStorage, ethereumContract,
+		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.HotStop(), input,
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)

@@ -8,6 +8,7 @@ package smartpool
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 	"time"
 )
@@ -40,6 +41,15 @@ type UserOutput interface {
 	// number of claim accepted, number of share per claim on average,
 	// average hash rate,...
 	Printf(format string, a ...interface{}) (n int, err error)
+}
+
+// PersistentStorage is the gateway for smartpool to interact with external
+// persistent storage such as a file system, a database or even a cloud based
+// service.
+// Smartpool should only persist something via this interface.
+type PersistentStorage interface {
+	Persist(data interface{}, id string) error
+	Load(data interface{}, id string) (interface{}, error)
 }
 
 // Contract is the interface for smartpool to interact with contract side of
@@ -90,6 +100,7 @@ type NetworkClient interface {
 	// so the full block solution can take credits. It also maintain workflow
 	// between miner and the network client.
 	SubmitSolution(s Solution) bool
+	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
 	// ReadyToMine returns true when the network is ready to give and accept
 	// pow work and solution. It returns false otherwise.
 	ReadyToMine() bool
@@ -101,10 +112,27 @@ type NetworkClient interface {
 // miners.
 type ShareReceiver interface {
 	AcceptSolution(s Solution) Share
+	Persist(storage PersistentStorage) error
 }
 
 type PoolMonitor interface {
 	RequireClientUpdate() bool
 	RequireContractUpdate() bool
 	ContractAddress() common.Address
+}
+
+type StatRecorder interface {
+	RecordShare(status string, share Share, rig Rig)
+	RecordClaim(status string, claim Claim)
+	RecordHashrate(hashrate hexutil.Uint64, id common.Hash, rig Rig)
+	// Notify StatRecorder how many share were restored from last session
+	// so StatRecorder can track number of abandoned shares
+	ShareRestored(noshares uint64)
+
+	OverallFarmStat() interface{}
+	FarmStat(start uint64, end uint64) interface{}
+	OverallRigStat(rig Rig) interface{}
+	RigStat(rig Rig, start uint64, end uint64) interface{}
+
+	Persist(storage PersistentStorage) error
 }

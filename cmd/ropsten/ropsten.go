@@ -7,7 +7,9 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
 	"github.com/SmartPool/smartpool-client/ethereum/geth"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"github.com/SmartPool/smartpool-client/protocol"
+	"github.com/SmartPool/smartpool-client/storage"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
@@ -16,15 +18,6 @@ import (
 	"syscall"
 	"time"
 )
-
-func buildExtraData(address common.Address, diff *big.Int) string {
-	// id = address % (26+26+10)**11
-	base := big.NewInt(0)
-	base.Exp(big.NewInt(62), big.NewInt(11), nil)
-	id := big.NewInt(0)
-	id.Mod(address.Big(), base)
-	return fmt.Sprintf("SmartPool-%s%s", smartpool.BigToBase62(id), smartpool.BigToBase62(diff))
-}
 
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
@@ -69,9 +62,11 @@ func Run(c *cli.Context) error {
 		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
 		return nil
 	}
+	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
-	ethereumWorkPool := &ethereum.WorkPool{}
-	go ethereumWorkPool.Cleanning()
+	fileStorage := storage.NewGobFileStorage()
+	ethereumWorkPool := ethereum.NewWorkPool(fileStorage)
+	go ethereumWorkPool.RunCleaner()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
@@ -83,7 +78,7 @@ func Run(c *cli.Context) error {
 	}
 	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
-	input.SetExtraData(buildExtraData(
+	input.SetExtraData(ethereum.BuildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	gethRPC, _ := geth.NewGethRPC(
@@ -131,6 +126,7 @@ func Run(c *cli.Context) error {
 				common.HexToAddress(input.ContractAddress()), gethRPC,
 				common.HexToAddress(input.MinerAddress()),
 				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				uint64(gasprice),
 			)
 			if gethContractClient != nil {
 				break
@@ -157,23 +153,24 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
+	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
 		input.MinerAddress(),
 		input.ContractAddress(),
+		fileStorage,
 	)
+	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	fileStorage := ethereum.NewFileStorage()
 	ethminer.SmartPool = protocol.NewSmartPool(
-		ethereumPoolMonitor,
-		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, fileStorage, ethereumContract,
+		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
+		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.HotStop(), input,
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)
@@ -204,8 +201,13 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.UintFlag{
 			Name:  "diff",
-			Value: 1000000,
+			Value: 4000000000,
 			Usage: "Difficulty of a share.",
+		},
+		cli.UintFlag{
+			Name:  "gasprice",
+			Value: 5,
+			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.StringFlag{
 			Name:  "spcontract",

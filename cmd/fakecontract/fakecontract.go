@@ -8,7 +8,9 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
 	"github.com/SmartPool/smartpool-client/ethereum/geth"
 	"github.com/SmartPool/smartpool-client/ethereum/geth/fakecontract"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"github.com/SmartPool/smartpool-client/protocol"
+	"github.com/SmartPool/smartpool-client/storage"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
@@ -71,8 +73,9 @@ func Run(c *cli.Context) error {
 		return nil
 	}
 	smartpool.Output = &smartpool.StdOut{}
+	fileStorage := storage.NewGobFileStorage()
 	ethereumWorkPool := &ethereum.WorkPool{}
-	go ethereumWorkPool.Cleanning()
+	go ethereumWorkPool.RunCleaner()
 	address, _, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
@@ -118,23 +121,23 @@ func Run(c *cli.Context) error {
 		return errors.New("Contract address is not set on the gateway")
 	}
 	gethContractClient := fakecontract.NewGethContractClient()
+	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
 		input.MinerAddress(),
 		input.ContractAddress(),
+		fileStorage,
 	)
 	ethereumContract := ethereum.NewContract(gethContractClient)
-	fileStorage := ethereum.NewFileStorage()
 	ethminer.SmartPool = protocol.NewSmartPool(
-		ethereumPoolMonitor,
-		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, fileStorage, ethereumContract,
+		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
+		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.HotStop(), input,
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)
