@@ -20,6 +20,7 @@ type UserInput interface {
 	RPCEndpoint() string
 	KeystorePath() string
 	ShareThreshold() int
+	ClaimThreshold() int
 	ShareDifficulty() *big.Int
 	SubmitInterval() time.Duration
 	ContractAddress() string
@@ -72,18 +73,22 @@ type Contract interface {
 	// SubmitClaim takes some necessary parameters that represent a claim and
 	// submit to the contract using miner's address. The address should be
 	// unlocked first.
-	SubmitClaim(claim Claim) error
+	SubmitClaim(claim Claim, lastClaim bool) error
 	// GetShareIndex returns index of the share that is requested to submit
-	// proof to the contract to represent correctness of the submitted claim.
+	// proof to the contract to represent correctness of the submitted claims.
 	// GetShareIndex must be called after SubmitClaim to get shareIndex which
 	// is used to pass to VerifyClaim. If GetShareIndex is called before
 	// SubmitClaim, the index will have no meaning to contract.
-	GetShareIndex(claim Claim) *big.Int
+	// GetShareIndex returns 2 indexes, first is submission index, second is
+	// share index in the relevant submission (claim)
+	GetShareIndex(claim Claim) (*big.Int, *big.Int, error)
+	NumOpenClaims() (*big.Int, error)
+	ResetOpenClaims() error
 	// VerifyClaim takes some necessary parameters that provides complete proof
 	// of a share with index shareIndex in the cliam and submit to contract side
 	// in order to prove that the claim is valid so the miner can take credit
 	// of it.
-	VerifyClaim(shareIndex *big.Int, claim Claim) error
+	VerifyClaim(submissionIndex *big.Int, shareIndex *big.Int, claim Claim) error
 }
 
 // NetworkClient represents client for blockchain network that miner is mining

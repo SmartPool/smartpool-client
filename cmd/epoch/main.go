@@ -26,7 +26,7 @@ type Input struct {
 func Initialize(c *cli.Context) *Input {
 	rpcEndPoint := c.String("rpc")
 	keystorePath := c.String("keystore")
-	contractAddr := ""
+	contractAddr := c.String("ethash-contract")
 	minerAddr := c.String("account")
 	from := c.Uint("from")
 	to := c.Uint("to")
@@ -54,11 +54,6 @@ func Run(c *cli.Context) error {
 		fmt.Printf("You have to specify keystore path by --keystore. Abort!\n")
 		return nil
 	}
-	gateway := common.HexToAddress(c.String("gateway"))
-	if gateway.Big().Cmp(common.Big0) == 0 {
-		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
-		return nil
-	}
 	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
 	address, ok, addresses := geth.GetAddress(
@@ -83,35 +78,24 @@ func Run(c *cli.Context) error {
 		return err
 	}
 	fmt.Printf("Connected to Ethereum node: %s\n", client)
-	ethereumPoolMonitor, err := geth.NewPoolMonitor(
-		gateway,
-		common.HexToAddress(input.ContractAddr),
-		smartpool.VERSION,
-		input.RpcEndPoint,
-	)
-	if err != nil {
-		fmt.Printf("Couln't connect to gateway.\n")
-		return err
-	}
-	input.ContractAddr = ethereumPoolMonitor.ContractAddress().Hex()
 	fmt.Printf("Epoch data will be submitted to contract at %s\n", input.ContractAddr)
 	if common.HexToAddress(input.ContractAddr).Big().Cmp(common.Big0) == 0 {
 		fmt.Printf("Contract address is not set on gateway. Abort!\n")
 		return errors.New("Contract address is not set")
 	}
-	var gethContractClient *geth.GethContractClient
+	var ethashContractClient *geth.EthashContractClient
 	for {
 		if ok {
 			passphrase, _ := promptUserPassPhrase(
 				input.MinerAddr,
 			)
-			gethContractClient, err = geth.NewGethContractClient(
+			ethashContractClient, err = geth.NewEthashContractClient(
 				common.HexToAddress(input.ContractAddr), gethRPC,
 				common.HexToAddress(input.MinerAddr),
 				input.RpcEndPoint, input.KeystorePath, passphrase,
 				uint64(gasprice),
 			)
-			if gethContractClient != nil {
+			if ethashContractClient != nil {
 				break
 			} else {
 				fmt.Printf("error: %s\n", err)
@@ -136,7 +120,7 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
-	ethereumContract := ethereum.NewContract(gethContractClient)
+	ethereumContract := ethereum.NewEthashContract(ethashContractClient)
 	for i := int(input.From); i <= int(input.To); i++ {
 		fmt.Printf("Calculating epoch datas for epochs number %d...\n", i)
 		err = ethereumContract.SetEpochData(i)
@@ -170,13 +154,13 @@ func BuildAppCommandLine() *cli.App {
 			Usage: "The address that is used to submit epoch data (Default: First account in your keystore.)",
 		},
 		cli.StringFlag{
-			Name:  "gateway",
-			Value: "0x79A09eab4Cb39A43115cF34D9DDCD26AD73e03ea",
-			Usage: "Gateway address. Its default value is the official gateway maintained by SmartPool team",
+			Name:  "ethash-contract",
+			Value: "0xd93c6293a076fc6c8f49d678b6d01aab3232fddc",
+			Usage: "Ethash contract address. Its default value is the official ethash contract maintained by SmartPool team",
 		},
 		cli.UintFlag{
 			Name:  "gasprice",
-			Value: 5,
+			Value: 50,
 			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.UintFlag{

@@ -4,6 +4,7 @@
 package protocol
 
 import (
+	"errors"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -44,6 +45,7 @@ type SmartPool struct {
 	ExtraData         string
 	SubmitInterval    time.Duration
 	ShareThreshold    int
+	ClaimThreshold    int
 	HotStop           bool
 	loopStarted       bool
 	ticker            <-chan time.Time
@@ -146,8 +148,18 @@ func (sp *SmartPool) GetCurrentClaim(threshold int) smartpool.Claim {
 	return sp.ClaimRepo.GetCurrentClaim(threshold)
 }
 
-func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) *big.Int {
-	return sp.Contract.GetShareIndex(claim)
+func (sp *SmartPool) GetVerificationIndex(claim smartpool.Claim) (*big.Int, *big.Int) {
+	var claimIndex, shareIndex *big.Int
+	var err error
+	for {
+		claimIndex, shareIndex, err = sp.Contract.GetShareIndex(claim)
+		if err != nil {
+			smartpool.Output.Printf("Got error(%s) while trying to get verification index. Retry in 10s...\n", err.Error())
+			time.Sleep(10 * time.Second)
+		} else {
+			return claimIndex, shareIndex
+		}
+	}
 }
 
 func (sp *SmartPool) SealClaim() smartpool.Claim {
@@ -173,29 +185,64 @@ func persistLatestCounter(ps smartpool.PersistentStorage, counter *big.Int) erro
 // It returns true when the claim is fully verified and accepted by the
 // contract. It returns false otherwise.
 func (sp *SmartPool) Submit() (bool, error) {
+	numOpenClaimsContract, err := sp.Contract.NumOpenClaims()
+	if err != nil {
+		return false, err
+	}
+	if numOpenClaimsContract.Uint64() != sp.ClaimRepo.NumOpenClaims() {
+		smartpool.Output.Printf(
+			"Inconsistent open claim list between client(%d claims) and contract(%d claims). Resetting open claim list on both sides...",
+			sp.ClaimRepo.NumOpenClaims(),
+			numOpenClaimsContract.Uint64(),
+		)
+		sp.ClaimRepo.ResetOpenClaims()
+		err := sp.Contract.ResetOpenClaims()
+		if err != nil {
+			return false, err
+		} else {
+			smartpool.Output.Printf("Done.\n")
+		}
+	}
 	claim := sp.SealClaim()
 	if claim == nil {
 		return false, nil
 	}
 	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
-	subErr := sp.Contract.SubmitClaim(claim)
+	var lastClaim bool
+	if int(sp.ClaimRepo.NumOpenClaims()+1) >= sp.ClaimThreshold {
+		lastClaim = true
+	} else {
+		lastClaim = false
+	}
+	subErr := sp.Contract.SubmitClaim(claim, lastClaim)
 	if subErr != nil {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		return false, subErr
 	}
 	sp.StatRecorder.RecordClaim("submitted", claim)
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
-	smartpool.Output.Printf("Waiting for verification index...")
-	index := sp.GetVerificationIndex(claim)
-	smartpool.Output.Printf("Verification index of %d has been requested. Submitting claim verification.\n", index.Int64())
-	verErr := sp.Contract.VerifyClaim(index, claim)
-	if verErr != nil {
-		smartpool.Output.Printf("%s\n", verErr)
-		sp.StatRecorder.RecordClaim("rejected", claim)
-		return false, verErr
+	sp.ClaimRepo.PutOpenClaim(claim)
+	smartpool.Output.Printf("The claim is successfully put into open claims queue.\n")
+	if lastClaim {
+		sp.ClaimRepo.SealClaimBatch()
+		smartpool.Output.Printf("Waiting for verification index...")
+		claimIndex, shareIndex := sp.GetVerificationIndex(claim)
+		smartpool.Output.Printf("Verification for share index(%d) in claim index(%d) has been requested.\n", shareIndex.Int64(), claimIndex.Int64())
+		claim = sp.ClaimRepo.GetOpenClaim(int(claimIndex.Int64()))
+		if claim == nil {
+			smartpool.Output.Printf("Got nil claim for share index(%d) in claim index(%d). This is a bug. Please report it to SmartPool Team.\n", shareIndex.Int64(), claimIndex.Int64())
+			return false, errors.New("Nil claim. Incorrect verification indexes")
+		}
+		smartpool.Output.Printf("Submitting claim verification...\n")
+		verErr := sp.Contract.VerifyClaim(claimIndex, shareIndex, claim)
+		if verErr != nil {
+			smartpool.Output.Printf("%s\n", verErr)
+			sp.StatRecorder.RecordClaim("rejected", claim)
+			return false, verErr
+		}
+		smartpool.Output.Printf("Claim is successfully verified.\n")
+		sp.StatRecorder.RecordClaim("accepted", claim)
 	}
-	smartpool.Output.Printf("Claim is successfully verified.\n")
-	sp.StatRecorder.RecordClaim("accepted", claim)
 	return true, nil
 }
 
@@ -346,8 +393,8 @@ func NewSmartPool(
 	pm smartpool.PoolMonitor, sr smartpool.ShareReceiver,
 	nc smartpool.NetworkClient, cr ClaimRepo, ps smartpool.PersistentStorage,
 	co smartpool.Contract, stat smartpool.StatRecorder, ca common.Address,
-	ma common.Address, ed string, interval time.Duration, threshold int,
-	hotStop bool, input smartpool.UserInput) *SmartPool {
+	ma common.Address, ed string, interval time.Duration, shareThreshold int,
+	claimThreshold int, hotStop bool, input smartpool.UserInput) *SmartPool {
 	counter, err := loadLatestCounter(ps)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't load counter from storage. Initialize it to 0.\n")
@@ -367,7 +414,8 @@ func NewSmartPool(
 		MinerAddress:      ma,
 		ExtraData:         ed,
 		SubmitInterval:    interval,
-		ShareThreshold:    threshold,
+		ShareThreshold:    shareThreshold,
+		ClaimThreshold:    claimThreshold,
 		HotStop:           hotStop,
 		loopStarted:       false,
 		LatestCounter:     counter,

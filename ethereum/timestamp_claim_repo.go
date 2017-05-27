@@ -20,10 +20,13 @@ const ACTIVE_SHARE_FILE string = "active_shares"
 // shares
 type TimestampClaimRepo struct {
 	activeShares    map[string]*Share
+	mu              sync.RWMutex
+	activeClaims    []smartpool.Claim
+	openClaims      []smartpool.Claim
+	claimMu         sync.Mutex
 	recentTimestamp *big.Int
 	noShares        uint64
 	noRecentShares  uint64
-	mu              sync.RWMutex
 	storage         smartpool.PersistentStorage
 	diff            *big.Int
 	miner           string
@@ -124,10 +127,13 @@ func NewTimestampClaimRepo(diff *big.Int, miner, coinbase string, storage smartp
 	}
 	cr := TimestampClaimRepo{
 		shares,
+		sync.RWMutex{},
+		[]smartpool.Claim{},
+		[]smartpool.Claim{},
+		sync.Mutex{},
 		currentTimestamp,
 		uint64(noShares),
 		uint64(noRecentShares),
-		sync.RWMutex{},
 		storage,
 		diff,
 		miner,
@@ -263,6 +269,41 @@ func (cr *TimestampClaimRepo) getCurrentClaim(threshold int) smartpool.Claim {
 	cr.activeShares = newActiveShares
 	cr.noShares = 0
 	return c
+}
+
+func (cr *TimestampClaimRepo) PutOpenClaim(claim smartpool.Claim) {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	cr.activeClaims = append(cr.activeClaims, claim)
+}
+
+func (cr *TimestampClaimRepo) GetOpenClaim(index int) smartpool.Claim {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	if index >= len(cr.openClaims) {
+		return nil
+	} else {
+		return cr.openClaims[index]
+	}
+}
+
+func (cr *TimestampClaimRepo) SealClaimBatch() {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	cr.openClaims = cr.activeClaims
+	cr.activeClaims = []smartpool.Claim{}
+}
+
+func (cr *TimestampClaimRepo) NumOpenClaims() uint64 {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	return uint64(len(cr.activeClaims))
+}
+
+func (cr *TimestampClaimRepo) ResetOpenClaims() {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	cr.activeClaims = []smartpool.Claim{}
 }
 
 func (cr *TimestampClaimRepo) GetCurrentClaim(threshold int) smartpool.Claim {

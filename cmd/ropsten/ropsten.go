@@ -23,7 +23,8 @@ func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
 	rpcEndPoint := c.String("rpc")
 	keystorePath := c.String("keystore")
-	shareThreshold := int(c.Uint("threshold"))
+	shareThreshold := int(c.Uint("share-threshold"))
+	claimThreshold := int(c.Uint("claim-threshold"))
 	shareDifficulty := big.NewInt(int64(c.Uint("diff")))
 	submitInterval := 1 * time.Minute
 	contractAddr := c.String("spcontract")
@@ -34,8 +35,9 @@ func Initialize(c *cli.Context) *smartpool.Input {
 	}
 	extraData := ""
 	return smartpool.NewInput(
-		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData, hotStop,
+		rpcEndPoint, keystorePath, shareThreshold, claimThreshold,
+		shareDifficulty, submitInterval, contractAddr, minerAddr,
+		extraData, hotStop,
 	)
 }
 
@@ -161,14 +163,15 @@ func Run(c *cli.Context) error {
 		fileStorage,
 	)
 	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
-	ethereumContract := ethereum.NewContract(gethContractClient)
+	ethereumContract := ethereum.NewContract(
+		gethContractClient, common.HexToAddress(input.MinerAddress()))
 	ethminer.SmartPool = protocol.NewSmartPool(
 		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
 		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(), input,
+		input.ShareThreshold(), input.ClaimThreshold(), input.HotStop(), input,
 	)
 	server := ethminer.NewServer(
 		smartpool.Output,
@@ -195,9 +198,14 @@ func BuildAppCommandLine() *cli.App {
 			Usage: "Keystore path to your ethereum account private key. SmartPool will look for private key of the miner address you specified in that path.",
 		},
 		cli.UintFlag{
-			Name:  "threshold",
-			Value: 50,
+			Name:  "share-threshold",
+			Value: 304,
 			Usage: "Minimum number of shares in a claim. SmartPool will not submit the claim if it does not have more than or equal to this threshold numer of share.",
+		},
+		cli.UintFlag{
+			Name:  "claim-threshold",
+			Value: 10,
+			Usage: "Number of claims in a payment.",
 		},
 		cli.UintFlag{
 			Name:  "diff",

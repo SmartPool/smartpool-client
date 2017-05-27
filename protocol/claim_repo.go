@@ -15,6 +15,11 @@ type ClaimRepo interface {
 	// GetCurrentClaim returns nil when there are not enough shares in the claim
 	// as compared to the threshold.
 	GetCurrentClaim(threshold int) smartpool.Claim
+	PutOpenClaim(claim smartpool.Claim)
+	GetOpenClaim(claimIndex int) smartpool.Claim
+	ResetOpenClaims()
+	NumOpenClaims() uint64
+	SealClaimBatch()
 	Persist(storage smartpool.PersistentStorage) error
 	NoActiveShares() uint64
 }
