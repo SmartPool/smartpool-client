@@ -185,27 +185,39 @@ func persistLatestCounter(ps smartpool.PersistentStorage, counter *big.Int) erro
 // It returns true when the claim is fully verified and accepted by the
 // contract. It returns false otherwise.
 func (sp *SmartPool) Submit() (bool, error) {
-	numOpenClaimsContract, err := sp.Contract.NumOpenClaims()
-	if err != nil {
-		return false, err
-	}
-	if numOpenClaimsContract.Uint64() != sp.ClaimRepo.NumOpenClaims() {
-		smartpool.Output.Printf(
-			"Inconsistent open claim list between client(%d claims) and contract(%d claims). Resetting open claim list on both sides...",
-			sp.ClaimRepo.NumOpenClaims(),
-			numOpenClaimsContract.Uint64(),
-		)
-		sp.ClaimRepo.ResetOpenClaims()
-		err := sp.Contract.ResetOpenClaims()
-		if err != nil {
-			return false, err
-		} else {
-			smartpool.Output.Printf("Done.\n")
-		}
-	}
 	claim := sp.SealClaim()
 	if claim == nil {
 		return false, nil
+	}
+	waited := 0
+	for {
+		numOpenClaimsContract, err := sp.Contract.NumOpenClaims()
+		if err != nil {
+			return false, err
+		}
+		if numOpenClaimsContract.Uint64() != sp.ClaimRepo.NumOpenClaims() {
+			if waited >= 140 {
+				smartpool.Output.Printf("Unrecoverable inconsistent state between client and contract. Resetting both sides...")
+				sp.ClaimRepo.ResetOpenClaims()
+				err := sp.Contract.ResetOpenClaims()
+				if err != nil {
+					return false, err
+				} else {
+					smartpool.Output.Printf("Done.\n")
+				}
+				break
+			} else {
+				smartpool.Output.Printf(
+					"Inconsistent open claim list between client(%d claims) and contract(%d claims). Recheck in 14s...\n",
+					sp.ClaimRepo.NumOpenClaims(),
+					numOpenClaimsContract.Uint64(),
+				)
+				time.Sleep(14 * time.Second)
+				waited += 14
+			}
+		} else {
+			break
+		}
 	}
 	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	var lastClaim bool
