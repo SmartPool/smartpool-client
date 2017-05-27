@@ -383,6 +383,13 @@ func (cr *TimestampClaimRepo) PutOpenClaim(claim smartpool.Claim) {
 	cr.activeClaims = append(cr.activeClaims, claim)
 }
 
+func (cr *TimestampClaimRepo) RemoveOpenClaim(claim smartpool.Claim) {
+	cr.claimMu.Lock()
+	defer cr.claimMu.Unlock()
+	cr.activeClaims[len(cr.activeClaims)-1] = nil
+	cr.activeClaims = cr.activeClaims[:len(cr.activeClaims)-1]
+}
+
 func (cr *TimestampClaimRepo) GetOpenClaim(index int) smartpool.Claim {
 	cr.claimMu.Lock()
 	defer cr.claimMu.Unlock()

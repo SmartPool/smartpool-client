@@ -180,20 +180,12 @@ func persistLatestCounter(ps smartpool.PersistentStorage, counter *big.Int) erro
 	return ps.Persist(counter, COUNTER_FILE)
 }
 
-// Submit does all the protocol that communicates with the contract to submit
-// the claim then verify it.
-// It returns true when the claim is fully verified and accepted by the
-// contract. It returns false otherwise.
-func (sp *SmartPool) Submit() (bool, error) {
-	claim := sp.SealClaim()
-	if claim == nil {
-		return false, nil
-	}
+func (sp *SmartPool) consistencyCheck() error {
 	waited := 0
 	for {
 		numOpenClaimsContract, err := sp.Contract.NumOpenClaims()
 		if err != nil {
-			return false, err
+			return err
 		}
 		if numOpenClaimsContract.Uint64() != sp.ClaimRepo.NumOpenClaims() {
 			if waited >= 140 {
@@ -201,7 +193,7 @@ func (sp *SmartPool) Submit() (bool, error) {
 				sp.ClaimRepo.ResetOpenClaims()
 				err := sp.Contract.ResetOpenClaims()
 				if err != nil {
-					return false, err
+					return err
 				} else {
 					smartpool.Output.Printf("Done.\n")
 				}
@@ -219,6 +211,21 @@ func (sp *SmartPool) Submit() (bool, error) {
 			break
 		}
 	}
+	return nil
+}
+
+// Submit does all the protocol that communicates with the contract to submit
+// the claim then verify it.
+// It returns true when the claim is fully verified and accepted by the
+// contract. It returns false otherwise.
+func (sp *SmartPool) Submit() (bool, error) {
+	claim := sp.SealClaim()
+	if claim == nil {
+		return false, nil
+	}
+	if err := sp.consistencyCheck(); err != nil {
+		return false, err
+	}
 	smartpool.Output.Printf("Submitting the claim with %d shares.\n", claim.NumShares().Int64())
 	var lastClaim bool
 	if int(sp.ClaimRepo.NumOpenClaims()+1) >= sp.ClaimThreshold {
@@ -226,15 +233,16 @@ func (sp *SmartPool) Submit() (bool, error) {
 	} else {
 		lastClaim = false
 	}
+	sp.ClaimRepo.PutOpenClaim(claim)
+	smartpool.Output.Printf("The claim is successfully put into open claims queue.\n")
 	subErr := sp.Contract.SubmitClaim(claim, lastClaim)
 	if subErr != nil {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
+		sp.ClaimRepo.RemoveOpenClaim(claim)
 		return false, subErr
 	}
 	sp.StatRecorder.RecordClaim("submitted", claim)
 	smartpool.Output.Printf("The claim is successfully submitted.\n")
-	sp.ClaimRepo.PutOpenClaim(claim)
-	smartpool.Output.Printf("The claim is successfully put into open claims queue.\n")
 	if lastClaim {
 		sp.ClaimRepo.SealClaimBatch()
 		smartpool.Output.Printf("Waiting for verification index...")

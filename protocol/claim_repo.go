@@ -16,6 +16,7 @@ type ClaimRepo interface {
 	// as compared to the threshold.
 	GetCurrentClaim(threshold int) smartpool.Claim
 	PutOpenClaim(claim smartpool.Claim)
+	RemoveOpenClaim(claim smartpool.Claim)
 	GetOpenClaim(claimIndex int) smartpool.Claim
 	ResetOpenClaims()
 	NumOpenClaims() uint64
