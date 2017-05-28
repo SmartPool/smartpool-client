@@ -35,3 +35,6 @@ func (self *testUserInput) ExtraData() string {
 func (self *testUserInput) HotStop() bool {
 	return true
 }
+func (self *testUserInput) ClaimThreshold() int {
+	return 1
+}

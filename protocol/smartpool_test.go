@@ -19,7 +19,7 @@ func newTestSmartPool() *SmartPool {
 		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
 		common.HexToAddress("0x001aDBc838eDe392B5B054A47f8B8c28f2fA9F3F"),
 		"extradata", time.Minute,
-		100, true, &testUserInput{},
+		100, 1, true, &testUserInput{},
 	)
 }
 

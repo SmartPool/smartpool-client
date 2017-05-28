@@ -36,7 +36,7 @@ func (c *testContract) Register(paymentAddress common.Address) error {
 	c.Registered = true
 	return nil
 }
-func (c *testContract) SubmitClaim(claim smartpool.Claim) error {
+func (c *testContract) SubmitClaim(claim smartpool.Claim, lastClaim bool) error {
 	c.claim = claim.(*testClaim)
 	if c.SubmitFailed {
 		return errors.New("fail")
@@ -45,12 +45,12 @@ func (c *testContract) SubmitClaim(claim smartpool.Claim) error {
 	c.SubmitTime = &t
 	return nil
 }
-func (c *testContract) GetShareIndex(claim smartpool.Claim) *big.Int {
+func (c *testContract) GetShareIndex(claim smartpool.Claim) (*big.Int, *big.Int, error) {
 	t := time.Now()
 	c.IndexRequestedTime = &t
-	return big.NewInt(100)
+	return big.NewInt(0), big.NewInt(100), nil
 }
-func (c *testContract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) error {
+func (c *testContract) VerifyClaim(claimIndex *big.Int, shareIndex *big.Int, claim smartpool.Claim) error {
 	if c.VerifyFailed {
 		return errors.New("fail")
 	}
@@ -61,4 +61,10 @@ func (c *testContract) VerifyClaim(shareIndex *big.Int, claim smartpool.Claim) e
 }
 func (c *testContract) GetLastSubmittedClaim() *testClaim {
 	return c.claim
+}
+func (c *testContract) NumOpenClaims() (*big.Int, error) {
+	return big.NewInt(0), nil
+}
+func (c *testContract) ResetOpenClaims() error {
+	return nil
 }

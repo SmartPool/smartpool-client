@@ -76,6 +76,10 @@ func (c *Claim) SetEvidence(shareIndex *big.Int) {
 	c.shareIndex = shareIndex
 }
 
+func (c *Claim) GetEvidence() *big.Int {
+	return c.shareIndex
+}
+
 func (c *Claim) CounterBranch() []*big.Int {
 	if c.pamt == nil {
 		c.buildProofAugTree()

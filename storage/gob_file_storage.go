@@ -86,7 +86,7 @@ func (gfs *GobFileStorage) register(value interface{}) {
 	}
 }
 
-func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
+func (gfs *GobFileStorage) persistToFile(data interface{}, id string) error {
 	err := os.MkdirAll(SmartPoolDir, 0766)
 	if err != nil {
 		return err
@@ -98,7 +98,11 @@ func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
 	defer f.Close()
 	gfs.register(data)
 	enc := gob.NewEncoder(f)
-	if err = enc.Encode(data); err != nil {
+	return enc.Encode(data)
+}
+
+func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
+	if err := gfs.persistToFile(data, id); err != nil {
 		return err
 	}
 	return os.Rename(getTempFile(id), getFile(id))

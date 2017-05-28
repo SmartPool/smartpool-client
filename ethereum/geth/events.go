@@ -11,6 +11,7 @@ var RegisterEventTopic = common.HexToHash("0x1d759fb22634fe2d322d688a4b46aaf185d
 var SubmitClaimEventTopic = common.HexToHash("0x53ab9d877ae22286591454f9a8d58501caa34a07c99eac2c09bc0066c065400d").Big()
 var VerifyClaimEventTopic = common.HexToHash("0x096caf97202169a068288f02e51ff9fcc85f98e1477f6ad9acbf6ebf25dbcd00").Big()
 var SetEpochDataEventTopic = common.HexToHash("0x5cd723400be8430351b9cbaa5ea421b3fb2528c6a7650c493f895e7d97750da1").Big()
+var ResetOpenClaimsEventTopic = common.HexToHash("b4392733a0c6dd35350239f2e9eb97a9a9e574fc090445fb267bea4114f9d706").Big()
 
 var ErrorMap = map[uint64][]string{
 	0x80000000: []string{"register", "miner id is already in use", "miner id"},
