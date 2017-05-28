@@ -15,7 +15,6 @@ import (
 	"log"
 	"math/big"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -137,22 +136,20 @@ func processDuringRead(
 }
 
 func (s *Share) buildDagTree() {
-	indices := ethash.Instance.GetVerificationIndices(s)
+	indices := ethash.Instance.GetVerificationIndices(
+		s.NumberU64(),
+		s.BlockHeader().HashNoNonce(),
+		s.Nonce(),
+	)
 	fmt.Print("indices: %v\n", indices)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
-	fullSize, _ := ethash.MakeDAGWithSize(s.NumberU64(), "")
+	ethash.MakeDataset(s.NumberU64(), ethash.DefaultDir)
+	fullSize := ethash.DAGSize(s.NumberU64())
 	fullSizeIn128Resolution := fullSize / 128
 	branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))
 	s.dt.RegisterStoredLevel(uint32(branchDepth), uint32(10))
-	seedHash, err := ethash.GetSeedHash(s.NumberU64())
-	if err != nil {
-		panic(err)
-	}
-	path := filepath.Join(
-		ethash.DefaultDir,
-		fmt.Sprintf("full-R%s-%s", "23", hex.EncodeToString(seedHash[:8])),
-	)
+	path := ethash.PathToDAG(uint64(s.NumberU64()/30000), ethash.DefaultDir)
 	processDuringRead(path, s.dt)
 	s.dt.Finalize()
 }
