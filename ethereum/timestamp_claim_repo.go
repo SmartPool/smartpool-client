@@ -326,7 +326,11 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 		share.BlockHeader().Hash().Hex(),
 		share.Nonce())
 	if share.BlockHeader().Coinbase.Hex() != cr.coinbase {
-		return errors.New("inconsistent coinbase address")
+		return errors.New(
+			fmt.Sprintf("inconsistent coinbase address: share(%s) vs. expected(%s)",
+				share.BlockHeader().Coinbase.Hex(),
+				cr.coinbase,
+			))
 	}
 	if share.ShareDifficulty().Cmp(cr.diff) != 0 {
 		return errors.New(
