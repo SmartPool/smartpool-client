@@ -46,6 +46,9 @@ func (cr *testClaimRepo) GetOpenClaim(claimIndex int) smartpool.Claim {
 func (cr *testClaimRepo) ResetOpenClaims() {
 }
 
+func (cr *testClaimRepo) RemoveOpenClaim(claim smartpool.Claim) {
+}
+
 func (cr *testClaimRepo) NumOpenClaims() uint64 {
 	return 0
 }
