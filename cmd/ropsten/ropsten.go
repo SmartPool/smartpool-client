@@ -158,8 +158,8 @@ func Run(c *cli.Context) error {
 	statRecorder := stat.NewStatRecorder(fileStorage)
 	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
 		input.ShareDifficulty(),
-		input.MinerAddress(),
-		input.ContractAddress(),
+		common.HexToAddress(input.MinerAddress()).Hex(),
+		common.HexToAddress(input.ContractAddress()).Hex(),
 		fileStorage,
 	)
 	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
