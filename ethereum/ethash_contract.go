@@ -15,7 +15,7 @@ type EthashContract struct {
 func (c *EthashContract) SetEpochData(epoch int) error {
 	var err error
 	smartpool.Output.Printf("Checking DAG file. Generate if needed...\n")
-	ethash.MakeDataset(uint64(epoch*30000), ethash.DefaultDir)
+	ethash.MakeDAG(uint64(epoch*30000), ethash.DefaultDir)
 	fullSize := ethash.DAGSize(uint64(epoch * 30000))
 	fullSizeIn128Resolution := fullSize / 128
 	path := ethash.PathToDAG(uint64(epoch), ethash.DefaultDir)

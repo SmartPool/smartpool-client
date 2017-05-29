@@ -144,7 +144,7 @@ func (s *Share) buildDagTree() {
 	fmt.Print("indices: %v\n", indices)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
-	ethash.MakeDataset(s.NumberU64(), ethash.DefaultDir)
+	ethash.MakeDAG(s.NumberU64(), ethash.DefaultDir)
 	fullSize := ethash.DAGSize(s.NumberU64())
 	fullSizeIn128Resolution := fullSize / 128
 	branchDepth := len(fmt.Sprintf("%b", fullSizeIn128Resolution-1))

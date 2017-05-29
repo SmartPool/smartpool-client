@@ -250,6 +250,7 @@ func (d *dataset) generate(dir string, limit int, test bool) {
 		dsize := datasetSize(d.epoch*epochLength + 1)
 		seed := seedHash(d.epoch*epochLength + 1)
 
+		fmt.Printf("here 1\n")
 		if dir == "" {
 			cache := make([]uint32, csize/4)
 			generateCache(cache, d.epoch, seed)
@@ -265,10 +266,13 @@ func (d *dataset) generate(dir string, limit int, test bool) {
 		path := filepath.Join(dir, fmt.Sprintf("full-R%d-%x%s", algorithmRevision, seed[:8], endian))
 		logger := log.New("epoch", d.epoch)
 
+		fmt.Printf("here 2\n")
+
 		// Try to load the file from disk and memory map it
 		var err error
 		d.dump, d.mmap, d.dataset, err = memoryMap(path)
 		if err == nil {
+			fmt.Printf("loaded from old file: %s\n", path)
 			logger.Debug("Loaded old ethash dataset from disk")
 			return
 		}
@@ -279,6 +283,9 @@ func (d *dataset) generate(dir string, limit int, test bool) {
 		generateCache(cache, d.epoch, seed)
 
 		d.dump, d.mmap, d.dataset, err = memoryMapAndGenerate(path, dsize, func(buffer []uint32) { generateDataset(buffer, d.epoch, cache) })
+
+		fmt.Printf("here 3\n")
+
 		if err != nil {
 			logger.Error("Failed to generate mapped ethash dataset", "err", err)
 

@@ -88,6 +88,10 @@ func hashimotoIndices(hash []byte, nonce uint64, size uint64, lookup func(index 
 	return result
 }
 
+func MakeDAG(block uint64, dir string) {
+	MakeDataset(block-30000, dir)
+}
+
 func PathToDAG(epoch uint64, dir string) string {
 	seed := ethash.SeedHash(epoch*epochLength + 1)
 	var endian string
