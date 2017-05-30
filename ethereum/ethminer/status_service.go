@@ -11,6 +11,7 @@ type StatusService struct{}
 type StatusData struct {
 	RPCEndpoint    string   `json:"rpc_endpoint"`
 	ShareThreshold int      `json:"share_threshold"`
+	ClaimThreshold int      `json:"claim_threshold"`
 	ShareDiff      *big.Int `json:"share_difficulty"`
 	Contract       string   `json:"contract_address"`
 	Miner          string   `json:"miner_address"`
@@ -23,6 +24,7 @@ func (server *StatusService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	result := StatusData{
 		SmartPool.Input.RPCEndpoint(),
 		SmartPool.Input.ShareThreshold(),
+		SmartPool.Input.ClaimThreshold(),
 		SmartPool.Input.ShareDifficulty(),
 		SmartPool.Input.ContractAddress(),
 		SmartPool.Input.MinerAddress(),
