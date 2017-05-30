@@ -96,7 +96,7 @@ func (sr *StatRecorder) ShareRestored(noShares uint64) {
 func (sr *StatRecorder) RecordShare(status string, share smartpool.Share, rig smartpool.Rig) {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
-	t := time.Now()
+	t := time.Now().In(Zone)
 	rigData := sr.getRigData(rig)
 	rigData.AddShare(status, share, t)
 	sr.FarmData.AddShare(rig, status, share, t)
@@ -105,14 +105,14 @@ func (sr *StatRecorder) RecordShare(status string, share smartpool.Share, rig sm
 func (sr *StatRecorder) RecordClaim(status string, claim smartpool.Claim) {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
-	t := time.Now()
+	t := time.Now().In(Zone)
 	sr.FarmData.AddClaim(status, claim, t)
 }
 
 func (sr *StatRecorder) RecordHashrate(hashrate hexutil.Uint64, id common.Hash, rig smartpool.Rig) {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
-	t := time.Now()
+	t := time.Now().In(Zone)
 	rigData := sr.getRigData(rig)
 	rigData.AddHashrate(hashrate, id, t)
 	// fmt.Printf("going to update rig hashrate:\n")

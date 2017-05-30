@@ -28,6 +28,7 @@ func farmStat() map[string]interface{} {
 		"long_window_sample":    longWindowStat,
 		"long_window_duration":  stat.LongWindow,
 		"period_duration":       stat.BaseTimePeriod,
+		"server_time":           time.Now().In(stat.Zone),
 	}
 }
 
