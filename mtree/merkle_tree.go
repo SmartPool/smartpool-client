@@ -23,13 +23,25 @@ type elementHashFunc func(ElementData) NodeData
 type dummyNodeModifierFunc func(NodeData)
 
 type MerkleTree struct {
-	mtbuf          *list.List
-	h              hashFunc
-	eh             elementHashFunc
-	dnf            dummyNodeModifierFunc
-	finalized      bool
-	indexes        map[uint32]bool
-	orderedIndexes []uint32
+	mtbuf           *list.List
+	h               hashFunc
+	eh              elementHashFunc
+	dnf             dummyNodeModifierFunc
+	finalized       bool
+	indexes         map[uint32]bool
+	orderedIndexes  []uint32
+	storedLevel     uint32
+	exportNodeCount uint32
+	exportNodes     []NodeData
+}
+
+func (mt *MerkleTree) StoredLevel() uint32 {
+	return mt.storedLevel
+}
+
+func (mt *MerkleTree) RegisterStoredLevel(depth, level uint32) {
+	mt.storedLevel = level
+	mt.exportNodeCount = 1<<(depth-level+1) - 1
 }
 
 // register indexes to build branches
@@ -99,6 +111,9 @@ func (mt *MerkleTree) insertNode(_node node) {
 		prevNode.Data = mt.h(prevNode.Data, cNode.Data)
 		// fmt.Printf("=> %4s\n", hex.EncodeToString(prevNode.Data[:]))
 		prevNode.NodeCount = cNode.NodeCount*2 + 1
+		if prevNode.NodeCount == mt.exportNodeCount {
+			mt.exportNodes = append(mt.exportNodes, prevNode.Data)
+		}
 
 		mt.mtbuf.Remove(e)
 		mt.mtbuf.Remove(prev)
@@ -125,6 +140,10 @@ func (mt MerkleTree) Root() NodeData {
 		return mt.mtbuf.Front().Value.(node).Data
 	}
 	panic("SP Merkle tree needs to be finalized by calling mt.Finalize()")
+}
+
+func (mt MerkleTree) ExportNodes() []NodeData {
+	return mt.exportNodes
 }
 
 func (mt MerkleTree) Branches() map[uint32]BranchTree {

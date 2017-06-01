@@ -7,7 +7,9 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/SmartPool/smartpool-client/ethereum/ethminer"
 	"github.com/SmartPool/smartpool-client/ethereum/geth"
+	"github.com/SmartPool/smartpool-client/ethereum/stat"
 	"github.com/SmartPool/smartpool-client/protocol"
+	"github.com/SmartPool/smartpool-client/storage"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
@@ -17,20 +19,12 @@ import (
 	"time"
 )
 
-func buildExtraData(address common.Address, diff *big.Int) string {
-	// id = address % (26+26+10)**11
-	base := big.NewInt(0)
-	base.Exp(big.NewInt(62), big.NewInt(11), nil)
-	id := big.NewInt(0)
-	id.Mod(address.Big(), base)
-	return fmt.Sprintf("SmartPool-%s%s", smartpool.BigToBase62(id), smartpool.BigToBase62(diff))
-}
-
 func Initialize(c *cli.Context) *smartpool.Input {
 	// Setting
 	rpcEndPoint := c.String("rpc")
 	keystorePath := c.String("keystore")
-	shareThreshold := int(c.Uint("threshold"))
+	shareThreshold := int(c.Uint("share-threshold"))
+	claimThreshold := int(c.Uint("claim-threshold"))
 	shareDifficulty := big.NewInt(int64(c.Uint("diff")))
 	submitInterval := 1 * time.Minute
 	contractAddr := c.String("spcontract")
@@ -41,8 +35,9 @@ func Initialize(c *cli.Context) *smartpool.Input {
 	}
 	extraData := ""
 	return smartpool.NewInput(
-		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
-		submitInterval, contractAddr, minerAddr, extraData, hotStop,
+		rpcEndPoint, keystorePath, shareThreshold, claimThreshold,
+		shareDifficulty, submitInterval, contractAddr, minerAddr,
+		extraData, hotStop,
 	)
 }
 
@@ -64,9 +59,16 @@ func Run(c *cli.Context) error {
 		fmt.Printf("You have to specify keystore path by --keystore. Abort!\n")
 		return nil
 	}
+	gateway := common.HexToAddress(c.String("gateway"))
+	if gateway.Big().Cmp(common.Big0) == 0 {
+		fmt.Printf("Gateway address %s is invalid.\n", c.String("gateway"))
+		return nil
+	}
+	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
-	ethereumWorkPool := &ethereum.WorkPool{}
-	go ethereumWorkPool.Cleanning()
+	fileStorage := storage.NewGobFileStorage()
+	ethereumWorkPool := ethereum.NewWorkPool(fileStorage)
+	go ethereumWorkPool.RunCleaner()
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath(),
 		common.HexToAddress(input.MinerAddress()),
@@ -78,12 +80,13 @@ func Run(c *cli.Context) error {
 	}
 	fmt.Printf("Using miner address: %s\n", address.Hex())
 	input.SetMinerAddress(address)
-	input.SetExtraData(buildExtraData(
+	input.SetExtraData(ethereum.BuildExtraData(
 		common.HexToAddress(input.MinerAddress()),
 		input.ShareDifficulty()))
 	gethRPC, _ := geth.NewGethRPC(
 		input.RPCEndpoint(), input.ContractAddress(),
 		input.ExtraData(), input.ShareDifficulty(),
+		input.MinerAddress(),
 	)
 	client, err := gethRPC.ClientVersion()
 	if err != nil {
@@ -100,8 +103,8 @@ func Run(c *cli.Context) error {
 		gethRPC,
 		ethereumWorkPool,
 	)
-	ethereumClaimRepo := ethereum.NewTimestampClaimRepo()
 	ethereumPoolMonitor, err := geth.NewPoolMonitor(
+		gateway,
 		common.HexToAddress(input.ContractAddress()),
 		smartpool.VERSION,
 		input.RPCEndpoint(),
@@ -125,6 +128,7 @@ func Run(c *cli.Context) error {
 				common.HexToAddress(input.ContractAddress()), gethRPC,
 				common.HexToAddress(input.MinerAddress()),
 				input.RPCEndpoint(), input.KeystorePath(), passphrase,
+				uint64(gasprice),
 			)
 			if gethContractClient != nil {
 				break
@@ -151,17 +155,25 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
-	ethereumContract := ethereum.NewContract(gethContractClient)
+	statRecorder := stat.NewStatRecorder(fileStorage)
+	ethereumClaimRepo := ethereum.NewTimestampClaimRepo(
+		input.ShareDifficulty(),
+		common.HexToAddress(input.MinerAddress()).Hex(),
+		common.HexToAddress(input.ContractAddress()).Hex(),
+		fileStorage,
+	)
+	statRecorder.ShareRestored(ethereumClaimRepo.NoActiveShares())
+	ethereumContract := ethereum.NewContract(
+		gethContractClient, common.HexToAddress(input.MinerAddress()))
 	ethminer.SmartPool = protocol.NewSmartPool(
-		ethereumPoolMonitor,
-		ethereumWorkPool, ethereumNetworkClient,
-		ethereumClaimRepo, ethereumContract,
+		ethereumPoolMonitor, ethereumWorkPool, ethereumNetworkClient,
+		ethereumClaimRepo, fileStorage, ethereumContract, statRecorder,
 		common.HexToAddress(input.ContractAddress()),
 		common.HexToAddress(input.MinerAddress()),
 		input.ExtraData(), input.SubmitInterval(),
-		input.ShareThreshold(), input.HotStop(),
+		input.ShareThreshold(), input.ClaimThreshold(), input.HotStop(), input,
 	)
-	server := ethminer.NewRPCServer(
+	server := ethminer.NewServer(
 		smartpool.Output,
 		uint16(1633),
 	)
@@ -186,19 +198,34 @@ func BuildAppCommandLine() *cli.App {
 			Usage: "Keystore path to your ethereum account private key. SmartPool will look for private key of the miner address you specified in that path.",
 		},
 		cli.UintFlag{
-			Name:  "threshold",
-			Value: 50,
+			Name:  "share-threshold",
+			Value: 304,
 			Usage: "Minimum number of shares in a claim. SmartPool will not submit the claim if it does not have more than or equal to this threshold numer of share.",
 		},
 		cli.UintFlag{
+			Name:  "claim-threshold",
+			Value: 10,
+			Usage: "Number of claims in a payment.",
+		},
+		cli.UintFlag{
 			Name:  "diff",
-			Value: 1000000,
+			Value: 4000000000,
 			Usage: "Difficulty of a share.",
+		},
+		cli.UintFlag{
+			Name:  "gasprice",
+			Value: 5,
+			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.StringFlag{
 			Name:  "spcontract",
 			Value: "0xf7d93BCB8e4372F46383ecee82f9adF1aA397BA9",
 			Usage: "SmartPool latest contract address.",
+		},
+		cli.StringFlag{
+			Name:  "gateway",
+			Value: "0xddcdad6b099b1b237bdb1341cc6881eb63ee3b28",
+			Usage: "Gateway address. Its default value is the official gateway maintained by SmartPool team",
 		},
 		cli.StringFlag{
 			Name:  "miner",

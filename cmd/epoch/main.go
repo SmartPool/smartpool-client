@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
@@ -25,7 +26,7 @@ type Input struct {
 func Initialize(c *cli.Context) *Input {
 	rpcEndPoint := c.String("rpc")
 	keystorePath := c.String("keystore")
-	contractAddr := "0x3dC682397e93E46EBb5bE7463658fdD658365e9D"
+	contractAddr := c.String("ethash-contract")
 	minerAddr := c.String("account")
 	from := c.Uint("from")
 	to := c.Uint("to")
@@ -53,6 +54,7 @@ func Run(c *cli.Context) error {
 		fmt.Printf("You have to specify keystore path by --keystore. Abort!\n")
 		return nil
 	}
+	gasprice := c.Uint("gasprice")
 	smartpool.Output = &smartpool.StdOut{}
 	address, ok, addresses := geth.GetAddress(
 		input.KeystorePath,
@@ -67,7 +69,7 @@ func Run(c *cli.Context) error {
 	input.MinerAddr = address.Hex()
 	gethRPC, _ := geth.NewGethRPC(
 		input.RpcEndPoint, input.ContractAddr,
-		"", big.NewInt(1),
+		"", big.NewInt(1), "",
 	)
 	client, err := gethRPC.ClientVersion()
 	if err != nil {
@@ -76,29 +78,24 @@ func Run(c *cli.Context) error {
 		return err
 	}
 	fmt.Printf("Connected to Ethereum node: %s\n", client)
-	ethereumPoolMonitor, err := geth.NewPoolMonitor(
-		common.HexToAddress(input.ContractAddr),
-		smartpool.VERSION,
-		input.RpcEndPoint,
-	)
-	if err != nil {
-		fmt.Printf("Couln't connect to gateway.\n")
-		return err
-	}
-	input.ContractAddr = ethereumPoolMonitor.ContractAddress().Hex()
 	fmt.Printf("Epoch data will be submitted to contract at %s\n", input.ContractAddr)
-	var gethContractClient *geth.GethContractClient
+	if common.HexToAddress(input.ContractAddr).Big().Cmp(common.Big0) == 0 {
+		fmt.Printf("Contract address is not set on gateway. Abort!\n")
+		return errors.New("Contract address is not set")
+	}
+	var ethashContractClient *geth.EthashContractClient
 	for {
 		if ok {
 			passphrase, _ := promptUserPassPhrase(
 				input.MinerAddr,
 			)
-			gethContractClient, err = geth.NewGethContractClient(
+			ethashContractClient, err = geth.NewEthashContractClient(
 				common.HexToAddress(input.ContractAddr), gethRPC,
 				common.HexToAddress(input.MinerAddr),
 				input.RpcEndPoint, input.KeystorePath, passphrase,
+				uint64(gasprice),
 			)
-			if gethContractClient != nil {
+			if ethashContractClient != nil {
 				break
 			} else {
 				fmt.Printf("error: %s\n", err)
@@ -123,19 +120,14 @@ func Run(c *cli.Context) error {
 			return nil
 		}
 	}
-	ethereumContract := ethereum.NewContract(gethContractClient)
-	var epochs = []int{}
+	ethereumContract := ethereum.NewEthashContract(ethashContractClient)
 	for i := int(input.From); i <= int(input.To); i++ {
-		epochs = append(epochs, i)
-		if len(epochs) == 10 || i == int(input.To) {
-			fmt.Printf("Calculating epoch datas for epochs number %v...\n", epochs)
-			err = ethereumContract.SetEpochData(epochs...)
-			if err != nil {
-				fmt.Printf("Got error: %s\n", err)
-			} else {
-				fmt.Printf("Succeeded.\n")
-			}
-			epochs = []int{}
+		fmt.Printf("Calculating epoch datas for epochs number %d...\n", i)
+		err = ethereumContract.SetEpochData(i)
+		if err != nil {
+			fmt.Printf("Got error: %s\n", err)
+		} else {
+			fmt.Printf("Succeeded.\n")
 		}
 	}
 	return nil
@@ -160,6 +152,16 @@ func BuildAppCommandLine() *cli.App {
 		cli.StringFlag{
 			Name:  "account",
 			Usage: "The address that is used to submit epoch data (Default: First account in your keystore.)",
+		},
+		cli.StringFlag{
+			Name:  "ethash-contract",
+			Value: "0xd93c6293a076fc6c8f49d678b6d01aab3232fddc",
+			Usage: "Ethash contract address. Its default value is the official ethash contract maintained by SmartPool team",
+		},
+		cli.UintFlag{
+			Name:  "gasprice",
+			Value: 50,
+			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.UintFlag{
 			Name:  "from",

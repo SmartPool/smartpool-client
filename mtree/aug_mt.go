@@ -107,6 +107,9 @@ func NewAugTree() *AugTree {
 			false,
 			map[uint32]bool{},
 			[]uint32{},
+			0,
+			0,
+			[]NodeData{},
 		},
 	}
 }

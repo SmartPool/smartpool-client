@@ -38,6 +38,7 @@ type GethRPC struct {
 	ContractAddr    common.Address
 	ExtraData       []byte
 	ShareDifficulty *big.Int
+	MinerAddress    string
 }
 
 func (g *GethRPC) ClientVersion() (string, error) {
@@ -103,17 +104,12 @@ func (g *GethRPC) GetWork() *ethereum.Work {
 	for {
 		h = g.GetPendingBlockHeader()
 		g.client.Call(&w, "eth_getWork")
-		// waiting for pending block to be the same as
-		// block we are going to pass to miner
 		if w.PoWHash() != "" && w.PoWHash() == h.HashNoNonce().Hex() {
-			// json, _ := h.MarshalJSON()
-			// fmt.Printf("Pow Hash: %s - Header: %s\n", w.PoWHash(), json)
 			break
 		}
 		time.Sleep(1000 * time.Millisecond)
-		// fmt.Printf("Get inconsistent pending block header. Retry in 1s...\n")
 	}
-	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty)
+	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty, g.MinerAddress)
 }
 
 func (g *GethRPC) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
@@ -160,7 +156,7 @@ func (g *GethRPC) GetLog(
 	g.client.Call(&result, "eth_getLogs", param)
 	if len(result) != 1 {
 		smartpool.Output.Printf(
-			"Got %d logs. This must be a bug. Topic: %s, sender: %s, from: %s\n",
+			"Got %d logs. Contract unexpectedly threw. Topic: %s, sender: %s, from: %s\n",
 			len(result),
 			common.BigToHash(event).Hex(),
 			common.BigToHash(sender).Hex(),
@@ -240,10 +236,10 @@ func (g *GethRPC) Broadcast(data []byte) (common.Hash, error) {
 	return hash, err
 }
 
-func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int) (*GethRPC, error) {
+func NewGethRPC(endpoint, contractAddr, extraData string, diff *big.Int, miner string) (*GethRPC, error) {
 	client, err := rpc.DialHTTP(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	return &GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff}, nil
+	return &GethRPC{client, common.HexToAddress(contractAddr), []byte(extraData), diff, miner}, nil
 }
