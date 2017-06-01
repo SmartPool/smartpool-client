@@ -1,7 +1,9 @@
 ﻿a {
     cursor: pointer;
 }
-
+.container{
+    min-width: 600px;
+}
 * {
     word-wrap: break-word;
 }

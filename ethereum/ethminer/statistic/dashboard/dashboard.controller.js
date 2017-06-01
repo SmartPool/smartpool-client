@@ -28,6 +28,21 @@
         vm.config = {};
 
         vm.farm = {
+            "closet_data":{
+                "duration_in_min": 0,
+                "hash_rate": {
+                    "effective_hashrate":0,
+                    "reported_hashrate":0,
+                    "effective_hashrate_percent":"",
+                },
+                "shares": {
+                    "mined_share": 0,
+                    "valid_share": 0,
+                    "rejected_share": 0,
+                    "valid_share_percent":"",
+                    "rejected_share_percent":""
+                }
+            },
             "short_duration": {
                 "duration_in_hour": 0,
                 "point_number": 1,
@@ -43,6 +58,9 @@
                     "mined_share_avarage": 0,
                     "valid_share_avarage": 0,
                     "rejected_share_avarage": 0,
+                    "mined_share_total": 0,
+                    "valid_share_total": 0,
+                    "rejected_share_total": 0,
                     "chart": [
 
                     ],
@@ -63,6 +81,9 @@
                     "mined_share_avarage": 0,
                     "valid_share_avarage": 0,
                     "rejected_share_avarage": 0,
+                    "mined_share_total": 0,
+                    "valid_share_total": 0,
+                    "rejected_share_total": 0,
                     "chart": [
 
                     ],
@@ -186,6 +207,9 @@
                 y: {
                     show: true
                 }
+            },
+             padding: {
+                bottom: 12,
             }
         });
         // vm.shortSharesChart = c3.generate({
@@ -233,13 +257,16 @@
                     label: {
                         text: 'Shares',
                         position: 'outer-middle'
-                    }
+                    },
                 }
             },
             grid: {
                 y: {
                     show: true
                 }
+            },
+            padding: {
+                bottom: 12,
             },
         });
         vm.longRigChart = c3.generate({
@@ -267,7 +294,11 @@
                 y: {
                     show: true
                 }
+            },
+             padding: {
+                bottom: 12,
             }
+
         });
 
         vm.cancelSocker = false;
@@ -286,7 +317,6 @@
                     if (vm.cancelSocker){
                         return;
                     }
-                    console.log("farm");
                      socket.send(JSON.stringify({
                           action: "getFarmInfo"
                         }));
@@ -311,6 +341,7 @@
                 })
             }
             socket.onclose = function() {
+                 vm.cancelSocker = true;   
                 console.log("Socket is close");
             }
         }
@@ -337,10 +368,23 @@
 
             //anchor point
             var anchorPoint = vm.getAnchorPointShort(response);
+
+            //add data for closest data
+            vm.farm.closet_data.duration_in_min = response.period_duration / 60;
+            if(response.short_window_sample[anchorPoint]) {
+                vm.farm.closet_data.hash_rate.effective_hashrate = response.short_window_sample[anchorPoint].effective_hashrate;
+                vm.farm.closet_data.hash_rate.reported_hashrate = response.short_window_sample[anchorPoint].reported_hashrate;
+                vm.farm.closet_data.hash_rate.effective_hashrate_percent = response.short_window_sample[anchorPoint].reported_hashrate ===0?"":vm.roundHashRate(response.short_window_sample[anchorPoint].effective_hashrate / response.short_window_sample[anchorPoint].reported_hashrate * 100);
+                vm.farm.closet_data.shares.mined_share = response.short_window_sample[anchorPoint].mined_share;
+                vm.farm.closet_data.shares.valid_share = response.short_window_sample[anchorPoint].valid_share;
+                vm.farm.closet_data.shares.rejected_share = response.short_window_sample[anchorPoint].rejected_share;
+                vm.farm.closet_data.shares.valid_share_percent = vm.farm.closet_data.shares.mined_share === 0 ?"":vm.roundShares(vm.farm.closet_data.shares.valid_share / vm.farm.closet_data.shares.mined_share * 100);
+                vm.farm.closet_data.shares.rejected_share_percent = vm.farm.closet_data.shares.mined_share === 0 ?"":vm.roundShares(vm.farm.closet_data.shares.rejected_share / vm.farm.closet_data.shares.mined_share * 100);
+            }
             var val;
-            for (var key = anchorPoint; key < (anchorPoint + pointTotal); key++) {
+            for (var key = (anchorPoint - pointTotal + 1); key <= anchorPoint; key++) {
                 //console.log(key);
-                if (response.short_window_sample[key]) {
+                if (response.short_window_sample[key]) {              
                     val = response.short_window_sample[key]
                     xChart.push(key * response.period_duration * 1000);
 
@@ -385,16 +429,19 @@
             vm.farm.short_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.short_duration.hash_rate.effective_hashrate_avarage = vm.convertHashrate(totalEffectiveHashRate / pointTotal);
             vm.farm.short_duration.hash_rate.reported_hashrate_avarage = vm.convertHashrate(totalReportedHashRate / pointTotal);
-            vm.farm.short_duration.hash_rate.effective_hashrate_percent = vm.roundShares(vm.farm.short_duration.hash_rate.effective_hashrate_avarage / vm.farm.short_duration.hash_rate.reported_hashrate_avarage * 100);
+            vm.farm.short_duration.hash_rate.effective_hashrate_percent = vm.farm.short_duration.hash_rate.reported_hashrate_avarage === 0? "":vm.roundShares(vm.farm.short_duration.hash_rate.effective_hashrate_avarage / vm.farm.short_duration.hash_rate.reported_hashrate_avarage * 100);
 
             vm.farm.short_duration.shares.chart = [xChart, minedChart, validChart, rejectedChart];
+            vm.farm.short_duration.shares.mined_share_total = totalMinedShare;
             vm.farm.short_duration.shares.mined_share_avarage = vm.roundShares(totalMinedShare / pointTotal);
+            vm.farm.short_duration.shares.valid_share_total = totalValidShare;
             vm.farm.short_duration.shares.valid_share_avarage = vm.roundShares(totalValidShare / pointTotal);
+            vm.farm.short_duration.shares.rejected_share_total = totalRejectedShare;
             vm.farm.short_duration.shares.rejected_share_avarage = vm.roundShares(totalRejectedShare / pointTotal);
 
             //calculate share percent
-            vm.farm.short_duration.shares.valid_share_percent = vm.roundShares(vm.farm.short_duration.shares.valid_share_avarage / vm.farm.short_duration.shares.mined_share_avarage * 100);
-            vm.farm.short_duration.shares.rejected_share_percent = vm.roundShares(vm.farm.short_duration.shares.rejected_share_avarage / vm.farm.short_duration.shares.mined_share_avarage * 100);
+            vm.farm.short_duration.shares.valid_share_percent = totalValidShare === 0? "":vm.roundShares(totalValidShare / totalMinedShare * 100);
+            vm.farm.short_duration.shares.rejected_share_percent = totalRejectedShare === 0 ? "":vm.roundShares(totalRejectedShare / totalMinedShare * 100);
 
 
             //load chart
@@ -429,7 +476,7 @@
             //anchor point
             var anchorPoint = vm.getAnchorPointLong(response);
             var val;
-            for (var key = anchorPoint; key < (anchorPoint + pointTotal); key++) {
+            for (var key = (anchorPoint - pointTotal + 1); key <= anchorPoint; key++) {
                 //console.log(key);
                 if (response.long_window_sample[key]) {
                     val = response.long_window_sample[key];
@@ -484,16 +531,19 @@
             vm.farm.long_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.long_duration.hash_rate.effective_hashrate_avarage = vm.convertHashrate(totalEffectiveHashRate / pointTotal);
             vm.farm.long_duration.hash_rate.reported_hashrate_avarage = vm.convertHashrate(totalReportedHashRate / pointTotal);
-            vm.farm.long_duration.hash_rate.effective_hashrate_percent = vm.roundShares(vm.farm.long_duration.hash_rate.effective_hashrate_avarage / vm.farm.long_duration.hash_rate.reported_hashrate_avarage * 100);
+            vm.farm.long_duration.hash_rate.effective_hashrate_percent = totalEffectiveHashRate === 0?"":vm.roundShares(totalEffectiveHashRate / totalReportedHashRate * 100);
 
             //for share
             vm.farm.long_duration.shares.chart = [xChart, minedChart, validChart, rejectedChart];
+            vm.farm.long_duration.shares.mined_share_total = totalMinedShare;
             vm.farm.long_duration.shares.mined_share_avarage = vm.roundShares(totalMinedShare / pointTotal);
+            vm.farm.long_duration.shares.valid_share_total = totalValidShare;
             vm.farm.long_duration.shares.valid_share_avarage = vm.roundShares(totalValidShare / pointTotal);
+            vm.farm.long_duration.shares.rejected_share_total = totalRejectedShare;
             vm.farm.long_duration.shares.rejected_share_avarage = vm.roundShares(totalRejectedShare / pointTotal);
             //calculate percent
-            vm.farm.long_duration.shares.valid_share_percent = vm.roundShares(vm.farm.long_duration.shares.valid_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
-            vm.farm.long_duration.shares.rejected_share_percent = vm.roundShares(vm.farm.long_duration.shares.rejected_share_avarage / vm.farm.long_duration.shares.mined_share_avarage * 100);
+            vm.farm.long_duration.shares.valid_share_percent = totalMinedShare === 0 ? "":vm.roundShares(totalValidShare / totalMinedShare * 100);
+            vm.farm.long_duration.shares.rejected_share_percent = totalMinedShare === 0 ? "":vm.roundShares(totalRejectedShare / totalMinedShare * 100);
 
             //for active worker
             vm.farm.long_duration.rigs.chart = [xChart, workerChart];
@@ -513,17 +563,17 @@
         function applyOverall(response) {
             vm.farm.overall.effective_hashrate = vm.roundHashRate(response.overall.effective_hashrate / 1000000);
             vm.farm.overall.reported_hashrate = vm.roundHashRate(response.overall.reported_hashrate / 1000000);
-            vm.farm.overall.effective_hashrate_percent = vm.roundShares(vm.farm.overall.effective_hashrate / vm.farm.overall.reported_hashrate * 100);
+            vm.farm.overall.effective_hashrate_percent = vm.farm.overall.reported_hashrate === 0 ? "":vm.roundShares(vm.farm.overall.effective_hashrate / vm.farm.overall.reported_hashrate * 100);
 
             vm.farm.overall.mined_share = response.overall.mined_share;
             vm.farm.overall.valid_share = response.overall.valid_share;
             vm.farm.overall.rejected_share = response.overall.rejected_share;
             vm.farm.overall.verified_share = response.overall.verified_share;
             vm.farm.overall.pending_share = response.overall.pending_share;
-            if (vm.farm.overall.mined_share > 0) {
-                vm.farm.overall.valid_share_percent = vm.roundShares(vm.farm.overall.valid_share / vm.farm.overall.mined_share * 100);
-                vm.farm.overall.rejected_share_percent = vm.roundShares(vm.farm.overall.rejected_share / vm.farm.overall.mined_share * 100);
-            }
+            //if (vm.farm.overall.mined_share > 0) {
+                vm.farm.overall.valid_share_percent = vm.farm.overall.mined_share === 0 ? "":vm.roundShares(vm.farm.overall.valid_share / vm.farm.overall.mined_share * 100);
+                vm.farm.overall.rejected_share_percent = vm.farm.overall.mined_share===0?"":vm.roundShares(vm.farm.overall.rejected_share / vm.farm.overall.mined_share * 100);
+            //}
             //calculate hashrate
             for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
                 var rigName = vm.farm.worker.worker_list[i][0];
@@ -557,8 +607,8 @@
                 },
                 columns: [
                     { title: "Worker" },
-                    { title: vm.farm.short_duration.duration_in_hour + " ago" },
-                    { title: vm.farm.long_duration.duration_in_hour + " ago" },
+                    { title: "Last " + vm.farm.short_duration.duration_in_hour + " hours" },
+                    { title: "Last " + vm.farm.long_duration.duration_in_hour + " hours" },
                     { title: "Overall" },
                 ],
                 columnDefs: [{
@@ -615,26 +665,49 @@
         }
 
         function getAnchorPointShort(response) {
-            var point = 99999999;
+            var periodDuration = response.period_duration;
+            if (periodDuration === 0 ){
+                return 0 ;
+            }
+            var now = Date.now();
+            var currentPoint = Math.round(now / periodDuration / 1000);
+
+            var maxPoint = 0;
             $.each(response.short_window_sample, function(key, val) {
                 var keyInt = parseInt(key, 10);
-                if (keyInt < point) {
-                    point = keyInt;
+                if (keyInt > maxPoint) {
+                    maxPoint = keyInt;
                 }
             })
-            return point
+            if (maxPoint === currentPoint){
+                return maxPoint
+            }else{
+                return currentPoint - 1;
+            }
         }
 
 
         function getAnchorPointLong(response) {
-            var point = 99999999;
-            $.each(response.long_window_sample, function(key, val) {
+            var periodDuration = response.period_duration;
+            if (periodDuration === 0 ){
+                return 0 ;
+            }
+            var now = Date.now();
+            var currentPoint = Math.round(now / periodDuration / 1000);
+
+            var maxPoint = 0;
+            $.each(response.short_window_sample, function(key, val) {
                 var keyInt = parseInt(key, 10);
-                if (keyInt < point) {
-                    point = keyInt;
+                if (keyInt > maxPoint) {
+                    maxPoint = keyInt;
                 }
             })
-            return point
+
+            if (maxPoint === currentPoint){
+                return maxPoint
+            }else{
+                return currentPoint - 1;
+            }
         }
     }
 

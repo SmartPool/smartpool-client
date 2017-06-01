@@ -17,20 +17,28 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{vm.farm.short_duration.duration_in_hour}} hour ago</td>
-                    <td>{{vm.farm.short_duration.hash_rate.effective_hashrate_avarage}} <span class="stat-percent">({{vm.farm.short_duration.hash_rate.effective_hashrate_percent}}%)</span></td>
-                    <td>{{vm.farm.short_duration.hash_rate.reported_hashrate_avarage}}</td>
-                    <td>{{vm.farm.short_duration.shares.mined_share_avarage}}</td>
-                    <td>{{vm.farm.short_duration.shares.valid_share_avarage}} <span class="stat-percent"> ({{vm.farm.short_duration.shares.valid_share_percent}}%)</span></td>
-                    <td>{{vm.farm.short_duration.shares.rejected_share_avarage}} <span class="stat-percent"> ({{vm.farm.short_duration.shares.rejected_share_percent}}%)</span></td>
+                    <td>Last {{vm.farm.closet_data.duration_in_min}} minutes</td>
+                    <td>{{vm.farm.closet_data.hash_rate.effective_hashrate}} <span class="stat-percent">({{vm.farm.closet_data.hash_rate.effective_hashrate_percent}}%)</span></td>
+                    <td>{{vm.farm.closet_data.hash_rate.reported_hashrate}}</td>
+                    <td>{{vm.farm.closet_data.shares.mined_share}}</td>
+                    <td>{{vm.farm.closet_data.shares.valid_share}} <span class="stat-percent"> ({{vm.farm.closet_data.shares.valid_share_percent}}%)</span></td>
+                    <td>{{vm.farm.closet_data.shares.rejected_share}} <span class="stat-percent"> ({{vm.farm.closet_data.shares.rejected_share_percent}}%)</span></td>
                 </tr>
                 <tr>
-                    <td>{{vm.farm.long_duration.duration_in_hour}} hour ago</td>
+                    <td>Last {{vm.farm.short_duration.duration_in_hour}} hours</td>
+                    <td>{{vm.farm.short_duration.hash_rate.effective_hashrate_avarage}} <span class="stat-percent">({{vm.farm.short_duration.hash_rate.effective_hashrate_percent}}%)</span></td>
+                    <td>{{vm.farm.short_duration.hash_rate.reported_hashrate_avarage}}</td>
+                    <td>{{vm.farm.short_duration.shares.mined_share_total}}</td>
+                    <td>{{vm.farm.short_duration.shares.valid_share_total}} <span class="stat-percent"> ({{vm.farm.short_duration.shares.valid_share_percent}}%)</span></td>
+                    <td>{{vm.farm.short_duration.shares.rejected_share_total}} <span class="stat-percent"> ({{vm.farm.short_duration.shares.rejected_share_percent}}%)</span></td>
+                </tr>
+                <tr>
+                    <td>Last {{vm.farm.long_duration.duration_in_hour}} hours</td>
                     <td>{{vm.farm.long_duration.hash_rate.effective_hashrate_avarage}}  <span class="stat-percent">({{vm.farm.long_duration.hash_rate.effective_hashrate_percent}}%)</span></td>
                     <td>{{vm.farm.long_duration.hash_rate.reported_hashrate_avarage}}</td>
-                    <td>{{vm.farm.long_duration.shares.mined_share_avarage}}</td>
-                    <td>{{vm.farm.long_duration.shares.valid_share_avarage}} <span class="stat-percent"> ({{vm.farm.long_duration.shares.valid_share_percent}}%)</span></td>
-                    <td>{{vm.farm.long_duration.shares.rejected_share_avarage}} <span class="stat-percent"> ({{vm.farm.long_duration.shares.rejected_share_percent}}%)</span></td>
+                    <td>{{vm.farm.long_duration.shares.mined_share_total}}</td>
+                    <td>{{vm.farm.long_duration.shares.valid_share_total}} <span class="stat-percent"> ({{vm.farm.long_duration.shares.valid_share_percent}}%)</span></td>
+                    <td>{{vm.farm.long_duration.shares.rejected_share_total}} <span class="stat-percent"> ({{vm.farm.long_duration.shares.rejected_share_percent}}%)</span></td>
                 </tr>
                 <tr>
                     <td>Life time</td>
@@ -92,7 +100,7 @@
         </div>
     </div> -->
     <div class="worker_tables">
-        <h3>Average Reported hashrate (MH/s) of {{vm.farm.worker.active_count}} <span popover-trigger="'mouseenter'" uib-popover="Workers submit their hash rate in {{vm.farm.short_duration.duration_in_hour}} hour ago" popover-placement="right">active workers</span></h3>
+        <h3>Average Reported hashrate (MH/s) of {{vm.farm.worker.active_count}} <span popover-trigger="'mouseenter'" uib-popover="Workers submit their hash rate in last {{vm.farm.short_duration.duration_in_hour}} hours" popover-placement="right">active workers</span></h3>
         <table id="worker_table" class="table table-borderless"></table>
     </div>
     <div class="advance_info">
@@ -128,6 +136,10 @@
                 <tr>
                     <td>Share threshold</td>
                     <td>{{vm.config.share_threshold}}</td>
+                </tr>
+                <tr>
+                    <td>Claim threshold</td>
+                    <td>{{vm.config.claim_threshold}}</td>
                 </tr>
                 <tr>
                     <td>Share difficulty</td>
