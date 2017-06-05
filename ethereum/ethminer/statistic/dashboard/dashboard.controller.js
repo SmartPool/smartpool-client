@@ -372,8 +372,8 @@
             //add data for closest data
             vm.farm.closet_data.duration_in_min = response.period_duration / 60;
             if(response.short_window_sample[anchorPoint]) {
-                vm.farm.closet_data.hash_rate.effective_hashrate = response.short_window_sample[anchorPoint].effective_hashrate;
-                vm.farm.closet_data.hash_rate.reported_hashrate = response.short_window_sample[anchorPoint].reported_hashrate;
+                vm.farm.closet_data.hash_rate.effective_hashrate = vm.convertHashrate(response.short_window_sample[anchorPoint].effective_hashrate);
+                vm.farm.closet_data.hash_rate.reported_hashrate = vm.convertHashrate(response.short_window_sample[anchorPoint].reported_hashrate);
                 vm.farm.closet_data.hash_rate.effective_hashrate_percent = response.short_window_sample[anchorPoint].reported_hashrate ===0?"":vm.roundHashRate(response.short_window_sample[anchorPoint].effective_hashrate / response.short_window_sample[anchorPoint].reported_hashrate * 100);
                 vm.farm.closet_data.shares.mined_share = response.short_window_sample[anchorPoint].mined_share;
                 vm.farm.closet_data.shares.valid_share = response.short_window_sample[anchorPoint].valid_share;
