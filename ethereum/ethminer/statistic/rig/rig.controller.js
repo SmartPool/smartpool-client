@@ -201,7 +201,9 @@
                     label: {
                         text: 'Hashrate [MH/s]',
                         position: 'outer-middle'
-                    }
+                    },
+                      min: 0,
+                     padding: {top:0, bottom:0}
                 }
             },
             grid: {
@@ -259,6 +261,8 @@
                         text: 'Shares',
                         position: 'outer-middle'
                     },
+                      min: 0,
+                     padding: {top:0, bottom:0}
                 }
             },
             grid: {

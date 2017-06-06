@@ -199,7 +199,9 @@
                     label: {
                         text: 'Hashrate [MH/s]',
                         position: 'outer-middle'
-                    }
+                    },
+                    min: 0,
+                     padding: {top:0, bottom:0}
                 }
             },
             grid: {
@@ -257,6 +259,8 @@
                         text: 'Shares',
                         position: 'outer-middle'
                     },
+                    min: 0,
+                     padding: {top:0, bottom:0}
                 }
             },
             grid: {
@@ -286,7 +290,9 @@
                     label: {
                         text: 'Active workers',
                         position: 'outer-middle'
-                    }
+                    },
+                    min: 0,
+                     padding: {top:0, bottom:0}
                 }
             },
             grid: {
@@ -728,14 +734,14 @@
             var now = Date.now();
             var currentPoint = Math.round(now / periodDuration / 1000);
 
-            var maxPoint = 0;
+           //var maxPoint = 0;
             $.each(response.short_window_sample, function(key, val) {
                 var keyInt = parseInt(key, 10);
                 if (keyInt > maxPoint) {
                     maxPoint = keyInt;
                 }
             })
-            //return maxPoint;
+            return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
