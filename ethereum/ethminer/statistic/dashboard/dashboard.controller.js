@@ -111,76 +111,7 @@
                 "active_count": 0,
                 "worker_list": []
             }
-
-            //     }
-            // "hash_rate": {
-            //     "short_duration": {
-            //         "effective_hashrate_avarage": 0,
-            //         "reported_hashrate_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Reported Hashrate', 30, 200, 100, 400, 150, 250],
-            //             ['Effective Hashrate', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     },
-            //     "long_duration": {
-            //         "effective_hashrate_avarage": 0,
-            //         "reported_hashrate_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Reported Hashrate', 30, 200, 100, 400, 150, 250],
-            //             ['Effective Hashrate', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     },
-            //     "life_time": {
-
-            //     }
-            // },
-            // "shares": {
-            //     "short_duration": {
-            //         "mined_share_avarage": 0,
-            //         "valid_share_avarage": 0,
-            //         "rejected_share_avarage": 0,
-            //         "duration_in_hour": 1,
-            //         "chart": [
-            //             ['x', 30, 50, 100, 230, 300, 310],
-            //             ['Mined shares', 30, 200, 100, 400, 150, 250],
-            //             ['Valid shares', 50, 20, 10, 40, 15, 25],
-            //             ['Rejected shares', 50, 20, 10, 40, 15, 25]
-            //         ],
-            //     }
-            // }
         };
-
-        // vm.shortHashrateChart = c3.generate({
-        //     bindto: '#shortHashChart',
-        //     data: {
-        //         x: 'x',
-        //         columns: vm.farm.short_duration.hash_rate.chart
-        //     },
-        //     axis: {
-        //         x: {
-        //             type: 'timeseries',
-        //             tick: {
-        //                 format: '%Y-%m-%d %H:%M'
-        //             },
-        //             show: false
-        //         },
-        //         y: {
-        //             label: {
-        //                 text: 'Hashrate [MH/s]',
-        //                 position: 'outer-middle'
-        //             }
-        //         }
-        //     },
-        //     grid: {
-        //         y: {
-        //             show: true
-        //         }
-        //     }
-        // });
         vm.longHashrateChart = c3.generate({
             bindto: '#longHashChart',
             data: {
@@ -213,33 +144,6 @@
                 bottom: 12,
             }
         });
-        // vm.shortSharesChart = c3.generate({
-        //     bindto: '#shortSharesChart',
-        //     data: {
-        //         x: 'x',
-        //         columns: vm.farm.short_duration.shares.chart
-        //     },
-        //     axis: {
-        //         x: {
-        //             type: 'timeseries',
-        //             tick: {
-        //                 format: '%Y-%m-%d %H:%M'
-        //             },
-        //             show: false
-        //         },
-        //         y: {
-        //             label: {
-        //                 text: 'Shares',
-        //                 position: 'outer-middle'
-        //             }
-        //         }
-        //     },
-        //     grid: {
-        //         y: {
-        //             show: true
-        //         }
-        //     }
-        // });
         vm.longSharesChart = c3.generate({
             bindto: '#longSharesChart',
             data: {
@@ -320,7 +224,6 @@
 
             socket.onopen = function() {
                 console.log("Socket is open");
-
                 //var i = 0;
                 vm.sockerInterval = setInterval(function() {
                         if (vm.counter === 0) {
@@ -337,19 +240,6 @@
                             vm.counter = 0;
                         }
                     }, 1000)
-                    //get info after interval time
-                    // (function refreshData() {
-                    //     if (vm.cancelSocker) {
-                    //         return;
-                    //     }
-
-                //     //return sendWsMessage;
-                //     $timeout(refreshData, appConstants.CONST_FRESH_FARM_DATA)
-                // }());
-
-                // $interval(function sendWsMessage() {
-
-                //   }(), appConstants.CONST_FRESH_FARM_DATA);
             };
             socket.onmessage = function(message) {
                 var response = JSON.parse(message.data);
@@ -670,17 +560,6 @@
 
         function showAdvanceInfo() {
             vm.advance.flag = !vm.advance.flag;
-            // if (vm.advance.load) {
-            //     vm.advance.flag = !vm.advance.flag;
-            //     return;
-            // }
-            // EthminerService.GetAdvanceInfo()
-            //     .then(function(response) {
-            //         vm.advance.x = response.x;
-            //         vm.advance.y = response.y;
-            //         vm.advance.load = true;
-            //         vm.advance.flag = true;
-            //     });
         }
         (function initController() {
             EthminerService.GetConfigInfo()
@@ -734,14 +613,14 @@
             var now = Date.now();
             var currentPoint = Math.round(now / periodDuration / 1000);
 
-           //var maxPoint = 0;
+            var maxPoint = 0;
             $.each(response.short_window_sample, function(key, val) {
                 var keyInt = parseInt(key, 10);
                 if (keyInt > maxPoint) {
                     maxPoint = keyInt;
                 }
             })
-            return maxPoint;
+            //return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
