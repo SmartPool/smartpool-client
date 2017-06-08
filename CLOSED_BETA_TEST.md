@@ -12,7 +12,7 @@ When using SmartPool, because the pool is maintained by a smart contract, only a
 In SmartPool, the local server will need to install an Ethereum client (either Geth or Parity) and a SmartPool client. The SmartPool client will interact with the mining rigs to collect all the shares. It also submit a few share to the SmartPool contract via the Ethereum client. Details on how to install these components are in the next section.
 
 ## Requirements and installations
-Currently we only support linux for the local-server of the farm. Supporting other platforms will be in the future.
+The below instructions are for  the the local-server of the farm which runs on linux. Supporting other platforms will be likely the same. We will help you setup if you use Windows, don't worry!
 ### Geth or Parity installed
 You need to install a full-node client for Ethereum. We support both [Go-ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://github.com/paritytech/parity).
 
