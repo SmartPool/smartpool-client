@@ -21,7 +21,6 @@
             return $http.get('/status').then(handleSuccess, handleError('Error get information'));
         }
 
-
         // private functions
 
         function handleSuccess(res) {

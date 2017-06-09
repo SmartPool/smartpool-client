@@ -24,48 +24,6 @@
                 templateUrl: 'rig/rig.view.html',
                 controllerAs: 'vm'
             })
-        // .when('/submitMessage', {
-        //     controller: 'SubmitMessageController',
-        //     templateUrl: 'submitMessage/submitMessage.view.html',
-        //     controllerAs: 'vm'
-        // })
-
-        // .when('/checkMessage', {
-        //     controller: 'CheckMessageController',
-        //     templateUrl: 'checkMessage/checkMessage.view.html',
-        //     controllerAs: 'vm'
-        // })
-
-        .otherwise({ redirectTo: '/' });
+            .otherwise({ redirectTo: '/' });
     }
-
-
-    //run.$inject = ['$rootScope', '$location', '$http'];
-
-    // function run($rootScope, $location, $http) {
-    //     if (window.WebSocket === undefined) {
-    //         console.log("windows is not support websocket");
-    //     } else {
-    //         var socket = new WebSocket("ws://" + $location.$$host + ":" + $location.$$port + "/ws");
-
-    //         socket.onopen = function() {
-    //             console.log("Socket is open");
-    //         };
-    //         socket.onmessage = function(message) {
-    //             var reponse = JSON.parse(message.data);
-    //             $rootScope.$apply(function() {
-    //                 $rootScope.currency = reponse.currency;
-    //                 if( $rootScope.auth ){
-    //                     $rootScope.globals.currentUser.balance = reponse.balance;
-    //                     $rootScope.globals.currentUser.pending_tx = reponse.pending_tx;
-    //                 }
-    //             })
-
-    //         }
-    //         socket.onclose = function() {
-    //             console.log("Socket is close");
-    //         }
-    //     }
-    // }
-
 })();
