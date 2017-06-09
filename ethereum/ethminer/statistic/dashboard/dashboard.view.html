@@ -1,9 +1,10 @@
-﻿
-<div class="farm-dashboard ">
+﻿<div class="farm-dashboard ">
     <ol class="breadcrumb">
-      <li class="active">Farm</li>
+        <li class="active">Farm</li>
     </ol>
-    <!-- <h1>Farm dashboard</h1> -->
+    <div style="float: right;color: red;font-size: 15px;">
+        Fetch new data in {{10-vm.counter}}s ...
+    </div>
     <div class="compare_table">
         <h3>Average information of hashrate & shares</h3>
         <table class="table table-bordered">
@@ -34,7 +35,7 @@
                 </tr>
                 <tr>
                     <td>Last {{vm.farm.long_duration.duration_in_hour}} hours</td>
-                    <td>{{vm.farm.long_duration.hash_rate.effective_hashrate_avarage}}  <span class="stat-percent">({{vm.farm.long_duration.hash_rate.effective_hashrate_percent}}%)</span></td>
+                    <td>{{vm.farm.long_duration.hash_rate.effective_hashrate_avarage}} <span class="stat-percent">({{vm.farm.long_duration.hash_rate.effective_hashrate_percent}}%)</span></td>
                     <td>{{vm.farm.long_duration.hash_rate.reported_hashrate_avarage}}</td>
                     <td>{{vm.farm.long_duration.shares.mined_share_total}}</td>
                     <td>{{vm.farm.long_duration.shares.valid_share_total}} <span class="stat-percent"> ({{vm.farm.long_duration.shares.valid_share_percent}}%)</span></td>
@@ -66,39 +67,9 @@
     <div class="hsw_chart">
         <h3>Hashrate, Shares & Workers in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
         <div id="longHashChart" class="hash_chart"></div>
-         <div id="longSharesChart" class="shares_chart"></div>
-          <div id="longRigChart" class="rig_chart"></div>
+        <div id="longSharesChart" class="shares_chart"></div>
+        <div id="longRigChart" class="rig_chart"></div>
     </div>
-    <!-- <div class="hashrate_charts">
-        <div>
-            <h3>Hashrate in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
-            <div id="shortHashChart" class="hash_chart"></div>
-        </div>
-        <div>
-            <h3>Hashrate in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
-            <div id="longHashChart" class="hash_chart"></div>
-        </div>
-    </div>
-    <div class="shares_charts">
-        <div>
-            <h3>Shares in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
-            <div id="shortSharesChart" class="shares_chart"></div>
-        </div>
-        <div>
-            <h3>Shares in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
-            <div id="longSharesChart" class="shares_chart"></div>
-        </div>
-    </div>
-    <div class="rig_charts">
-        <div>
-            <h3>Shares in last {{vm.farm.short_duration.duration_in_hour}} hour</h3>
-            <div id="shortSharesChart" class="shares_chart"></div>
-        </div>
-        <div>
-            <h3>Active workers in last {{vm.farm.long_duration.duration_in_hour}} hour</h3>
-            <div id="longRigChart" class="rig_chart"></div>
-        </div>
-    </div> -->
     <div class="worker_tables">
         <h3>Average Reported hashrate (MH/s) of {{vm.farm.worker.active_count}} <span popover-trigger="'mouseenter'" uib-popover="Workers submit their hash rate in last {{vm.farm.short_duration.duration_in_hour}} hours" popover-placement="right">active workers</span></h3>
         <table id="worker_table" class="table table-borderless"></table>
