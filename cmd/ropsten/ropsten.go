@@ -199,7 +199,7 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.UintFlag{
 			Name:  "share-threshold",
-			Value: 304,
+			Value: 1040,
 			Usage: "Minimum number of shares in a claim. SmartPool will not submit the claim if it does not have more than or equal to this threshold numer of share.",
 		},
 		cli.UintFlag{
@@ -214,17 +214,17 @@ func BuildAppCommandLine() *cli.App {
 		},
 		cli.UintFlag{
 			Name:  "gasprice",
-			Value: 5,
+			Value: 10,
 			Usage: "Gas price in gwei to use in communication with the contract. Specify 0 if you let your Ethereum Client decide on gas price.",
 		},
 		cli.StringFlag{
 			Name:  "spcontract",
-			Value: "0xf7d93BCB8e4372F46383ecee82f9adF1aA397BA9",
+			Value: "0x893DC419776635F8FD1b1fa9934BF529aeF25607",
 			Usage: "SmartPool latest contract address.",
 		},
 		cli.StringFlag{
 			Name:  "gateway",
-			Value: "0xddcdad6b099b1b237bdb1341cc6881eb63ee3b28",
+			Value: "0x83f0a55a11f2767643d323ab5c06f5cb9ac05f4e",
 			Usage: "Gateway address. Its default value is the official gateway maintained by SmartPool team",
 		},
 		cli.StringFlag{
