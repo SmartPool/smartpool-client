@@ -132,7 +132,7 @@
                         position: 'outer-middle'
                     },
                     min: 0,
-                     padding: {top:0, bottom:0}
+                    padding: { top: 0, bottom: 0 }
                 }
             },
             grid: {
@@ -164,7 +164,7 @@
                         position: 'outer-middle'
                     },
                     min: 0,
-                     padding: {top:0, bottom:0}
+                    padding: { top: 0, bottom: 0 }
                 }
             },
             grid: {
@@ -196,7 +196,7 @@
                         position: 'outer-middle'
                     },
                     min: 0,
-                     padding: {top:0, bottom:0}
+                    padding: { top: 0, bottom: 0 }
                 }
             },
             grid: {
@@ -226,20 +226,20 @@
                 console.log("Socket is open");
                 //var i = 0;
                 vm.sockerInterval = setInterval(function() {
-                        if (vm.counter === 0) {
-                            //console.log("resh");
-                            socket.send(JSON.stringify({
-                                action: "getFarmInfo"
-                            }));
-                        }
-                        $scope.$apply(function() {
-                            vm.counter++;
-                        })
+                    if (vm.counter === 0) {
+                        //console.log("resh");
+                        socket.send(JSON.stringify({
+                            action: "getFarmInfo"
+                        }));
+                    }
+                    $scope.$apply(function() {
+                        vm.counter++;
+                    })
 
-                        if (vm.counter * 1000 === appConstants.CONST_FRESH_FARM_DATA) {
-                            vm.counter = 0;
-                        }
-                    }, 1000)
+                    if (vm.counter * 1000 === appConstants.CONST_FRESH_FARM_DATA) {
+                        vm.counter = 0;
+                    }
+                }, 1000)
             };
             socket.onmessage = function(message) {
                 var response = JSON.parse(message.data);
@@ -296,7 +296,6 @@
             }
             var val;
             for (var key = (anchorPoint - pointTotal + 1); key <= anchorPoint; key++) {
-                //console.log(key);
                 if (response.short_window_sample[key]) {
                     val = response.short_window_sample[key]
                     xChart.push(key * response.period_duration * 1000);
@@ -334,9 +333,9 @@
                         } else {
                             vm.farm.worker.active_count += 1;
                             if (closetFlag) {
-                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1"])
+                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
                             } else {
-                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1"])
+                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
                             }
                         }
 
@@ -435,6 +434,8 @@
                         }
                         if (check) {
                             vm.farm.worker.worker_list[i][3] += rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0;
+                        } else {
+                            vm.farm.worker.worker_list.push([rigName, 0, 0, rigVal.ReportedHashrate, 0, "127.0.0.1", "i"]);
                         }
                         if (rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)) {
                             activeWorker++;
@@ -509,6 +510,8 @@
         }
 
         function applyWorker(response) {
+            vm.farm.worker.active_count = vm.farm.worker.worker_list.length;
+          //  console.log(vm.farm.worker.worker_list);
             if (vm.tableWorker) {
                 $('#worker_table').dataTable().fnDestroy();
             }
@@ -523,6 +526,9 @@
                 vm.farm.worker.worker_list[i][4] = vm.convertHashrate(vm.farm.worker.worker_list[i][4])
             }
             vm.tableWorker = $("#worker_table").DataTable({
+                order: [
+                    [2, 'desc'],
+                ],
                 paging: false,
                 info: false,
                 stateSave: true,
@@ -544,11 +550,19 @@
                     // `data` option, which defaults to the column being worked with, in
                     // this case `data: 0`.
                     "render": function(data, type, row) {
-                        return '<a href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-default btn-xs">' + data + '</a>';
+                        // console.log(row);
+                        // console.log(type);
+                        if (row[6] === 'a') {
+                            return '<a title="active workers" href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-success btn-xs">' + data + '</a>';
+                        } else {
+                            return '<a title="inactive workers" href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-danger btn-xs">' + data + '</a>';
+                        }
+
                     },
                     "targets": 0
                 }, ]
             });
+           // console.log("x");
         }
 
         function applyAdvanceInfo(response) {
@@ -596,7 +610,7 @@
                     maxPoint = keyInt;
                 }
             })
-            //return maxPoint;
+            return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
@@ -620,7 +634,7 @@
                     maxPoint = keyInt;
                 }
             })
-            //return maxPoint;
+            return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
