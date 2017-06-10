@@ -261,7 +261,7 @@
 
         function applyShortPeriod(response) {
             vm.farm.short_duration.duration_in_hour = response.short_window_duration / 3600;
-            var pointTotal = response.short_window_duration / response.period_duration;
+            var pointTotal = response.short_window_duration / response.period_duration + 1;
             vm.farm.short_duration.point_number = pointTotal;
             var totalEffectiveHashRate = 0;
             var totalReportedHashRate = 0;
@@ -367,7 +367,6 @@
             vm.farm.short_duration.shares.valid_share_percent = totalValidShare === 0 ? "" : vm.roundShares(totalValidShare / totalMinedShare * 100);
             vm.farm.short_duration.shares.rejected_share_percent = totalRejectedShare === 0 ? "" : vm.roundShares(totalRejectedShare / totalMinedShare * 100);
 
-
             //load chart
             // vm.shortHashrateChart.load({
             //     columns: vm.farm.short_duration.hash_rate.chart
@@ -379,7 +378,7 @@
 
         function applyLongPeriod(response) {
             vm.farm.long_duration.duration_in_hour = response.long_window_duration / 3600;
-            var pointTotal = response.long_window_duration / response.period_duration;
+            var pointTotal = response.long_window_duration / response.period_duration +1;
             vm.farm.long_duration.point_number = pointTotal;
             var totalEffectiveHashRate = 0;
             var totalReportedHashRate = 0;
@@ -511,7 +510,6 @@
 
         function applyWorker(response) {
             vm.farm.worker.active_count = vm.farm.worker.worker_list.length;
-          //  console.log(vm.farm.worker.worker_list);
             if (vm.tableWorker) {
                 $('#worker_table').dataTable().fnDestroy();
             }
@@ -546,12 +544,7 @@
                     { title: "Ip address" }
                 ],
                 columnDefs: [{
-                    // The `data` parameter refers to the data for the cell (defined by the
-                    // `data` option, which defaults to the column being worked with, in
-                    // this case `data: 0`.
                     "render": function(data, type, row) {
-                        // console.log(row);
-                        // console.log(type);
                         if (row[6] === 'a') {
                             return '<a title="active workers" href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-success btn-xs">' + data + '</a>';
                         } else {
@@ -610,7 +603,7 @@
                     maxPoint = keyInt;
                 }
             })
-            return maxPoint;
+            //return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
@@ -634,7 +627,7 @@
                     maxPoint = keyInt;
                 }
             })
-            return maxPoint;
+            //return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {

@@ -223,7 +223,7 @@
 
         function applyShortPeriod(response) {
             vm.farm.short_duration.duration_in_hour = response.short_window_duration / 3600;
-            var pointTotal = response.short_window_duration / response.period_duration;
+            var pointTotal = response.short_window_duration / response.period_duration + 1;
             vm.farm.short_duration.point_number = pointTotal;
             var totalEffectiveHashRate = 0;
             var totalReportedHashRate = 0;
@@ -302,7 +302,7 @@
 
         function applyLongPeriod(response) {
             vm.farm.long_duration.duration_in_hour = response.long_window_duration / 3600;
-            var pointTotal = response.long_window_duration / response.period_duration;
+            var pointTotal = response.long_window_duration / response.period_duration + 1;
             vm.farm.long_duration.point_number = pointTotal;
             var totalEffectiveHashRate = 0;
             var totalReportedHashRate = 0;
