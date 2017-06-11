@@ -45,9 +45,9 @@ func (cc *EthashContractClient) SetEpochData(
 				smartpool.Output.Printf("Setting optimized epoch data. Error: %s\n", err)
 				return err
 			}
-			errCode, errInfo, err := NewTxWatcher(
-				tx, cc.node, blockNo, SetEpochDataEventTopic,
-				cc.sender.Big()).Wait()
+			errCode, errInfo, err := GetTxResult(
+				tx, cc.transactor, cc.node, blockNo, SetEpochDataEventTopic,
+				cc.sender.Big())
 			if err != nil {
 				smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 				return err

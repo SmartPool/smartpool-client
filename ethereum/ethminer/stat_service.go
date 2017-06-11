@@ -53,7 +53,6 @@ func rigStat(rig smartpool.Rig) map[string]interface{} {
 func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	method := r.URL.Query().Get(":method")
-	fmt.Printf("method: %s\n", method)
 	if method == "json" {
 		scope := r.URL.Query().Get(":scope")
 		if scope == "farm" {
