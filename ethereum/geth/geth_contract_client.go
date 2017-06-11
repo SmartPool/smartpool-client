@@ -15,7 +15,7 @@ import (
 type GethContractClient struct {
 	// the contract implementation that holds all underlying
 	// communication with Ethereum Contract
-	pool       *TestPool
+	pool       *SmartPool
 	transactor *bind.TransactOpts
 	node       ethereum.RPCClient
 	sender     common.Address
@@ -201,7 +201,7 @@ func NewGethContractClient(
 		smartpool.Output.Printf("Couldn't connect to Geth/Parity. Error: %s\n", err)
 		return nil, err
 	}
-	pool, err := NewTestPool(contractAddr, client)
+	pool, err := NewSmartPool(contractAddr, client)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't get SmartPool information from Ethereum Blockchain. Error: %s\n", err)
 		return nil, err
