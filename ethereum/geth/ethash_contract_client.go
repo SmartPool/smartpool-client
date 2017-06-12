@@ -47,10 +47,12 @@ func (cc *EthashContractClient) SetEpochData(
 			}
 			errCode, errInfo, err := NewTxWatcher(
 				tx, cc.node, blockNo, SetEpochDataEventTopic,
-				cc.sender.Big()).Wait()
+				cc.sender.Big()).WaitAndRetry()
 			if err != nil {
 				smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
-				return err
+				start.Add(start, mnlen)
+				nodes = []*big.Int{}
+				continue
 			}
 			if errCode.Cmp(common.Big0) != 0 {
 				smartpool.Output.Printf("Error code: 0x%s - Error info: 0x%s\n", errCode.Text(16), errInfo.Text(16))
