@@ -10,6 +10,7 @@
     function RigController($location, $rootScope, $http, $scope, EthminerService, appConstants, $timeout, $routeParams) {
         var vm = this;
         vm.rigId = $routeParams.rigId;
+        vm.rigIp = $routeParams.rigIp;
         vm.roundHashRate = roundHashRate;
         vm.roundShares = roundShares;
         vm.applyShortPeriod = applyShortPeriod;
@@ -191,7 +192,8 @@
                         //console.log("resh");
                         socket.send(JSON.stringify({
                             action: "getRigInfo",
-                            rigId: vm.rigId
+                            rigId: vm.rigId,
+                            rigIp: vm.rigIp
                         }));
                     }
                     $scope.$apply(function() {
