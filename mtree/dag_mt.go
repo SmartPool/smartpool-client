@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/crypto"
+	"math/big"
 )
 
 type DagData smartpool.SPHash
@@ -56,6 +57,9 @@ func NewDagTree() *DagTree {
 			false,
 			map[uint32]bool{},
 			[]uint32{},
+			0,
+			0,
+			[]NodeData{},
 		},
 	}
 }
@@ -63,6 +67,27 @@ func NewDagTree() *DagTree {
 func (dt DagTree) RootHash() smartpool.SPHash {
 	if dt.finalized {
 		return smartpool.SPHash(dt.Root().(DagData))
+	}
+	panic("SP Merkle tree needs to be finalized by calling mt.Finalize()")
+}
+
+func (dt DagTree) MerkleNodes() []*big.Int {
+	if dt.finalized {
+		result := []*big.Int{}
+		for i := 0; i*2 < len(dt.exportNodes); i++ {
+			if i*2+1 >= len(dt.exportNodes) {
+				result = append(result,
+					smartpool.BranchElementFromHash(
+						smartpool.SPHash(DagData{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
+						smartpool.SPHash(dt.exportNodes[i*2].(DagData))).Big())
+			} else {
+				result = append(result,
+					smartpool.BranchElementFromHash(
+						smartpool.SPHash(dt.exportNodes[i*2+1].(DagData)),
+						smartpool.SPHash(dt.exportNodes[i*2].(DagData))).Big())
+			}
+		}
+		return result
 	}
 	panic("SP Merkle tree needs to be finalized by calling mt.Finalize()")
 }
@@ -80,7 +105,8 @@ func (dt DagTree) AllBranchesArray() []smartpool.BranchElement {
 		for _, k := range dt.Indices() {
 			// p := proofs[k]
 			// fmt.Printf("Index: %d\nRawData: %s\nHashedData: %s\n", k, hex.EncodeToString(p.RawData[:]), proofs[k].HashedData.Hex())
-			hashes := branches[k].ToNodeArray()[1:]
+			hh := branches[k].ToNodeArray()[1:]
+			hashes := hh[:len(hh)-int(dt.StoredLevel())]
 			// fmt.Printf("Len proofs: %s\n", len(pfs))
 			for i := 0; i*2 < len(hashes); i++ {
 				// for anyone who is courious why i*2 + 1 comes before i * 2

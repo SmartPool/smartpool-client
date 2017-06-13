@@ -6,59 +6,69 @@
 package ethereum
 
 import (
+	"encoding/binary"
 	"github.com/SmartPool/smartpool-client"
-	"github.com/SmartPool/smartpool-client/ethereum/ethash"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"time"
 )
 
+var maxUint256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
+
 // Work represents Ethereum pow work
 type Work struct {
-	blockHeader     *types.Header
-	powHash         string
-	seedHash        string
-	shareDifficulty *big.Int
-	createdAt       time.Time
+	BlockHeader     *types.Header
+	Hash            string
+	SeedHash        string
+	ShareDifficulty *big.Int
+	MinerAddress    string
+	CreatedAt       time.Time
 }
 
 func (w *Work) ID() string {
-	return w.powHash
+	return w.Hash
 }
 
-func (w *Work) CreatedAt() time.Time {
-	return w.createdAt
+func (w *Work) SolutionState(s *Share, shareDiff *big.Int) int {
+	hash := s.BlockHeader().HashNoNonce().Bytes()
+	seed := make([]byte, 40)
+	copy(seed, hash)
+	binary.LittleEndian.PutUint64(seed[32:], s.Nonce())
+
+	seed = crypto.Keccak512(seed)
+	hashimoto := new(big.Int).SetBytes(crypto.Keccak256(append(seed, s.MixDigest().Bytes()...)))
+
+	blockTarget := new(big.Int).Div(maxUint256, s.BlockHeader().Difficulty)
+	shareTarget := new(big.Int).Div(maxUint256, s.ShareDifficulty())
+
+	if hashimoto.Cmp(blockTarget) <= 0 {
+		return 2
+	}
+	if hashimoto.Cmp(shareTarget) <= 0 {
+		return 1
+	}
+	return 0
 }
 
 func (w *Work) AcceptSolution(sol smartpool.Solution) smartpool.Share {
 	solution := sol.(*Solution)
 	s := &Share{
-		blockHeader:     w.blockHeader,
+		blockHeader:     w.BlockHeader,
 		nonce:           solution.Nonce,
 		mixDigest:       solution.MixDigest,
-		shareDifficulty: w.ShareDifficulty(),
+		shareDifficulty: w.ShareDifficulty,
+		minerAddress:    w.MinerAddress,
 	}
-	s.SolutionState = ethash.Instance.SolutionState(s, w.ShareDifficulty())
+	s.SolutionState = w.SolutionState(s, s.ShareDifficulty())
 	return s
 }
 
 func (w *Work) PoWHash() common.Hash {
-	return common.HexToHash(w.powHash)
+	return common.HexToHash(w.Hash)
 }
 
-func (w Work) SeedHash() string {
-	return w.seedHash
-}
-
-func (w Work) ShareDifficulty() *big.Int {
-	return w.shareDifficulty
-}
-
-func (w Work) BlockHeader() *types.Header {
-	return w.blockHeader
-}
-
-func NewWork(h *types.Header, ph string, sh string, diff *big.Int) *Work {
-	return &Work{h, ph, sh, diff, time.Now()}
+func NewWork(h *types.Header, ph string, sh string, diff *big.Int, miner string) *Work {
+	return &Work{h, ph, sh, diff, miner, time.Now()}
 }

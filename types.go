@@ -104,6 +104,11 @@ func BranchElementFromHash(a, b SPHash) BranchElement {
 	return result
 }
 
+// Rig represents mining actor that will be directly interactive with smartpool.
+type Rig interface {
+	ID() string
+}
+
 // Work represents SmartPool work that miner needs to solve to have valid
 // shares. Work is easier (has smaller difficulty) than actual Ethereum
 // work that the miner can get from the network.

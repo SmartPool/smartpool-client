@@ -14,7 +14,7 @@ import (
 )
 
 // TestPoolABI is the input ABI used to generate the binding from.
-const TestPoolABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"owners\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"newVersionReleased\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getShareIndex\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"numShares\",\"type\":\"uint256\"},{\"name\":\"difficulty\",\"type\":\"uint256\"}],\"name\":\"calcPayment\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"canRegister\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"error\",\"type\":\"string\"}],\"name\":\"submitClientError\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"rlpHeader\",\"type\":\"bytes\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"shareIndex\",\"type\":\"uint256\"},{\"name\":\"dataSetLookup\",\"type\":\"uint256[]\"},{\"name\":\"witnessForLookup\",\"type\":\"uint256[]\"},{\"name\":\"augCountersBranch\",\"type\":\"uint256[]\"},{\"name\":\"augHashesBranch\",\"type\":\"uint256[]\"}],\"name\":\"verifyClaim\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"numShares\",\"type\":\"uint256\"},{\"name\":\"difficulty\",\"type\":\"uint256\"}],\"name\":\"calcPaymentShareUnits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"paymentAddress\",\"type\":\"address\"}],\"name\":\"register\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"header\",\"type\":\"bytes32\"},{\"name\":\"nonceLe\",\"type\":\"bytes8\"},{\"name\":\"fullSizeIn128Resultion\",\"type\":\"uint256\"},{\"name\":\"dataSetLookup\",\"type\":\"uint256[]\"},{\"name\":\"witnessForLookup\",\"type\":\"uint256[]\"},{\"name\":\"branchSize\",\"type\":\"uint256\"},{\"name\":\"root\",\"type\":\"uint256\"}],\"name\":\"hashimoto\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"epochData\",\"outputs\":[{\"name\":\"merkleRoot\",\"type\":\"uint128\"},{\"name\":\"fullSizeIn128Resultion\",\"type\":\"uint64\"},{\"name\":\"branchDepth\",\"type\":\"uint64\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getClaimSeed\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\"}],\"name\":\"getEpochData\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[3]\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getMinerId\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"declareNewerVersion\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"numShares\",\"type\":\"uint256\"},{\"name\":\"difficulty\",\"type\":\"uint256\"},{\"name\":\"min\",\"type\":\"uint256\"},{\"name\":\"max\",\"type\":\"uint256\"},{\"name\":\"augMerkle\",\"type\":\"uint256\"}],\"name\":\"submitClaim\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"budgetPerShareUnit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"existingIds\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"merkleRoot\",\"type\":\"uint128[]\"},{\"name\":\"fullSizeIn128Resultion\",\"type\":\"uint64[]\"},{\"name\":\"branchDepth\",\"type\":\"uint64[]\"},{\"name\":\"epoch\",\"type\":\"uint256[]\"}],\"name\":\"setEpochData\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"paymentUnitsPer1000Blocks\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"budget\",\"type\":\"uint256\"}],\"name\":\"setBudgetPerShareUnit\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"numChars\",\"type\":\"uint256\"}],\"name\":\"to62Encoding\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"_owners\",\"type\":\"address[3]\"}],\"payable\":true,\"type\":\"constructor\"},{\"payable\":true,\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"msg\",\"type\":\"string\"}],\"name\":\"Debug\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"msg\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"ErrorLog\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"msg\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"ErrorNumber\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"msg\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Pay\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"Register\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"SubmitClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"SetEpochData\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"VerifyExtraData\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"VerifyClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"string\"}],\"name\":\"ClientError\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"msg\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"VerifyAgt\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"result\",\"type\":\"uint256\"}],\"name\":\"Log\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"result\",\"type\":\"uint256\"}],\"name\":\"Result\",\"type\":\"event\"}]"
+const TestPoolABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"owners\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"newVersionReleased\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getPoolETHBalance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"uncleRate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"creationBlockNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"debugGetNumPendingSubmissions\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"canRegister\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"poolFees\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"paymentAddress\",\"type\":\"address\"}],\"name\":\"register\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_uncleRate\",\"type\":\"uint256\"},{\"name\":\"_poolFees\",\"type\":\"uint256\"}],\"name\":\"setUnlceRateAndFees\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getAverageDifficulty\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"debugResetSubmissions\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"},{\"name\":\"seed\",\"type\":\"uint256\"}],\"name\":\"calculateSubmissionIndex\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[2]\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getClaimSeed\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"rootHash\",\"type\":\"uint256\"},{\"name\":\"rootMin\",\"type\":\"uint256\"},{\"name\":\"rootMax\",\"type\":\"uint256\"},{\"name\":\"leafHash\",\"type\":\"uint256\"},{\"name\":\"leafCounter\",\"type\":\"uint256\"},{\"name\":\"branchIndex\",\"type\":\"uint256\"},{\"name\":\"countersBranch\",\"type\":\"uint256[]\"},{\"name\":\"hashesBranch\",\"type\":\"uint256[]\"}],\"name\":\"verifyAgtDebugForTesting\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"ethashContract\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getShareIndexDebugForTestRPC\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"},{\"name\":\"seed\",\"type\":\"uint256\"},{\"name\":\"submissionNumber\",\"type\":\"uint256\"},{\"name\":\"shareIndex\",\"type\":\"uint256\"}],\"name\":\"verifySubmissionIndex\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"miner\",\"type\":\"address\"},{\"name\":\"add\",\"type\":\"bool\"}],\"name\":\"updateWhiteList\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"rlpHeader\",\"type\":\"bytes\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"submissionIndex\",\"type\":\"uint256\"},{\"name\":\"shareIndex\",\"type\":\"uint256\"},{\"name\":\"dataSetLookup\",\"type\":\"uint256[]\"},{\"name\":\"witnessForLookup\",\"type\":\"uint256[]\"},{\"name\":\"augCountersBranch\",\"type\":\"uint256[]\"},{\"name\":\"augHashesBranch\",\"type\":\"uint256[]\"}],\"name\":\"verifyClaim\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"numShares\",\"type\":\"uint256\"},{\"name\":\"difficulty\",\"type\":\"uint256\"},{\"name\":\"min\",\"type\":\"uint256\"},{\"name\":\"max\",\"type\":\"uint256\"},{\"name\":\"augRoot\",\"type\":\"uint256\"},{\"name\":\"lastClaimBeforeVerification\",\"type\":\"bool\"}],\"name\":\"submitClaim\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"getMinerId\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"whiteListEnabled\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"declareNewerVersion\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"existingIds\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"numChars\",\"type\":\"uint256\"}],\"name\":\"to62Encoding\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"_owners\",\"type\":\"address[3]\"},{\"name\":\"_ethashContract\",\"type\":\"address\"},{\"name\":\"_whiteListEnabeled\",\"type\":\"bool\"}],\"payable\":true,\"type\":\"constructor\"},{\"payable\":true,\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"miner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"time\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"numShares\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"difficulty\",\"type\":\"uint256\"}],\"name\":\"ValidShares\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"Register\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"miner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"add\",\"type\":\"bool\"}],\"name\":\"UpdateWhiteList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"VerifyExtraData\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"VerifyClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amountInWei\",\"type\":\"uint256\"}],\"name\":\"IncomingFunds\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"SetUnlceRateAndFees\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"GetShareIndexDebugForTestRPCSubmissionIndex\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"GetShareIndexDebugForTestRPCShareIndex\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"SubmitClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"errorInfo\",\"type\":\"uint256\"}],\"name\":\"DebugResetSubmissions\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"error\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"VerifyAgt\",\"type\":\"event\"}]"
 
 // TestPool is an auto generated Go binding around an Ethereum contract.
 type TestPool struct {
@@ -143,82 +143,30 @@ func (_TestPool *TestPoolTransactorRaw) Transact(opts *bind.TransactOpts, method
 	return _TestPool.Contract.contract.Transact(opts, method, params...)
 }
 
-// BudgetPerShareUnit is a free data retrieval call binding the contract method 0xe97857db.
+// CalculateSubmissionIndex is a free data retrieval call binding the contract method 0x5ed1057d.
 //
-// Solidity: function budgetPerShareUnit() constant returns(uint256)
-func (_TestPool *TestPoolCaller) BudgetPerShareUnit(opts *bind.CallOpts) (*big.Int, error) {
+// Solidity: function calculateSubmissionIndex(sender address, seed uint256) constant returns(uint256[2])
+func (_TestPool *TestPoolCaller) CalculateSubmissionIndex(opts *bind.CallOpts, sender common.Address, seed *big.Int) ([2]*big.Int, error) {
 	var (
-		ret0 = new(*big.Int)
+		ret0 = new([2]*big.Int)
 	)
 	out := ret0
-	err := _TestPool.contract.Call(opts, out, "budgetPerShareUnit")
+	err := _TestPool.contract.Call(opts, out, "calculateSubmissionIndex", sender, seed)
 	return *ret0, err
 }
 
-// BudgetPerShareUnit is a free data retrieval call binding the contract method 0xe97857db.
+// CalculateSubmissionIndex is a free data retrieval call binding the contract method 0x5ed1057d.
 //
-// Solidity: function budgetPerShareUnit() constant returns(uint256)
-func (_TestPool *TestPoolSession) BudgetPerShareUnit() (*big.Int, error) {
-	return _TestPool.Contract.BudgetPerShareUnit(&_TestPool.CallOpts)
+// Solidity: function calculateSubmissionIndex(sender address, seed uint256) constant returns(uint256[2])
+func (_TestPool *TestPoolSession) CalculateSubmissionIndex(sender common.Address, seed *big.Int) ([2]*big.Int, error) {
+	return _TestPool.Contract.CalculateSubmissionIndex(&_TestPool.CallOpts, sender, seed)
 }
 
-// BudgetPerShareUnit is a free data retrieval call binding the contract method 0xe97857db.
+// CalculateSubmissionIndex is a free data retrieval call binding the contract method 0x5ed1057d.
 //
-// Solidity: function budgetPerShareUnit() constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) BudgetPerShareUnit() (*big.Int, error) {
-	return _TestPool.Contract.BudgetPerShareUnit(&_TestPool.CallOpts)
-}
-
-// CalcPayment is a free data retrieval call binding the contract method 0x17a720ac.
-//
-// Solidity: function calcPayment(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolCaller) CalcPayment(opts *bind.CallOpts, numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _TestPool.contract.Call(opts, out, "calcPayment", numShares, difficulty)
-	return *ret0, err
-}
-
-// CalcPayment is a free data retrieval call binding the contract method 0x17a720ac.
-//
-// Solidity: function calcPayment(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolSession) CalcPayment(numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.CalcPayment(&_TestPool.CallOpts, numShares, difficulty)
-}
-
-// CalcPayment is a free data retrieval call binding the contract method 0x17a720ac.
-//
-// Solidity: function calcPayment(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) CalcPayment(numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.CalcPayment(&_TestPool.CallOpts, numShares, difficulty)
-}
-
-// CalcPaymentShareUnits is a free data retrieval call binding the contract method 0x3c00146b.
-//
-// Solidity: function calcPaymentShareUnits(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolCaller) CalcPaymentShareUnits(opts *bind.CallOpts, numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _TestPool.contract.Call(opts, out, "calcPaymentShareUnits", numShares, difficulty)
-	return *ret0, err
-}
-
-// CalcPaymentShareUnits is a free data retrieval call binding the contract method 0x3c00146b.
-//
-// Solidity: function calcPaymentShareUnits(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolSession) CalcPaymentShareUnits(numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.CalcPaymentShareUnits(&_TestPool.CallOpts, numShares, difficulty)
-}
-
-// CalcPaymentShareUnits is a free data retrieval call binding the contract method 0x3c00146b.
-//
-// Solidity: function calcPaymentShareUnits(numShares uint256, difficulty uint256) constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) CalcPaymentShareUnits(numShares *big.Int, difficulty *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.CalcPaymentShareUnits(&_TestPool.CallOpts, numShares, difficulty)
+// Solidity: function calculateSubmissionIndex(sender address, seed uint256) constant returns(uint256[2])
+func (_TestPool *TestPoolCallerSession) CalculateSubmissionIndex(sender common.Address, seed *big.Int) ([2]*big.Int, error) {
+	return _TestPool.Contract.CalculateSubmissionIndex(&_TestPool.CallOpts, sender, seed)
 }
 
 // CanRegister is a free data retrieval call binding the contract method 0x320d46d4.
@@ -247,44 +195,82 @@ func (_TestPool *TestPoolCallerSession) CanRegister(sender common.Address) (bool
 	return _TestPool.Contract.CanRegister(&_TestPool.CallOpts, sender)
 }
 
-// EpochData is a free data retrieval call binding the contract method 0x6e821b2e.
+// CreationBlockNumber is a free data retrieval call binding the contract method 0x1bf30929.
 //
-// Solidity: function epochData( uint256) constant returns(merkleRoot uint128, fullSizeIn128Resultion uint64, branchDepth uint64)
-func (_TestPool *TestPoolCaller) EpochData(opts *bind.CallOpts, arg0 *big.Int) (struct {
-	MerkleRoot             *big.Int
-	FullSizeIn128Resultion uint64
-	BranchDepth            uint64
-}, error) {
-	ret := new(struct {
-		MerkleRoot             *big.Int
-		FullSizeIn128Resultion uint64
-		BranchDepth            uint64
-	})
-	out := ret
-	err := _TestPool.contract.Call(opts, out, "epochData", arg0)
-	return *ret, err
+// Solidity: function creationBlockNumber() constant returns(uint256)
+func (_TestPool *TestPoolCaller) CreationBlockNumber(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "creationBlockNumber")
+	return *ret0, err
 }
 
-// EpochData is a free data retrieval call binding the contract method 0x6e821b2e.
+// CreationBlockNumber is a free data retrieval call binding the contract method 0x1bf30929.
 //
-// Solidity: function epochData( uint256) constant returns(merkleRoot uint128, fullSizeIn128Resultion uint64, branchDepth uint64)
-func (_TestPool *TestPoolSession) EpochData(arg0 *big.Int) (struct {
-	MerkleRoot             *big.Int
-	FullSizeIn128Resultion uint64
-	BranchDepth            uint64
-}, error) {
-	return _TestPool.Contract.EpochData(&_TestPool.CallOpts, arg0)
+// Solidity: function creationBlockNumber() constant returns(uint256)
+func (_TestPool *TestPoolSession) CreationBlockNumber() (*big.Int, error) {
+	return _TestPool.Contract.CreationBlockNumber(&_TestPool.CallOpts)
 }
 
-// EpochData is a free data retrieval call binding the contract method 0x6e821b2e.
+// CreationBlockNumber is a free data retrieval call binding the contract method 0x1bf30929.
 //
-// Solidity: function epochData( uint256) constant returns(merkleRoot uint128, fullSizeIn128Resultion uint64, branchDepth uint64)
-func (_TestPool *TestPoolCallerSession) EpochData(arg0 *big.Int) (struct {
-	MerkleRoot             *big.Int
-	FullSizeIn128Resultion uint64
-	BranchDepth            uint64
-}, error) {
-	return _TestPool.Contract.EpochData(&_TestPool.CallOpts, arg0)
+// Solidity: function creationBlockNumber() constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) CreationBlockNumber() (*big.Int, error) {
+	return _TestPool.Contract.CreationBlockNumber(&_TestPool.CallOpts)
+}
+
+// DebugGetNumPendingSubmissions is a free data retrieval call binding the contract method 0x21aa4548.
+//
+// Solidity: function debugGetNumPendingSubmissions(sender address) constant returns(uint256)
+func (_TestPool *TestPoolCaller) DebugGetNumPendingSubmissions(opts *bind.CallOpts, sender common.Address) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "debugGetNumPendingSubmissions", sender)
+	return *ret0, err
+}
+
+// DebugGetNumPendingSubmissions is a free data retrieval call binding the contract method 0x21aa4548.
+//
+// Solidity: function debugGetNumPendingSubmissions(sender address) constant returns(uint256)
+func (_TestPool *TestPoolSession) DebugGetNumPendingSubmissions(sender common.Address) (*big.Int, error) {
+	return _TestPool.Contract.DebugGetNumPendingSubmissions(&_TestPool.CallOpts, sender)
+}
+
+// DebugGetNumPendingSubmissions is a free data retrieval call binding the contract method 0x21aa4548.
+//
+// Solidity: function debugGetNumPendingSubmissions(sender address) constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) DebugGetNumPendingSubmissions(sender common.Address) (*big.Int, error) {
+	return _TestPool.Contract.DebugGetNumPendingSubmissions(&_TestPool.CallOpts, sender)
+}
+
+// EthashContract is a free data retrieval call binding the contract method 0x7f949ac0.
+//
+// Solidity: function ethashContract() constant returns(address)
+func (_TestPool *TestPoolCaller) EthashContract(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "ethashContract")
+	return *ret0, err
+}
+
+// EthashContract is a free data retrieval call binding the contract method 0x7f949ac0.
+//
+// Solidity: function ethashContract() constant returns(address)
+func (_TestPool *TestPoolSession) EthashContract() (common.Address, error) {
+	return _TestPool.Contract.EthashContract(&_TestPool.CallOpts)
+}
+
+// EthashContract is a free data retrieval call binding the contract method 0x7f949ac0.
+//
+// Solidity: function ethashContract() constant returns(address)
+func (_TestPool *TestPoolCallerSession) EthashContract() (common.Address, error) {
+	return _TestPool.Contract.EthashContract(&_TestPool.CallOpts)
 }
 
 // ExistingIds is a free data retrieval call binding the contract method 0xee385304.
@@ -313,6 +299,32 @@ func (_TestPool *TestPoolCallerSession) ExistingIds(arg0 [32]byte) (bool, error)
 	return _TestPool.Contract.ExistingIds(&_TestPool.CallOpts, arg0)
 }
 
+// GetAverageDifficulty is a free data retrieval call binding the contract method 0x48d17a67.
+//
+// Solidity: function getAverageDifficulty(sender address) constant returns(uint256)
+func (_TestPool *TestPoolCaller) GetAverageDifficulty(opts *bind.CallOpts, sender common.Address) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "getAverageDifficulty", sender)
+	return *ret0, err
+}
+
+// GetAverageDifficulty is a free data retrieval call binding the contract method 0x48d17a67.
+//
+// Solidity: function getAverageDifficulty(sender address) constant returns(uint256)
+func (_TestPool *TestPoolSession) GetAverageDifficulty(sender common.Address) (*big.Int, error) {
+	return _TestPool.Contract.GetAverageDifficulty(&_TestPool.CallOpts, sender)
+}
+
+// GetAverageDifficulty is a free data retrieval call binding the contract method 0x48d17a67.
+//
+// Solidity: function getAverageDifficulty(sender address) constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) GetAverageDifficulty(sender common.Address) (*big.Int, error) {
+	return _TestPool.Contract.GetAverageDifficulty(&_TestPool.CallOpts, sender)
+}
+
 // GetClaimSeed is a free data retrieval call binding the contract method 0x7087ed2c.
 //
 // Solidity: function getClaimSeed(sender address) constant returns(uint256)
@@ -337,32 +349,6 @@ func (_TestPool *TestPoolSession) GetClaimSeed(sender common.Address) (*big.Int,
 // Solidity: function getClaimSeed(sender address) constant returns(uint256)
 func (_TestPool *TestPoolCallerSession) GetClaimSeed(sender common.Address) (*big.Int, error) {
 	return _TestPool.Contract.GetClaimSeed(&_TestPool.CallOpts, sender)
-}
-
-// GetEpochData is a free data retrieval call binding the contract method 0x859e7d32.
-//
-// Solidity: function getEpochData(epoch uint256) constant returns(uint256[3])
-func (_TestPool *TestPoolCaller) GetEpochData(opts *bind.CallOpts, epoch *big.Int) ([3]*big.Int, error) {
-	var (
-		ret0 = new([3]*big.Int)
-	)
-	out := ret0
-	err := _TestPool.contract.Call(opts, out, "getEpochData", epoch)
-	return *ret0, err
-}
-
-// GetEpochData is a free data retrieval call binding the contract method 0x859e7d32.
-//
-// Solidity: function getEpochData(epoch uint256) constant returns(uint256[3])
-func (_TestPool *TestPoolSession) GetEpochData(epoch *big.Int) ([3]*big.Int, error) {
-	return _TestPool.Contract.GetEpochData(&_TestPool.CallOpts, epoch)
-}
-
-// GetEpochData is a free data retrieval call binding the contract method 0x859e7d32.
-//
-// Solidity: function getEpochData(epoch uint256) constant returns(uint256[3])
-func (_TestPool *TestPoolCallerSession) GetEpochData(epoch *big.Int) ([3]*big.Int, error) {
-	return _TestPool.Contract.GetEpochData(&_TestPool.CallOpts, epoch)
 }
 
 // GetMinerId is a free data retrieval call binding the contract method 0xe2dea715.
@@ -391,56 +377,30 @@ func (_TestPool *TestPoolCallerSession) GetMinerId(sender common.Address) ([32]b
 	return _TestPool.Contract.GetMinerId(&_TestPool.CallOpts, sender)
 }
 
-// GetShareIndex is a free data retrieval call binding the contract method 0x0f136527.
+// GetPoolETHBalance is a free data retrieval call binding the contract method 0x0abb8409.
 //
-// Solidity: function getShareIndex(sender address) constant returns(uint256)
-func (_TestPool *TestPoolCaller) GetShareIndex(opts *bind.CallOpts, sender common.Address) (*big.Int, error) {
+// Solidity: function getPoolETHBalance() constant returns(uint256)
+func (_TestPool *TestPoolCaller) GetPoolETHBalance(opts *bind.CallOpts) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _TestPool.contract.Call(opts, out, "getShareIndex", sender)
+	err := _TestPool.contract.Call(opts, out, "getPoolETHBalance")
 	return *ret0, err
 }
 
-// GetShareIndex is a free data retrieval call binding the contract method 0x0f136527.
+// GetPoolETHBalance is a free data retrieval call binding the contract method 0x0abb8409.
 //
-// Solidity: function getShareIndex(sender address) constant returns(uint256)
-func (_TestPool *TestPoolSession) GetShareIndex(sender common.Address) (*big.Int, error) {
-	return _TestPool.Contract.GetShareIndex(&_TestPool.CallOpts, sender)
+// Solidity: function getPoolETHBalance() constant returns(uint256)
+func (_TestPool *TestPoolSession) GetPoolETHBalance() (*big.Int, error) {
+	return _TestPool.Contract.GetPoolETHBalance(&_TestPool.CallOpts)
 }
 
-// GetShareIndex is a free data retrieval call binding the contract method 0x0f136527.
+// GetPoolETHBalance is a free data retrieval call binding the contract method 0x0abb8409.
 //
-// Solidity: function getShareIndex(sender address) constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) GetShareIndex(sender common.Address) (*big.Int, error) {
-	return _TestPool.Contract.GetShareIndex(&_TestPool.CallOpts, sender)
-}
-
-// Hashimoto is a free data retrieval call binding the contract method 0x58e69c5a.
-//
-// Solidity: function hashimoto(header bytes32, nonceLe bytes8, fullSizeIn128Resultion uint256, dataSetLookup uint256[], witnessForLookup uint256[], branchSize uint256, root uint256) constant returns(uint256)
-func (_TestPool *TestPoolCaller) Hashimoto(opts *bind.CallOpts, header [32]byte, nonceLe [8]byte, fullSizeIn128Resultion *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, branchSize *big.Int, root *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _TestPool.contract.Call(opts, out, "hashimoto", header, nonceLe, fullSizeIn128Resultion, dataSetLookup, witnessForLookup, branchSize, root)
-	return *ret0, err
-}
-
-// Hashimoto is a free data retrieval call binding the contract method 0x58e69c5a.
-//
-// Solidity: function hashimoto(header bytes32, nonceLe bytes8, fullSizeIn128Resultion uint256, dataSetLookup uint256[], witnessForLookup uint256[], branchSize uint256, root uint256) constant returns(uint256)
-func (_TestPool *TestPoolSession) Hashimoto(header [32]byte, nonceLe [8]byte, fullSizeIn128Resultion *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, branchSize *big.Int, root *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.Hashimoto(&_TestPool.CallOpts, header, nonceLe, fullSizeIn128Resultion, dataSetLookup, witnessForLookup, branchSize, root)
-}
-
-// Hashimoto is a free data retrieval call binding the contract method 0x58e69c5a.
-//
-// Solidity: function hashimoto(header bytes32, nonceLe bytes8, fullSizeIn128Resultion uint256, dataSetLookup uint256[], witnessForLookup uint256[], branchSize uint256, root uint256) constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) Hashimoto(header [32]byte, nonceLe [8]byte, fullSizeIn128Resultion *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, branchSize *big.Int, root *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.Hashimoto(&_TestPool.CallOpts, header, nonceLe, fullSizeIn128Resultion, dataSetLookup, witnessForLookup, branchSize, root)
+// Solidity: function getPoolETHBalance() constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) GetPoolETHBalance() (*big.Int, error) {
+	return _TestPool.Contract.GetPoolETHBalance(&_TestPool.CallOpts)
 }
 
 // IsRegistered is a free data retrieval call binding the contract method 0xc3c5a547.
@@ -521,30 +481,30 @@ func (_TestPool *TestPoolCallerSession) Owners(arg0 common.Address) (bool, error
 	return _TestPool.Contract.Owners(&_TestPool.CallOpts, arg0)
 }
 
-// PaymentUnitsPer1000Blocks is a free data retrieval call binding the contract method 0xf4d00f99.
+// PoolFees is a free data retrieval call binding the contract method 0x33580959.
 //
-// Solidity: function paymentUnitsPer1000Blocks( uint256) constant returns(uint256)
-func (_TestPool *TestPoolCaller) PaymentUnitsPer1000Blocks(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+// Solidity: function poolFees() constant returns(uint256)
+func (_TestPool *TestPoolCaller) PoolFees(opts *bind.CallOpts) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _TestPool.contract.Call(opts, out, "paymentUnitsPer1000Blocks", arg0)
+	err := _TestPool.contract.Call(opts, out, "poolFees")
 	return *ret0, err
 }
 
-// PaymentUnitsPer1000Blocks is a free data retrieval call binding the contract method 0xf4d00f99.
+// PoolFees is a free data retrieval call binding the contract method 0x33580959.
 //
-// Solidity: function paymentUnitsPer1000Blocks( uint256) constant returns(uint256)
-func (_TestPool *TestPoolSession) PaymentUnitsPer1000Blocks(arg0 *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.PaymentUnitsPer1000Blocks(&_TestPool.CallOpts, arg0)
+// Solidity: function poolFees() constant returns(uint256)
+func (_TestPool *TestPoolSession) PoolFees() (*big.Int, error) {
+	return _TestPool.Contract.PoolFees(&_TestPool.CallOpts)
 }
 
-// PaymentUnitsPer1000Blocks is a free data retrieval call binding the contract method 0xf4d00f99.
+// PoolFees is a free data retrieval call binding the contract method 0x33580959.
 //
-// Solidity: function paymentUnitsPer1000Blocks( uint256) constant returns(uint256)
-func (_TestPool *TestPoolCallerSession) PaymentUnitsPer1000Blocks(arg0 *big.Int) (*big.Int, error) {
-	return _TestPool.Contract.PaymentUnitsPer1000Blocks(&_TestPool.CallOpts, arg0)
+// Solidity: function poolFees() constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) PoolFees() (*big.Int, error) {
+	return _TestPool.Contract.PoolFees(&_TestPool.CallOpts)
 }
 
 // To62Encoding is a free data retrieval call binding the contract method 0xff5d2c39.
@@ -573,6 +533,58 @@ func (_TestPool *TestPoolCallerSession) To62Encoding(id *big.Int, numChars *big.
 	return _TestPool.Contract.To62Encoding(&_TestPool.CallOpts, id, numChars)
 }
 
+// UncleRate is a free data retrieval call binding the contract method 0x1bc41284.
+//
+// Solidity: function uncleRate() constant returns(uint256)
+func (_TestPool *TestPoolCaller) UncleRate(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "uncleRate")
+	return *ret0, err
+}
+
+// UncleRate is a free data retrieval call binding the contract method 0x1bc41284.
+//
+// Solidity: function uncleRate() constant returns(uint256)
+func (_TestPool *TestPoolSession) UncleRate() (*big.Int, error) {
+	return _TestPool.Contract.UncleRate(&_TestPool.CallOpts)
+}
+
+// UncleRate is a free data retrieval call binding the contract method 0x1bc41284.
+//
+// Solidity: function uncleRate() constant returns(uint256)
+func (_TestPool *TestPoolCallerSession) UncleRate() (*big.Int, error) {
+	return _TestPool.Contract.UncleRate(&_TestPool.CallOpts)
+}
+
+// VerifySubmissionIndex is a free data retrieval call binding the contract method 0x9e133be4.
+//
+// Solidity: function verifySubmissionIndex(sender address, seed uint256, submissionNumber uint256, shareIndex uint256) constant returns(bool)
+func (_TestPool *TestPoolCaller) VerifySubmissionIndex(opts *bind.CallOpts, sender common.Address, seed *big.Int, submissionNumber *big.Int, shareIndex *big.Int) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "verifySubmissionIndex", sender, seed, submissionNumber, shareIndex)
+	return *ret0, err
+}
+
+// VerifySubmissionIndex is a free data retrieval call binding the contract method 0x9e133be4.
+//
+// Solidity: function verifySubmissionIndex(sender address, seed uint256, submissionNumber uint256, shareIndex uint256) constant returns(bool)
+func (_TestPool *TestPoolSession) VerifySubmissionIndex(sender common.Address, seed *big.Int, submissionNumber *big.Int, shareIndex *big.Int) (bool, error) {
+	return _TestPool.Contract.VerifySubmissionIndex(&_TestPool.CallOpts, sender, seed, submissionNumber, shareIndex)
+}
+
+// VerifySubmissionIndex is a free data retrieval call binding the contract method 0x9e133be4.
+//
+// Solidity: function verifySubmissionIndex(sender address, seed uint256, submissionNumber uint256, shareIndex uint256) constant returns(bool)
+func (_TestPool *TestPoolCallerSession) VerifySubmissionIndex(sender common.Address, seed *big.Int, submissionNumber *big.Int, shareIndex *big.Int) (bool, error) {
+	return _TestPool.Contract.VerifySubmissionIndex(&_TestPool.CallOpts, sender, seed, submissionNumber, shareIndex)
+}
+
 // Version is a free data retrieval call binding the contract method 0x54fd4d50.
 //
 // Solidity: function version() constant returns(string)
@@ -599,6 +611,53 @@ func (_TestPool *TestPoolCallerSession) Version() (string, error) {
 	return _TestPool.Contract.Version(&_TestPool.CallOpts)
 }
 
+// WhiteListEnabled is a free data retrieval call binding the contract method 0xe2e616bb.
+//
+// Solidity: function whiteListEnabled() constant returns(bool)
+func (_TestPool *TestPoolCaller) WhiteListEnabled(opts *bind.CallOpts) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _TestPool.contract.Call(opts, out, "whiteListEnabled")
+	return *ret0, err
+}
+
+// WhiteListEnabled is a free data retrieval call binding the contract method 0xe2e616bb.
+//
+// Solidity: function whiteListEnabled() constant returns(bool)
+func (_TestPool *TestPoolSession) WhiteListEnabled() (bool, error) {
+	return _TestPool.Contract.WhiteListEnabled(&_TestPool.CallOpts)
+}
+
+// WhiteListEnabled is a free data retrieval call binding the contract method 0xe2e616bb.
+//
+// Solidity: function whiteListEnabled() constant returns(bool)
+func (_TestPool *TestPoolCallerSession) WhiteListEnabled() (bool, error) {
+	return _TestPool.Contract.WhiteListEnabled(&_TestPool.CallOpts)
+}
+
+// DebugResetSubmissions is a paid mutator transaction binding the contract method 0x5eadd607.
+//
+// Solidity: function debugResetSubmissions() returns()
+func (_TestPool *TestPoolTransactor) DebugResetSubmissions(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "debugResetSubmissions")
+}
+
+// DebugResetSubmissions is a paid mutator transaction binding the contract method 0x5eadd607.
+//
+// Solidity: function debugResetSubmissions() returns()
+func (_TestPool *TestPoolSession) DebugResetSubmissions() (*types.Transaction, error) {
+	return _TestPool.Contract.DebugResetSubmissions(&_TestPool.TransactOpts)
+}
+
+// DebugResetSubmissions is a paid mutator transaction binding the contract method 0x5eadd607.
+//
+// Solidity: function debugResetSubmissions() returns()
+func (_TestPool *TestPoolTransactorSession) DebugResetSubmissions() (*types.Transaction, error) {
+	return _TestPool.Contract.DebugResetSubmissions(&_TestPool.TransactOpts)
+}
+
 // DeclareNewerVersion is a paid mutator transaction binding the contract method 0xe3d86998.
 //
 // Solidity: function declareNewerVersion() returns()
@@ -618,6 +677,27 @@ func (_TestPool *TestPoolSession) DeclareNewerVersion() (*types.Transaction, err
 // Solidity: function declareNewerVersion() returns()
 func (_TestPool *TestPoolTransactorSession) DeclareNewerVersion() (*types.Transaction, error) {
 	return _TestPool.Contract.DeclareNewerVersion(&_TestPool.TransactOpts)
+}
+
+// GetShareIndexDebugForTestRPC is a paid mutator transaction binding the contract method 0x84c65296.
+//
+// Solidity: function getShareIndexDebugForTestRPC(sender address) returns()
+func (_TestPool *TestPoolTransactor) GetShareIndexDebugForTestRPC(opts *bind.TransactOpts, sender common.Address) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "getShareIndexDebugForTestRPC", sender)
+}
+
+// GetShareIndexDebugForTestRPC is a paid mutator transaction binding the contract method 0x84c65296.
+//
+// Solidity: function getShareIndexDebugForTestRPC(sender address) returns()
+func (_TestPool *TestPoolSession) GetShareIndexDebugForTestRPC(sender common.Address) (*types.Transaction, error) {
+	return _TestPool.Contract.GetShareIndexDebugForTestRPC(&_TestPool.TransactOpts, sender)
+}
+
+// GetShareIndexDebugForTestRPC is a paid mutator transaction binding the contract method 0x84c65296.
+//
+// Solidity: function getShareIndexDebugForTestRPC(sender address) returns()
+func (_TestPool *TestPoolTransactorSession) GetShareIndexDebugForTestRPC(sender common.Address) (*types.Transaction, error) {
+	return _TestPool.Contract.GetShareIndexDebugForTestRPC(&_TestPool.TransactOpts, sender)
 }
 
 // Register is a paid mutator transaction binding the contract method 0x4420e486.
@@ -641,107 +721,107 @@ func (_TestPool *TestPoolTransactorSession) Register(paymentAddress common.Addre
 	return _TestPool.Contract.Register(&_TestPool.TransactOpts, paymentAddress)
 }
 
-// SetBudgetPerShareUnit is a paid mutator transaction binding the contract method 0xfad574be.
+// SetUnlceRateAndFees is a paid mutator transaction binding the contract method 0x46b3f696.
 //
-// Solidity: function setBudgetPerShareUnit(budget uint256) returns()
-func (_TestPool *TestPoolTransactor) SetBudgetPerShareUnit(opts *bind.TransactOpts, budget *big.Int) (*types.Transaction, error) {
-	return _TestPool.contract.Transact(opts, "setBudgetPerShareUnit", budget)
+// Solidity: function setUnlceRateAndFees(_uncleRate uint256, _poolFees uint256) returns()
+func (_TestPool *TestPoolTransactor) SetUnlceRateAndFees(opts *bind.TransactOpts, _uncleRate *big.Int, _poolFees *big.Int) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "setUnlceRateAndFees", _uncleRate, _poolFees)
 }
 
-// SetBudgetPerShareUnit is a paid mutator transaction binding the contract method 0xfad574be.
+// SetUnlceRateAndFees is a paid mutator transaction binding the contract method 0x46b3f696.
 //
-// Solidity: function setBudgetPerShareUnit(budget uint256) returns()
-func (_TestPool *TestPoolSession) SetBudgetPerShareUnit(budget *big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SetBudgetPerShareUnit(&_TestPool.TransactOpts, budget)
+// Solidity: function setUnlceRateAndFees(_uncleRate uint256, _poolFees uint256) returns()
+func (_TestPool *TestPoolSession) SetUnlceRateAndFees(_uncleRate *big.Int, _poolFees *big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.SetUnlceRateAndFees(&_TestPool.TransactOpts, _uncleRate, _poolFees)
 }
 
-// SetBudgetPerShareUnit is a paid mutator transaction binding the contract method 0xfad574be.
+// SetUnlceRateAndFees is a paid mutator transaction binding the contract method 0x46b3f696.
 //
-// Solidity: function setBudgetPerShareUnit(budget uint256) returns()
-func (_TestPool *TestPoolTransactorSession) SetBudgetPerShareUnit(budget *big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SetBudgetPerShareUnit(&_TestPool.TransactOpts, budget)
+// Solidity: function setUnlceRateAndFees(_uncleRate uint256, _poolFees uint256) returns()
+func (_TestPool *TestPoolTransactorSession) SetUnlceRateAndFees(_uncleRate *big.Int, _poolFees *big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.SetUnlceRateAndFees(&_TestPool.TransactOpts, _uncleRate, _poolFees)
 }
 
-// SetEpochData is a paid mutator transaction binding the contract method 0xf2cfe267.
+// SubmitClaim is a paid mutator transaction binding the contract method 0xcedb217a.
 //
-// Solidity: function setEpochData(merkleRoot uint128[], fullSizeIn128Resultion uint64[], branchDepth uint64[], epoch uint256[]) returns()
-func (_TestPool *TestPoolTransactor) SetEpochData(opts *bind.TransactOpts, merkleRoot []*big.Int, fullSizeIn128Resultion []uint64, branchDepth []uint64, epoch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.contract.Transact(opts, "setEpochData", merkleRoot, fullSizeIn128Resultion, branchDepth, epoch)
+// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augRoot uint256, lastClaimBeforeVerification bool) returns()
+func (_TestPool *TestPoolTransactor) SubmitClaim(opts *bind.TransactOpts, numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augRoot *big.Int, lastClaimBeforeVerification bool) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "submitClaim", numShares, difficulty, min, max, augRoot, lastClaimBeforeVerification)
 }
 
-// SetEpochData is a paid mutator transaction binding the contract method 0xf2cfe267.
+// SubmitClaim is a paid mutator transaction binding the contract method 0xcedb217a.
 //
-// Solidity: function setEpochData(merkleRoot uint128[], fullSizeIn128Resultion uint64[], branchDepth uint64[], epoch uint256[]) returns()
-func (_TestPool *TestPoolSession) SetEpochData(merkleRoot []*big.Int, fullSizeIn128Resultion []uint64, branchDepth []uint64, epoch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SetEpochData(&_TestPool.TransactOpts, merkleRoot, fullSizeIn128Resultion, branchDepth, epoch)
+// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augRoot uint256, lastClaimBeforeVerification bool) returns()
+func (_TestPool *TestPoolSession) SubmitClaim(numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augRoot *big.Int, lastClaimBeforeVerification bool) (*types.Transaction, error) {
+	return _TestPool.Contract.SubmitClaim(&_TestPool.TransactOpts, numShares, difficulty, min, max, augRoot, lastClaimBeforeVerification)
 }
 
-// SetEpochData is a paid mutator transaction binding the contract method 0xf2cfe267.
+// SubmitClaim is a paid mutator transaction binding the contract method 0xcedb217a.
 //
-// Solidity: function setEpochData(merkleRoot uint128[], fullSizeIn128Resultion uint64[], branchDepth uint64[], epoch uint256[]) returns()
-func (_TestPool *TestPoolTransactorSession) SetEpochData(merkleRoot []*big.Int, fullSizeIn128Resultion []uint64, branchDepth []uint64, epoch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SetEpochData(&_TestPool.TransactOpts, merkleRoot, fullSizeIn128Resultion, branchDepth, epoch)
+// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augRoot uint256, lastClaimBeforeVerification bool) returns()
+func (_TestPool *TestPoolTransactorSession) SubmitClaim(numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augRoot *big.Int, lastClaimBeforeVerification bool) (*types.Transaction, error) {
+	return _TestPool.Contract.SubmitClaim(&_TestPool.TransactOpts, numShares, difficulty, min, max, augRoot, lastClaimBeforeVerification)
 }
 
-// SubmitClaim is a paid mutator transaction binding the contract method 0xe7dac983.
+// UpdateWhiteList is a paid mutator transaction binding the contract method 0xac1d0609.
 //
-// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augMerkle uint256) returns()
-func (_TestPool *TestPoolTransactor) SubmitClaim(opts *bind.TransactOpts, numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augMerkle *big.Int) (*types.Transaction, error) {
-	return _TestPool.contract.Transact(opts, "submitClaim", numShares, difficulty, min, max, augMerkle)
+// Solidity: function updateWhiteList(miner address, add bool) returns()
+func (_TestPool *TestPoolTransactor) UpdateWhiteList(opts *bind.TransactOpts, miner common.Address, add bool) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "updateWhiteList", miner, add)
 }
 
-// SubmitClaim is a paid mutator transaction binding the contract method 0xe7dac983.
+// UpdateWhiteList is a paid mutator transaction binding the contract method 0xac1d0609.
 //
-// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augMerkle uint256) returns()
-func (_TestPool *TestPoolSession) SubmitClaim(numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augMerkle *big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SubmitClaim(&_TestPool.TransactOpts, numShares, difficulty, min, max, augMerkle)
+// Solidity: function updateWhiteList(miner address, add bool) returns()
+func (_TestPool *TestPoolSession) UpdateWhiteList(miner common.Address, add bool) (*types.Transaction, error) {
+	return _TestPool.Contract.UpdateWhiteList(&_TestPool.TransactOpts, miner, add)
 }
 
-// SubmitClaim is a paid mutator transaction binding the contract method 0xe7dac983.
+// UpdateWhiteList is a paid mutator transaction binding the contract method 0xac1d0609.
 //
-// Solidity: function submitClaim(numShares uint256, difficulty uint256, min uint256, max uint256, augMerkle uint256) returns()
-func (_TestPool *TestPoolTransactorSession) SubmitClaim(numShares *big.Int, difficulty *big.Int, min *big.Int, max *big.Int, augMerkle *big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.SubmitClaim(&_TestPool.TransactOpts, numShares, difficulty, min, max, augMerkle)
+// Solidity: function updateWhiteList(miner address, add bool) returns()
+func (_TestPool *TestPoolTransactorSession) UpdateWhiteList(miner common.Address, add bool) (*types.Transaction, error) {
+	return _TestPool.Contract.UpdateWhiteList(&_TestPool.TransactOpts, miner, add)
 }
 
-// SubmitClientError is a paid mutator transaction binding the contract method 0x33401c58.
+// VerifyAgtDebugForTesting is a paid mutator transaction binding the contract method 0x7ed996a3.
 //
-// Solidity: function submitClientError(error string) returns()
-func (_TestPool *TestPoolTransactor) SubmitClientError(opts *bind.TransactOpts, error string) (*types.Transaction, error) {
-	return _TestPool.contract.Transact(opts, "submitClientError", error)
+// Solidity: function verifyAgtDebugForTesting(rootHash uint256, rootMin uint256, rootMax uint256, leafHash uint256, leafCounter uint256, branchIndex uint256, countersBranch uint256[], hashesBranch uint256[]) returns(bool)
+func (_TestPool *TestPoolTransactor) VerifyAgtDebugForTesting(opts *bind.TransactOpts, rootHash *big.Int, rootMin *big.Int, rootMax *big.Int, leafHash *big.Int, leafCounter *big.Int, branchIndex *big.Int, countersBranch []*big.Int, hashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "verifyAgtDebugForTesting", rootHash, rootMin, rootMax, leafHash, leafCounter, branchIndex, countersBranch, hashesBranch)
 }
 
-// SubmitClientError is a paid mutator transaction binding the contract method 0x33401c58.
+// VerifyAgtDebugForTesting is a paid mutator transaction binding the contract method 0x7ed996a3.
 //
-// Solidity: function submitClientError(error string) returns()
-func (_TestPool *TestPoolSession) SubmitClientError(error string) (*types.Transaction, error) {
-	return _TestPool.Contract.SubmitClientError(&_TestPool.TransactOpts, error)
+// Solidity: function verifyAgtDebugForTesting(rootHash uint256, rootMin uint256, rootMax uint256, leafHash uint256, leafCounter uint256, branchIndex uint256, countersBranch uint256[], hashesBranch uint256[]) returns(bool)
+func (_TestPool *TestPoolSession) VerifyAgtDebugForTesting(rootHash *big.Int, rootMin *big.Int, rootMax *big.Int, leafHash *big.Int, leafCounter *big.Int, branchIndex *big.Int, countersBranch []*big.Int, hashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.VerifyAgtDebugForTesting(&_TestPool.TransactOpts, rootHash, rootMin, rootMax, leafHash, leafCounter, branchIndex, countersBranch, hashesBranch)
 }
 
-// SubmitClientError is a paid mutator transaction binding the contract method 0x33401c58.
+// VerifyAgtDebugForTesting is a paid mutator transaction binding the contract method 0x7ed996a3.
 //
-// Solidity: function submitClientError(error string) returns()
-func (_TestPool *TestPoolTransactorSession) SubmitClientError(error string) (*types.Transaction, error) {
-	return _TestPool.Contract.SubmitClientError(&_TestPool.TransactOpts, error)
+// Solidity: function verifyAgtDebugForTesting(rootHash uint256, rootMin uint256, rootMax uint256, leafHash uint256, leafCounter uint256, branchIndex uint256, countersBranch uint256[], hashesBranch uint256[]) returns(bool)
+func (_TestPool *TestPoolTransactorSession) VerifyAgtDebugForTesting(rootHash *big.Int, rootMin *big.Int, rootMax *big.Int, leafHash *big.Int, leafCounter *big.Int, branchIndex *big.Int, countersBranch []*big.Int, hashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.VerifyAgtDebugForTesting(&_TestPool.TransactOpts, rootHash, rootMin, rootMax, leafHash, leafCounter, branchIndex, countersBranch, hashesBranch)
 }
 
-// VerifyClaim is a paid mutator transaction binding the contract method 0x35ffbe74.
+// VerifyClaim is a paid mutator transaction binding the contract method 0xc2209acb.
 //
-// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns(uint256)
-func (_TestPool *TestPoolTransactor) VerifyClaim(opts *bind.TransactOpts, rlpHeader []byte, nonce *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.contract.Transact(opts, "verifyClaim", rlpHeader, nonce, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
+// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, submissionIndex uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns()
+func (_TestPool *TestPoolTransactor) VerifyClaim(opts *bind.TransactOpts, rlpHeader []byte, nonce *big.Int, submissionIndex *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.contract.Transact(opts, "verifyClaim", rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
 }
 
-// VerifyClaim is a paid mutator transaction binding the contract method 0x35ffbe74.
+// VerifyClaim is a paid mutator transaction binding the contract method 0xc2209acb.
 //
-// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns(uint256)
-func (_TestPool *TestPoolSession) VerifyClaim(rlpHeader []byte, nonce *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.VerifyClaim(&_TestPool.TransactOpts, rlpHeader, nonce, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
+// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, submissionIndex uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns()
+func (_TestPool *TestPoolSession) VerifyClaim(rlpHeader []byte, nonce *big.Int, submissionIndex *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.VerifyClaim(&_TestPool.TransactOpts, rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
 }
 
-// VerifyClaim is a paid mutator transaction binding the contract method 0x35ffbe74.
+// VerifyClaim is a paid mutator transaction binding the contract method 0xc2209acb.
 //
-// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns(uint256)
-func (_TestPool *TestPoolTransactorSession) VerifyClaim(rlpHeader []byte, nonce *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
-	return _TestPool.Contract.VerifyClaim(&_TestPool.TransactOpts, rlpHeader, nonce, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
+// Solidity: function verifyClaim(rlpHeader bytes, nonce uint256, submissionIndex uint256, shareIndex uint256, dataSetLookup uint256[], witnessForLookup uint256[], augCountersBranch uint256[], augHashesBranch uint256[]) returns()
+func (_TestPool *TestPoolTransactorSession) VerifyClaim(rlpHeader []byte, nonce *big.Int, submissionIndex *big.Int, shareIndex *big.Int, dataSetLookup []*big.Int, witnessForLookup []*big.Int, augCountersBranch []*big.Int, augHashesBranch []*big.Int) (*types.Transaction, error) {
+	return _TestPool.Contract.VerifyClaim(&_TestPool.TransactOpts, rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup, witnessForLookup, augCountersBranch, augHashesBranch)
 }

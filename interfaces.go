@@ -8,6 +8,7 @@ package smartpool
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 	"time"
 )
@@ -19,6 +20,7 @@ type UserInput interface {
 	RPCEndpoint() string
 	KeystorePath() string
 	ShareThreshold() int
+	ClaimThreshold() int
 	ShareDifficulty() *big.Int
 	SubmitInterval() time.Duration
 	ContractAddress() string
@@ -47,7 +49,8 @@ type UserOutput interface {
 // service.
 // Smartpool should only persist something via this interface.
 type PersistentStorage interface {
-	// TODO: Add necessary methods
+	Persist(data interface{}, id string) error
+	Load(data interface{}, id string) (interface{}, error)
 }
 
 // Contract is the interface for smartpool to interact with contract side of
@@ -70,18 +73,22 @@ type Contract interface {
 	// SubmitClaim takes some necessary parameters that represent a claim and
 	// submit to the contract using miner's address. The address should be
 	// unlocked first.
-	SubmitClaim(claim Claim) error
+	SubmitClaim(claim Claim, lastClaim bool) error
 	// GetShareIndex returns index of the share that is requested to submit
-	// proof to the contract to represent correctness of the submitted claim.
+	// proof to the contract to represent correctness of the submitted claims.
 	// GetShareIndex must be called after SubmitClaim to get shareIndex which
 	// is used to pass to VerifyClaim. If GetShareIndex is called before
 	// SubmitClaim, the index will have no meaning to contract.
-	GetShareIndex(claim Claim) *big.Int
+	// GetShareIndex returns 2 indexes, first is submission index, second is
+	// share index in the relevant submission (claim)
+	GetShareIndex(claim Claim) (*big.Int, *big.Int, error)
+	NumOpenClaims() (*big.Int, error)
+	ResetOpenClaims() error
 	// VerifyClaim takes some necessary parameters that provides complete proof
 	// of a share with index shareIndex in the cliam and submit to contract side
 	// in order to prove that the claim is valid so the miner can take credit
 	// of it.
-	VerifyClaim(shareIndex *big.Int, claim Claim) error
+	VerifyClaim(submissionIndex *big.Int, shareIndex *big.Int, claim Claim) error
 }
 
 // NetworkClient represents client for blockchain network that miner is mining
@@ -98,6 +105,7 @@ type NetworkClient interface {
 	// so the full block solution can take credits. It also maintain workflow
 	// between miner and the network client.
 	SubmitSolution(s Solution) bool
+	SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool
 	// ReadyToMine returns true when the network is ready to give and accept
 	// pow work and solution. It returns false otherwise.
 	ReadyToMine() bool
@@ -109,10 +117,27 @@ type NetworkClient interface {
 // miners.
 type ShareReceiver interface {
 	AcceptSolution(s Solution) Share
+	Persist(storage PersistentStorage) error
 }
 
 type PoolMonitor interface {
 	RequireClientUpdate() bool
 	RequireContractUpdate() bool
 	ContractAddress() common.Address
+}
+
+type StatRecorder interface {
+	RecordShare(status string, share Share, rig Rig)
+	RecordClaim(status string, claim Claim)
+	RecordHashrate(hashrate hexutil.Uint64, id common.Hash, rig Rig)
+	// Notify StatRecorder how many share were restored from last session
+	// so StatRecorder can track number of abandoned shares
+	ShareRestored(noshares uint64)
+
+	OverallFarmStat() interface{}
+	FarmStat(start uint64, end uint64) interface{}
+	OverallRigStat(rig Rig) interface{}
+	RigStat(rig Rig, start uint64, end uint64) interface{}
+
+	Persist(storage PersistentStorage) error
 }

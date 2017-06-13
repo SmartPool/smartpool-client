@@ -8,7 +8,7 @@ import (
 )
 
 // var PoolMonitorAddress = common.HexToAddress("0x7727D4535f1A9c9ECC59FB17B6bF8145C7d5D58c")
-var PoolMonitorAddress = common.HexToAddress("0xddcdad6b099b1b237bdb1341cc6881eb63ee3b28")
+// var PoolMonitorAddress = common.HexToAddress("0xddcdad6b099b1b237bdb1341cc6881eb63ee3b28")
 
 type PoolMonitor struct {
 	client   *PoolMonitorClient
@@ -54,13 +54,14 @@ func versionBytes(version string) [3]byte {
 }
 
 func NewPoolMonitor(
-	contractAddr common.Address, version string, ipc string) (*PoolMonitor, error) {
+	gatewayAddr common.Address, contractAddr common.Address,
+	version string, ipc string) (*PoolMonitor, error) {
 	client, err := getClient(ipc)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't connect to Geth via IPC file. Error: %s\n", err)
 		return nil, err
 	}
-	poolMonitor, err := NewPoolMonitorClient(PoolMonitorAddress, client)
+	poolMonitor, err := NewPoolMonitorClient(gatewayAddr, client)
 	if err != nil {
 		smartpool.Output.Printf("Couldn't get SmartPool information from Ethereum Blockchain. Error: %s\n", err)
 		return nil, err

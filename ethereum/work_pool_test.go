@@ -5,7 +5,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
+	"sync"
 	"testing"
+	"time"
 )
 
 func newTestWork() *Work {
@@ -17,6 +19,7 @@ func newTestWork() *Work {
 		"0x958c07589d805f63393997ea0baca55a3101baa2c6616e3a5c8d51baf590d6ec",
 		"0x0000000000000000000000000000000000000000000000000000000000000000",
 		big.NewInt(100000),
+		"0x958c07589d805f63393997ea0baca55a3101baa2c6616e3a5c8d51baf590d6ec",
 	)
 }
 
@@ -32,16 +35,15 @@ func newTestSolution() *Solution {
 func TestWorkPoolAcceptSolution(t *testing.T) {
 	w := newTestWork()
 	s := newTestSolution()
-	wp := WorkPool{
-		w.ID(): w,
-	}
+	wp := WorkPool{sync.RWMutex{}, map[string]*Work{}}
+	wp.works[w.ID()] = w
 	if wp.AcceptSolution(s) == nil {
 		t.Fail()
 	}
 }
 
 func TestWorkPoolDoesntAcceptSolution(t *testing.T) {
-	wp := WorkPool{}
+	wp := WorkPool{sync.RWMutex{}, map[string]*Work{}}
 	s := newTestSolution()
 	if wp.AcceptSolution(s) != nil {
 		t.Fail()
@@ -49,10 +51,45 @@ func TestWorkPoolDoesntAcceptSolution(t *testing.T) {
 }
 
 func TestWorkPoolAddWorkByItsID(t *testing.T) {
-	wp := WorkPool{}
+	wp := WorkPool{sync.RWMutex{}, map[string]*Work{}}
 	w := newTestWork()
 	wp.AddWork(w)
-	if wp[w.ID()] == nil {
+	if wp.works[w.ID()] == nil {
 		t.Fail()
 	}
+}
+
+func endlessAddWork(wp *WorkPool, w *Work, stop chan bool) {
+	for {
+		select {
+		case <-stop:
+			return
+		default:
+			wp.AddWork(w)
+		}
+	}
+}
+
+func endlessClean(wp *WorkPool, stop chan bool) {
+	for {
+		select {
+		case <-stop:
+			return
+		default:
+			wp.Clean()
+		}
+	}
+}
+
+func TestAddWorkConcurrently(t *testing.T) {
+	wp := WorkPool{sync.RWMutex{}, map[string]*Work{}}
+	w := newTestWork()
+	w.CreatedAt = w.CreatedAt.Add(-8 * 12 * time.Second)
+	wp.AddWork(w)
+	stop := make(chan bool, 1)
+	go endlessAddWork(&wp, w, stop)
+	go endlessAddWork(&wp, w, stop)
+	go endlessClean(&wp, stop)
+	time.Sleep(50 * time.Millisecond)
+	stop <- true
 }

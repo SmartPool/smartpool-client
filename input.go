@@ -10,6 +10,7 @@ type Input struct {
 	rpcEndPoint     string
 	keystorePath    string
 	shareThreshold  int
+	claimThreshold  int
 	shareDifficulty *big.Int
 	submitInterval  time.Duration
 	contractAddr    string
@@ -21,6 +22,7 @@ type Input struct {
 func (i *Input) RPCEndpoint() string           { return i.rpcEndPoint }
 func (i *Input) KeystorePath() string          { return i.keystorePath }
 func (i *Input) ShareThreshold() int           { return i.shareThreshold }
+func (i *Input) ClaimThreshold() int           { return i.claimThreshold }
 func (i *Input) ShareDifficulty() *big.Int     { return i.shareDifficulty }
 func (i *Input) SubmitInterval() time.Duration { return i.submitInterval }
 func (i *Input) ContractAddress() string       { return i.contractAddr }
@@ -41,6 +43,7 @@ func NewInput(
 	rpcEndPoint string,
 	keystorePath string,
 	shareThreshold int,
+	claimThreshold int,
 	shareDifficulty *big.Int,
 	submitInterval time.Duration,
 	contractAddr string,
@@ -49,7 +52,7 @@ func NewInput(
 	hotStop bool,
 ) *Input {
 	return &Input{
-		rpcEndPoint, keystorePath, shareThreshold, shareDifficulty,
+		rpcEndPoint, keystorePath, shareThreshold, claimThreshold, shareDifficulty,
 		submitInterval, contractAddr, minerAddr, extraData, hotStop,
 	}
 }
