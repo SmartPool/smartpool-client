@@ -22,7 +22,7 @@ func (server *RPCService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		mixDigest  common.Hash
 	)
 	rigName := r.URL.Query().Get(":rig")
-	service := NewSmartPoolService(rigName)
+	service := NewSmartPoolService(rigName, r.RemoteAddr)
 	method, rawParams, id, err := extractRPCMsg(r)
 	if err != nil {
 		res = createErrorResponse(id, err)

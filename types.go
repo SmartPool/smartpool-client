@@ -107,6 +107,7 @@ func BranchElementFromHash(a, b SPHash) BranchElement {
 // Rig represents mining actor that will be directly interactive with smartpool.
 type Rig interface {
 	ID() string
+	IP() string
 }
 
 // Work represents SmartPool work that miner needs to solve to have valid
