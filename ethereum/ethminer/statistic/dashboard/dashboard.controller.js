@@ -604,7 +604,7 @@
                     maxPoint = keyInt;
                 }
             })
-            return maxPoint;
+            //return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
@@ -628,7 +628,7 @@
                     maxPoint = keyInt;
                 }
             })
-            return maxPoint;
+            //return maxPoint;
             if (maxPoint === currentPoint) {
                 return maxPoint
             } else {
