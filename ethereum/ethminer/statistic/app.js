@@ -19,7 +19,7 @@
                 templateUrl: 'dashboard/dashboard.view.html',
                 controllerAs: 'vm'
             })
-            .when('/rig/:rigId', {
+            .when('/rig/:rigId/:rigIp', {
                 controller: 'RigController',
                 templateUrl: 'rig/rig.view.html',
                 controllerAs: 'vm'
