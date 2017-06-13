@@ -2,7 +2,6 @@ package ethminer
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/SmartPool/smartpool-client/ethereum/stat"

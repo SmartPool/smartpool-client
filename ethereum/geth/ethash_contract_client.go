@@ -39,7 +39,7 @@ func (cc *EthashContractClient) SetEpochData(
 			fmt.Printf("Going to do tx\n")
 			fmt.Printf("Block Number: %d\n", blockNo.Int64())
 
-			if k < 240 && epoch.Uint64() == 128 {
+			if k < 440 && epoch.Uint64() == 128 {
 				start.Add(start, mnlen)
 				nodes = []*big.Int{}
 				continue
