@@ -333,9 +333,9 @@
                         } else {
                             vm.farm.worker.active_count += 1;
                             if (closetFlag) {
-                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
+                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, rigVal.ip ? rigVal.ip : "Unknown", "a"])
                             } else {
-                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
+                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, rigVal.ip ? rigVal.ip : "Unknown", "a"])
                             }
                         }
 
@@ -378,7 +378,7 @@
 
         function applyLongPeriod(response) {
             vm.farm.long_duration.duration_in_hour = response.long_window_duration / 3600;
-            var pointTotal = response.long_window_duration / response.period_duration +1;
+            var pointTotal = response.long_window_duration / response.period_duration + 1;
             vm.farm.long_duration.point_number = pointTotal;
             var totalEffectiveHashRate = 0;
             var totalReportedHashRate = 0;
@@ -434,7 +434,7 @@
                         if (check) {
                             vm.farm.worker.worker_list[i][3] += rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0;
                         } else {
-                            vm.farm.worker.worker_list.push([rigName, 0, 0, rigVal.ReportedHashrate, 0, "127.0.0.1", "i"]);
+                            vm.farm.worker.worker_list.push([rigName, 0, 0, rigVal.ReportedHashrate, 0, rigVal.ip ? rigVal.ip : "Unknown", "i"]);
                         }
                         if (rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)) {
                             activeWorker++;
@@ -509,6 +509,7 @@
         }
 
         function applyWorker(response) {
+            //console.log(vm.farm.worker.worker_list);
             vm.farm.worker.active_count = vm.farm.worker.worker_list.length;
             if (vm.tableWorker) {
                 $('#worker_table').dataTable().fnDestroy();
@@ -546,16 +547,16 @@
                 columnDefs: [{
                     "render": function(data, type, row) {
                         if (row[6] === 'a') {
-                            return '<a title="active workers" href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-success btn-xs">' + data + '</a>';
+                            return '<a title="active workers" href="/stats/#!/rig/' + data + "/" + row[5] + '" rel="workerChart" class="btn btn-success btn-xs">' + data + '</a>';
                         } else {
-                            return '<a title="inactive workers" href="/stats/#!/rig/' + data + '" rel="workerChart" class="btn btn-danger btn-xs">' + data + '</a>';
+                            return '<a title="inactive workers" href="/stats/#!/rig/' + data + "/" + row[5] + '" rel="workerChart" class="btn btn-danger btn-xs">' + data + '</a>';
                         }
 
                     },
                     "targets": 0
                 }, ]
             });
-           // console.log("x");
+            // console.log("x");
         }
 
         function applyAdvanceInfo(response) {
