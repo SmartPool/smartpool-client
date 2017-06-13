@@ -60,7 +60,7 @@ func (server *StatService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			encoder.Encode(&result)
 		} else if scope == "rig" {
 			rigID := r.URL.Query().Get(":rig")
-			rig := ethereum.NewRig(rigID)
+			rig := ethereum.NewRig(rigID, r.RemoteAddr)
 			result := rigStat(rig)
 			encoder := json.NewEncoder(w)
 			encoder.Encode(&result)
@@ -97,7 +97,8 @@ func (server *StatService) handleMessages(conn *websocket.Conn) {
 				conn.WriteJSON(farmStat())
 			} else if m["action"] == "getRigInfo" {
 				rigID := m["rigId"]
-				rig := ethereum.NewRig(rigID)
+				rigIP := m["rigIP"]
+				rig := ethereum.NewRig(rigID, rigIP)
 				conn.WriteJSON(rigStat(rig))
 			}
 		} else {

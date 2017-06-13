@@ -9,11 +9,13 @@ import (
 
 type RigHashrate struct {
 	ReportedHashrate *big.Int
+	IP               string `json:"ip"`
 }
 
-func NewRigHashrate() *RigHashrate {
+func NewRigHashrate(ip string) *RigHashrate {
 	return &RigHashrate{
 		ReportedHashrate: big.NewInt(0),
+		IP:               ip,
 	}
 }
 
@@ -61,11 +63,11 @@ func (pfd *PeriodFarmData) updateAvgShareDifficulty(t time.Time) {
 	}
 }
 
-func (pfd *PeriodFarmData) getRigHashrate(id string) *RigHashrate {
-	if _, exist := pfd.Rigs[id]; !exist {
-		pfd.Rigs[id] = NewRigHashrate()
+func (pfd *PeriodFarmData) getRigHashrate(rig smartpool.Rig) *RigHashrate {
+	if _, exist := pfd.Rigs[rig.ID()]; !exist {
+		pfd.Rigs[rig.ID()] = NewRigHashrate(rig.IP())
 	}
-	return pfd.Rigs[id]
+	return pfd.Rigs[rig.ID()]
 }
 
 type OverallFarmData struct {
@@ -148,14 +150,14 @@ func (fd *FarmData) AddShare(rig smartpool.Rig, status string, share smartpool.S
 		fd.StartTime = t
 	}
 	if _, exist := fd.Rigs[rig.ID()]; !exist {
-		fd.Rigs[rig.ID()] = NewRigHashrate()
+		fd.Rigs[rig.ID()] = NewRigHashrate(rig.IP())
 	}
 	curPeriodData := fd.getData(t)
 	if curPeriodData.StartTime.IsZero() {
 		curPeriodData.StartTime = t
 	}
 	if _, exist := curPeriodData.Rigs[rig.ID()]; !exist {
-		curPeriodData.Rigs[rig.ID()] = NewRigHashrate()
+		curPeriodData.Rigs[rig.ID()] = NewRigHashrate(rig.IP())
 	}
 	if status == "submitted" {
 		fd.LastMinedShare = t
@@ -257,7 +259,7 @@ func (fd *FarmData) UpdateRigHashrate(
 		curPeriodData.StartTime = t
 	}
 
-	rigHashrate := fd.getRigHashrate(rig.ID())
+	rigHashrate := fd.getRigHashrate(rig)
 	// fmt.Printf("rig hashrate struct: %v\n", rigHashrate)
 	changedReportedHashrate := big.NewInt(0).Sub(reportedHashrate, rigHashrate.ReportedHashrate)
 	// fmt.Printf("changed reported hashrate: %d\n", changedReportedHashrate.Uint64())
@@ -265,7 +267,7 @@ func (fd *FarmData) UpdateRigHashrate(
 	fd.ReportedHashrate.Add(fd.ReportedHashrate, changedReportedHashrate)
 	// fmt.Printf("update rig hashrate struct: %v\n", rigHashrate)
 
-	rigHashrate = curPeriodData.getRigHashrate(rig.ID())
+	rigHashrate = curPeriodData.getRigHashrate(rig)
 	// fmt.Printf("rig hashrate struct in period sample: %v\n", rigHashrate)
 	changedReportedHashrate = big.NewInt(0).Sub(periodReportedHashrate, rigHashrate.ReportedHashrate)
 	// fmt.Printf("changed reported hashrate in period sample: %d\n", changedReportedHashrate.Uint64())
@@ -273,11 +275,11 @@ func (fd *FarmData) UpdateRigHashrate(
 	curPeriodData.ReportedHashrate.Add(curPeriodData.ReportedHashrate, changedReportedHashrate)
 }
 
-func (fd *FarmData) getRigHashrate(id string) *RigHashrate {
-	if _, exist := fd.Rigs[id]; !exist {
-		fd.Rigs[id] = NewRigHashrate()
+func (fd *FarmData) getRigHashrate(rig smartpool.Rig) *RigHashrate {
+	if _, exist := fd.Rigs[rig.ID()]; !exist {
+		fd.Rigs[rig.ID()] = NewRigHashrate(rig.IP())
 	}
-	return fd.Rigs[id]
+	return fd.Rigs[rig.ID()]
 }
 
 func (fd *FarmData) updateAvgEffHashrate(t time.Time) {

@@ -43,6 +43,6 @@ func (sps *SmartPoolService) SubmitWork(nonce types.BlockNonce, hash, mixDigest 
 	return SmartPool.AcceptSolution(sps.rig, sol)
 }
 
-func NewSmartPoolService(rigName string) *SmartPoolService {
-	return &SmartPoolService{ethereum.NewRig(rigName)}
+func NewSmartPoolService(rigName string, rigIP string) *SmartPoolService {
+	return &SmartPoolService{ethereum.NewRig(rigName, rigIP)}
 }
