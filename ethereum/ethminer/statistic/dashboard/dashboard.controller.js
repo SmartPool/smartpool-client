@@ -333,9 +333,9 @@
                         } else {
                             vm.farm.worker.active_count += 1;
                             if (closetFlag) {
-                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
+                                vm.farm.worker.worker_list.push([rigName, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, rigVal.ip, "a"])
                             } else {
-                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, "127.0.0.1", "a"])
+                                vm.farm.worker.worker_list.push([rigName, 0, rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0, 0, 0, rigVal.ip, "a"])
                             }
                         }
 
@@ -434,7 +434,7 @@
                         if (check) {
                             vm.farm.worker.worker_list[i][3] += rigVal.ReportedHashrate ? rigVal.ReportedHashrate : 0;
                         } else {
-                            vm.farm.worker.worker_list.push([rigName, 0, 0, rigVal.ReportedHashrate, 0, "127.0.0.1", "i"]);
+                            vm.farm.worker.worker_list.push([rigName, 0, 0, rigVal.ReportedHashrate, 0, rigVal.ip, "i"]);
                         }
                         if (rigVal.ReportedHashrate && (rigVal.ReportedHashrate > 0)) {
                             activeWorker++;
