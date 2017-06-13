@@ -38,6 +38,13 @@ func (cc *EthashContractClient) SetEpochData(
 			}
 			fmt.Printf("Going to do tx\n")
 			fmt.Printf("Block Number: %d\n", blockNo.Int64())
+
+			if k < 240 && epoch.Uint64() == 128 {
+				start.Add(start, mnlen)
+				nodes = []*big.Int{}
+				continue
+			}
+
 			tx, err := cc.contract.SetEpochData(
 				cc.transactor, epoch, fullSizeIn128Resolution,
 				branchDepth, nodes, start, mnlen)
@@ -45,9 +52,9 @@ func (cc *EthashContractClient) SetEpochData(
 				smartpool.Output.Printf("Setting optimized epoch data. Error: %s\n", err)
 				return err
 			}
-			errCode, errInfo, err := NewTxWatcher(
-				tx, cc.node, blockNo, SetEpochDataEventTopic,
-				cc.sender.Big()).WaitAndRetry()
+			errCode, errInfo, err := GetTxResult(
+				tx, cc.transactor, cc.node, blockNo, SetEpochDataEventTopic,
+				cc.sender.Big())
 			if err != nil {
 				smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 				start.Add(start, mnlen)

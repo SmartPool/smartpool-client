@@ -58,9 +58,10 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 		return err
 	}
 	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
-	errCode, errInfo, err := NewTxWatcher(
-		tx, cc.node, blockNo.Add(blockNo, common.Big1), RegisterEventTopic,
-		cc.sender.Big()).Wait()
+
+	errCode, errInfo, err := GetTxResult(tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), RegisterEventTopic,
+		cc.sender.Big())
+
 	if err != nil {
 		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
@@ -92,11 +93,10 @@ func (cc *GethContractClient) ResetOpenClaims() error {
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo, err := NewTxWatcher(
-		tx, cc.node, blockNo.Add(blockNo, common.Big1), ResetOpenClaimsEventTopic,
-		cc.sender.Big()).Wait()
+	errCode, errInfo, err := GetTxResult(
+		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), ResetOpenClaimsEventTopic,
+		cc.sender.Big())
 	if err != nil {
-		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
 	}
 	if errCode.Cmp(common.Big0) != 0 {
@@ -140,11 +140,10 @@ func (cc *GethContractClient) SubmitClaim(
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo, err := NewTxWatcher(
-		tx, cc.node, blockNo.Add(blockNo, common.Big1), SubmitClaimEventTopic,
-		cc.sender.Big()).Wait()
+	errCode, errInfo, err := GetTxResult(
+		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), SubmitClaimEventTopic,
+		cc.sender.Big())
 	if err != nil {
-		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
 	}
 	if errCode.Cmp(common.Big0) != 0 {
@@ -175,11 +174,10 @@ func (cc *GethContractClient) VerifyClaim(
 		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
 		return err
 	}
-	errCode, errInfo, err := NewTxWatcher(
-		tx, cc.node, blockNo.Add(blockNo, common.Big1), VerifyClaimEventTopic,
-		cc.sender.Big()).Wait()
+	errCode, errInfo, err := GetTxResult(
+		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), VerifyClaimEventTopic,
+		cc.sender.Big())
 	if err != nil {
-		smartpool.Output.Printf("Tx: %s was not approved by the network in time.\n", tx.Hash().Hex())
 		return err
 	}
 	if errCode.Cmp(common.Big0) != 0 {
