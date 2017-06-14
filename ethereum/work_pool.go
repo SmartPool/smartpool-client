@@ -64,7 +64,7 @@ func (wp *WorkPool) oldHashes() []string {
 	defer wp.mu.RUnlock()
 	result := []string{}
 	for hash, work := range wp.works {
-		if time.Since(work.CreatedAt) > 7*(12*time.Second) {
+		if time.Since(work.CreatedAt) > 200*(12*time.Second) {
 			result = append(result, hash)
 		}
 	}
