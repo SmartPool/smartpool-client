@@ -77,8 +77,6 @@ func getName(value interface{}) string {
 }
 
 func (gfs *GobFileStorage) register(value interface{}) {
-	gfs.mu.Lock()
-	defer gfs.mu.Unlock()
 	name := getName(value)
 	if _, found := gfs.registeredType[name]; !found {
 		gob.Register(value)
@@ -102,6 +100,8 @@ func (gfs *GobFileStorage) persistToFile(data interface{}, id string) error {
 }
 
 func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
+	gfs.mu.Lock()
+	defer gfs.mu.Unlock()
 	if err := gfs.persistToFile(data, id); err != nil {
 		return err
 	}
@@ -109,6 +109,8 @@ func (gfs *GobFileStorage) Persist(data interface{}, id string) error {
 }
 
 func (gfs *GobFileStorage) Load(data interface{}, id string) (interface{}, error) {
+	gfs.mu.Lock()
+	defer gfs.mu.Unlock()
 	f, err := os.Open(getFile(id))
 	if err != nil {
 		return data, err
