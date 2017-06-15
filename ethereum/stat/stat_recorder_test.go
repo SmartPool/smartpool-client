@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-var rig *ethereum.Rig = ethereum.NewRig("testrig")
-var rig2 *ethereum.Rig = ethereum.NewRig("anotherrig")
+var rig *ethereum.Rig = ethereum.NewRig("testrig", "192.168.1.2")
+var rig2 *ethereum.Rig = ethereum.NewRig("anotherrig", "192.168.1.3")
 
 func newStatRecorder() *StatRecorder {
 	return &StatRecorder{
