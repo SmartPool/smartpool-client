@@ -115,10 +115,10 @@ func (cc *GethContractClient) GetClaimSeed() *big.Int {
 		seed, err = cc.pool.GetClaimSeed(nil, cc.sender)
 		if err != nil {
 			smartpool.Output.Printf("Getting claim seed failed. Error: %s\n", err)
-			return big.NewInt(0)
-		}
-		if seed.Cmp(common.Big0) != 0 {
-			break
+		} else {
+			if seed.Cmp(common.Big0) != 0 {
+				break
+			}
 		}
 		time.Sleep(time.Second)
 	}
