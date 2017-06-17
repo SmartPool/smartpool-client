@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
-	"log"
 	"math/big"
 	"strings"
 	"time"
@@ -54,11 +53,11 @@ func (g *GethRPC) BlockNumber() (*big.Int, error) {
 	return result, err
 }
 
-func (g *GethRPC) GetPendingBlockHeader() *types.Header {
+func (g *GethRPC) GetPendingBlockHeader() (*types.Header, error) {
 	header := jsonHeader{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", "pending", false)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	result := types.Header{}
 	result.ParentHash = *header.ParentHash
@@ -81,14 +80,14 @@ func (g *GethRPC) GetPendingBlockHeader() *types.Header {
 	}
 	result.MixDigest = common.Hash{}
 	result.Nonce = types.BlockNonce{}
-	return &result
+	return &result, nil
 }
 
 func (g *GethRPC) GetBlockHeader(number int) *types.Header {
 	header := types.Header{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", number, false)
 	if err != nil {
-		log.Fatal("Couldn't get latest block:", err)
+		smartpool.Output.Printf("Couldn't get latest block:", err)
 		return nil
 	}
 	return &header
@@ -101,11 +100,15 @@ func (w gethWork) PoWHash() string { return w[0] }
 func (g *GethRPC) GetWork() *ethereum.Work {
 	w := gethWork{}
 	var h *types.Header
+	var err error
 	for {
-		h = g.GetPendingBlockHeader()
+		h, err = g.GetPendingBlockHeader()
 		g.client.Call(&w, "eth_getWork")
-		if w.PoWHash() != "" && w.PoWHash() == h.HashNoNonce().Hex() {
+		if err == nil && w.PoWHash() != "" && w.PoWHash() == h.HashNoNonce().Hex() {
 			break
+		}
+		if err != nil {
+			smartpool.Output.Printf("getting pending block failed: %s. Retry in 1s...", err.Error())
 		}
 		time.Sleep(1000 * time.Millisecond)
 	}
