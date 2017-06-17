@@ -30,7 +30,7 @@ type UserInput interface {
 }
 
 // Global output mechanism
-var Output = &StdOut{}
+var Output UserOutput = StdOut{}
 
 // UserOutput accepts all the information that SmartPool wants to tell the user.
 // It's only responsibility is to accept information. How the information is
@@ -42,6 +42,7 @@ type UserOutput interface {
 	// number of claim accepted, number of share per claim on average,
 	// average hash rate,...
 	Printf(format string, a ...interface{}) (n int, err error)
+	Close()
 }
 
 // PersistentStorage is the gateway for smartpool to interact with external
