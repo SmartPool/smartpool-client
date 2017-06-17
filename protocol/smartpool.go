@@ -5,6 +5,7 @@ package protocol
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -121,7 +122,7 @@ func (sp *SmartPool) AcceptSolution(rig smartpool.Rig, s smartpool.Solution) boo
 			smartpool.Output.Printf("Discarded because of %s.\n", err.Error())
 			success = false
 		} else {
-			smartpool.Output.Printf(".")
+			fmt.Print(".")
 			success = true
 		}
 	}
@@ -353,6 +354,8 @@ func (sp *SmartPool) Exit() {
 	sp.persist()
 	smartpool.Output.Printf("Gracefully stopped SmartPool.\n")
 	sp.SubmitterStopped <- true
+	smartpool.Output.Printf("Close log file.\n")
+	smartpool.Output.Close()
 }
 
 // Run can be called at most once to start a loop to submit and verify claims

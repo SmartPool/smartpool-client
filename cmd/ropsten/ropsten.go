@@ -65,7 +65,7 @@ func Run(c *cli.Context) error {
 		return nil
 	}
 	gasprice := c.Uint("gasprice")
-	smartpool.Output = &smartpool.StdOut{}
+	smartpool.Output = smartpool.NewLog()
 	fileStorage := storage.NewGobFileStorage()
 	ethereumWorkPool := ethereum.NewWorkPool(fileStorage)
 	go ethereumWorkPool.RunCleaner()
