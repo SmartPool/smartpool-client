@@ -1,12 +1,16 @@
 package ethereum
 
+import (
+	"fmt"
+)
+
 type Rig struct {
 	name string
 	ip   string
 }
 
 func (r *Rig) ID() string {
-	return r.name
+	return fmt.Sprintf("%s-%s", r.name, r.ip)
 }
 
 func (r *Rig) IP() string {
