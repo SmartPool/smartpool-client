@@ -71,6 +71,14 @@ func (tw *TxWatcher) newTx(oldTx *types.Transaction) (*types.Transaction, error)
 	return tw.transactor.Signer(types.HomesteadSigner{}, tw.transactor.From, newTx)
 }
 
+func (tw *TxWatcher) rebroadcastByPublicNode(signedTx *types.Transaction) error {
+	buff := bytes.NewBuffer([]byte{})
+	if err := signedTx.EncodeRLP(buff); err != nil {
+		return err
+	}
+	return SendRawTransaction(buff.Bytes())
+}
+
 func (tw *TxWatcher) rebroadcast(oldTx, signedTx *types.Transaction) error {
 	buff := bytes.NewBuffer([]byte{})
 	if err := signedTx.EncodeRLP(buff); err != nil {
@@ -105,10 +113,16 @@ func (tw *TxWatcher) WaitAndRetry() (*big.Int, *big.Int, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		return tw.Wait()
-	} else {
-		return errCode, errInfo, err
+		errCode, errInfo, err = tw.Wait()
+		if err != nil {
+			err = tw.rebroadcastByPublicNode(signedTx)
+			if err != nil {
+				smartpool.Output.Printf("Rebroadcast by public node of tx: %s failed. Error: %s\n", signedTx.Hash().Hex(), err)
+			}
+		}
+		errCode, errInfo, err = tw.Wait()
 	}
+	return errCode, errInfo, err
 }
 
 func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
@@ -120,7 +134,7 @@ func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
 	timeout := make(chan bool, 1)
 	go tw.loop(timeout)
 	go func() {
-		time.Sleep(2 * time.Minute)
+		time.Sleep(12 * time.Second)
 		// push 2 timeouts for the above loop and below select
 		timeout <- true
 		timeout <- true
