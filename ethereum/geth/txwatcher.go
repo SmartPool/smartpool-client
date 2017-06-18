@@ -134,7 +134,7 @@ func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
 	timeout := make(chan bool, 1)
 	go tw.loop(timeout)
 	go func() {
-		time.Sleep(12 * time.Second)
+		time.Sleep(10 * time.Minute)
 		// push 2 timeouts for the above loop and below select
 		timeout <- true
 		timeout <- true
