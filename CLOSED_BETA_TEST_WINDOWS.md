@@ -42,7 +42,7 @@ git checkout develop
 The last command will create `smartpool` executable file in your current directory.
 
 #### Download precompiled binary
-The precompiled binary can be download from [here](https://github.com/SmartPool/smartpool-client/blob/develop/build/bin/smartpool-windows-amd64-0.4.0.exe). This binary runs on Windows 64 bit and was tested on Windows 10 by SmartPool team.
+The precompiled binary can be download from [here](https://github.com/SmartPool/smartpool-client/blob/develop/build/bin/smartpool-windows-amd64-0.4.0.exe). This binary runs on Windows 64 bit and was tested on Windows 10 by SmartPool team. 
 
 ## Running SmartPool for your farm
 
@@ -63,7 +63,7 @@ or
 smartpool.exe --keystore <keystore_dir> --gateway 0x09077D92F7a71Ae3C4EAc8dC9f35cE9aa5A06F7B --share-threshold 36000 --claim-threshold 2 --spcontract 0xfc668AE14b0F7702c04b105448fE733D96C558DF --gasprice 4
 ```
 
-All the values for the parameters will be provided by us before you launch. SmartPool0client binds its rpc server address at 0.0.0.0:1633 for the mining rigs to submit shares.
+You can figure out the meaning of these parameters in our client by running `./smartpool --help`. Two important parameters are `share-threshold` and `claim-threshold`. You can reduce these parameters to get your payment faster, but the average costs for transaction fees will be higer. SmartPool client binds its rpc server address at 0.0.0.0:1633 for the mining rigs to submit shares. Now you can just let the SmartPool client runs, do not close it.
 
 ### Connect your rigs to SmartPool-client
 SmartPool-cient will serve work and accept shares at `0.0.0.0:1633/<rig_or_worker_name>/`. The trailing `/` is a required. `rig_or_worker_name` must be different to `farm`, `rig` and `status`. They are reserved for collecting and showing statistics of the farm and the rigs.
