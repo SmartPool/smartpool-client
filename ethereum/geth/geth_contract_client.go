@@ -220,7 +220,6 @@ func NewGethContractClient(
 		smartpool.Output.Printf("Failed to create authorized transactor: %s\n", err)
 		return nil, err
 	}
-	// TODO: make gas price one command line flag
 	if gasprice != 0 {
 		auth.GasPrice = big.NewInt(int64(gasprice * 1000000000))
 		smartpool.Output.Printf("Gas price is set to: %s wei.\n", auth.GasPrice.Text(10))

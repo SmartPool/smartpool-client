@@ -17,6 +17,10 @@ func (r *Rig) IP() string {
 	return r.ip
 }
 
+func (r *Rig) Name() string {
+	return r.name
+}
+
 func NewRig(name string, ip string) *Rig {
 	return &Rig{name, ip}
 }

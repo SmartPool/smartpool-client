@@ -108,6 +108,7 @@ func BranchElementFromHash(a, b SPHash) BranchElement {
 type Rig interface {
 	ID() string
 	IP() string
+	Name() string
 }
 
 // Work represents SmartPool work that miner needs to solve to have valid

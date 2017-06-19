@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"net/http"
+	"strings"
 )
 
 type RPCService struct{}
@@ -20,9 +21,16 @@ func (server *RPCService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		nonce      types.BlockNonce
 		hash       common.Hash
 		mixDigest  common.Hash
+		ip         string
 	)
 	rigName := r.URL.Query().Get(":rig")
-	service := NewSmartPoolService(rigName, r.RemoteAddr)
+	parts := strings.Split(r.RemoteAddr, ":")
+	if len(parts) == 0 {
+		ip = "unknown"
+	} else {
+		ip = parts[0]
+	}
+	service := NewSmartPoolService(rigName, ip)
 	method, rawParams, id, err := extractRPCMsg(r)
 	if err != nil {
 		res = createErrorResponse(id, err)
