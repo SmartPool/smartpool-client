@@ -249,7 +249,7 @@
             if (response.short_window_sample[anchorPoint - 1]) {
                 vm.farm.closet_data.hash_rate.effective_hashrate = vm.convertHashrate(response.short_window_sample[anchorPoint - 1].effective_hashrate);
                 vm.farm.closet_data.hash_rate.reported_hashrate = vm.convertHashrate(response.short_window_sample[anchorPoint - 1].reported_hashrate);
-                vm.farm.closet_data.hash_rate.effective_hashrate_percent = response.short_window_sample[anchorPoint - 1].reported_hashrate === 0 ? "" : vm.roundHashRate(response.short_window_sample[anchorPoint].effective_hashrate / response.short_window_sample[anchorPoint - 1].reported_hashrate * 100);
+                vm.farm.closet_data.hash_rate.effective_hashrate_percent = response.short_window_sample[anchorPoint - 1].reported_hashrate === 0 ? "" : vm.roundHashRate(response.short_window_sample[anchorPoint-1].effective_hashrate / response.short_window_sample[anchorPoint - 1].reported_hashrate * 100);
                 vm.farm.closet_data.shares.mined_share = response.short_window_sample[anchorPoint - 1].mined_share;
                 vm.farm.closet_data.shares.valid_share = response.short_window_sample[anchorPoint - 1].valid_share;
                 vm.farm.closet_data.shares.rejected_share = response.short_window_sample[anchorPoint - 1].rejected_share;
@@ -359,7 +359,7 @@
             vm.farm.long_duration.hash_rate.chart = [xChart, reportedChart, effectiveChart];
             vm.farm.long_duration.hash_rate.effective_hashrate_avarage = vm.convertHashrate(totalEffectiveHashRate / pointTotal);
             vm.farm.long_duration.hash_rate.reported_hashrate_avarage = sampleNum === 0 ? 0 : vm.convertHashrate(totalReportedHashRate / sampleNum);
-            vm.farm.long_duration.hash_rate.effective_hashrate_percent = totalEffectiveHashRate === 0 ? "" : vm.roundShares(totalEffectiveHashRate / totalReportedHashRate * 100);
+            vm.farm.long_duration.hash_rate.effective_hashrate_percent = vm.farm.long_duration.hash_rate.reported_hashrate_avarage === 0 ? "" : vm.roundShares(vm.farm.long_duration.hash_rate.effective_hashrate_avarage / vm.farm.long_duration.hash_rate.reported_hashrate_avarage * 100);
 
             //for share
             vm.farm.long_duration.shares.chart = [xChart, minedChart, validChart, rejectedChart];
