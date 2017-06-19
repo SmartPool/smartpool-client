@@ -21,6 +21,7 @@
         vm.getAnchorPointShort = getAnchorPointShort;
         vm.getAnchorPointLong = getAnchorPointLong;
         vm.convertHashrate = convertHashrate;
+        vm.getRigName = getRigName;
         vm.advance = {
             "load": false,
             "flag": true,
@@ -321,6 +322,7 @@
                         closetFlag = true;
                     }
                     $.each(val.rigs, function(rigName, rigVal) {
+                        var rigName = getRigName(rigName);
                         var check = false;
                         for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
                             if (rigName === vm.farm.worker.worker_list[i][0]) {
@@ -430,6 +432,7 @@
                     activeWorker = 0;
                     //calculate hashrate
                     $.each(val.rigs, function(rigName, rigVal) {
+                        var rigName = getRigName(rigName);
                         var check = false;
                         for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
                             if (rigName === vm.farm.worker.worker_list[i][0]) {
@@ -594,6 +597,15 @@
         function convertHashrate(hashRate) {
             //convert to Mhz
             return Math.round(hashRate / 1000000 * 100) / 100;
+        }
+
+        function getRigName(rigName){
+            var index = rigName.lastIndexOf("-");            
+            if(index != -1){
+                return rigName.substring(0,index);
+            }else{
+                return rigName;
+            }        
         }
 
         function getAnchorPointShort(response) {
