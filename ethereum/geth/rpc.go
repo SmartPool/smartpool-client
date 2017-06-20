@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
 	"math/big"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -110,7 +111,8 @@ func (g *GethRPC) GetWork() *ethereum.Work {
 		if err != nil {
 			smartpool.Output.Printf("getting pending block failed: %s. Retry in 1s...", err.Error())
 		}
-		time.Sleep(1000 * time.Millisecond)
+		waitTime := rand.Int()%2000 + 1000
+		time.Sleep(time.Duration(waitTime) * time.Millisecond)
 	}
 	return ethereum.NewWork(h, w[0], w[1], g.ShareDifficulty, g.MinerAddress)
 }
@@ -133,7 +135,7 @@ type filter struct {
 	Topics    []string `json:"topics,omitempty"`
 }
 
-type logs []struct {
+type elog struct {
 	LogIndex         string   `json:"logIndex,omitempty"`
 	BlockNumber      string   `json:"blockNumber,omitempty"`
 	BlockHash        string   `json:"blockHash,omitempty"`
@@ -144,7 +146,10 @@ type logs []struct {
 	Topics           []string `json:"topics,omitempty"`
 }
 
+type logs []elog
+
 func (g *GethRPC) GetLog(
+	txs []*types.Transaction,
 	from *big.Int, event *big.Int,
 	sender *big.Int) (*big.Int, *big.Int) {
 	param := filter{
@@ -156,10 +161,29 @@ func (g *GethRPC) GetLog(
 		},
 	}
 	result := logs{}
-	g.client.Call(&result, "eth_getLogs", param)
-	if len(result) != 1 {
+	for {
+		err := g.client.Call(&result, "eth_getLogs", param)
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Failed getting logs. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
+	}
+	var theLog elog
+Loop:
+	for _, l := range result {
+		for _, tx := range txs {
+			if common.HexToHash(l.TransactionHash).Big().Cmp(tx.Hash().Big()) == 0 {
+				theLog = l
+				break Loop
+			}
+		}
+	}
+	if theLog.BlockNumber == "" {
 		smartpool.Output.Printf(
-			"Got %d logs. Contract unexpectedly threw. Topic: %s, sender: %s, from: %s\n",
+			"Log not found. Contract unexpectedly threw. Topic: %s, sender: %s, from: %s\n",
 			len(result),
 			common.BigToHash(event).Hex(),
 			common.BigToHash(sender).Hex(),
@@ -167,7 +191,6 @@ func (g *GethRPC) GetLog(
 		)
 		return nil, nil
 	} else {
-		theLog := result[0]
 		dataInByte, err := hex.DecodeString(theLog.Data[2:])
 		if err != nil {
 			smartpool.Output.Printf(

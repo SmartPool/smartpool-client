@@ -6,8 +6,10 @@ import (
 	"github.com/SmartPool/smartpool-client/ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -79,7 +81,16 @@ func (cc *GethContractClient) CalculateSubmissionIndex(sender common.Address, se
 }
 
 func (cc *GethContractClient) NumOpenClaims(sender common.Address) (*big.Int, error) {
-	return cc.pool.DebugGetNumPendingSubmissions(nil, sender)
+	for {
+		data, err := cc.pool.DebugGetNumPendingSubmissions(nil, sender)
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Failed getting number of open claims in contract. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			return data, nil
+		}
+	}
 }
 
 func (cc *GethContractClient) ResetOpenClaims() error {
@@ -88,10 +99,16 @@ func (cc *GethContractClient) ResetOpenClaims() error {
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	tx, err := cc.pool.DebugResetSubmissions(cc.transactor)
-	if err != nil {
-		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
-		return err
+	var tx *types.Transaction
+	for {
+		tx, err = cc.pool.DebugResetSubmissions(cc.transactor)
+		if err != nil {
+			smartpool.Output.Printf("Resetting submissions failed. Error: %s\n", err)
+			waitTime := rand.Int()%10000 + 1000
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), ResetOpenClaimsEventTopic,
@@ -120,7 +137,8 @@ func (cc *GethContractClient) GetClaimSeed() *big.Int {
 				break
 			}
 		}
-		time.Sleep(time.Second)
+		waitTime := rand.Int()%10000 + 14000
+		time.Sleep(time.Duration(waitTime) * time.Millisecond)
 	}
 	return seed
 }
@@ -129,16 +147,31 @@ func (cc *GethContractClient) SubmitClaim(
 	numShares *big.Int, difficulty *big.Int,
 	min *big.Int, max *big.Int,
 	augMerkle *big.Int, lastClaim bool) error {
-	blockNo, err := cc.node.BlockNumber()
-	if err != nil {
-		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
-		return err
+	var (
+		tx      *types.Transaction
+		blockNo *big.Int
+		err     error
+	)
+	for {
+		blockNo, err = cc.node.BlockNumber()
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
-	tx, err := cc.pool.SubmitClaim(cc.transactor,
-		numShares, difficulty, min, max, augMerkle, lastClaim)
-	if err != nil {
-		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
-		return err
+	for {
+		tx, err = cc.pool.SubmitClaim(cc.transactor,
+			numShares, difficulty, min, max, augMerkle, lastClaim)
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), SubmitClaimEventTopic,
@@ -162,17 +195,32 @@ func (cc *GethContractClient) VerifyClaim(
 	witnessForLookup []*big.Int,
 	augCountersBranch []*big.Int,
 	augHashesBranch []*big.Int) error {
-	blockNo, err := cc.node.BlockNumber()
-	if err != nil {
-		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
-		return err
+	var (
+		blockNo *big.Int
+		err     error
+		tx      *types.Transaction
+	)
+	for {
+		blockNo, err = cc.node.BlockNumber()
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
-	tx, err := cc.pool.VerifyClaim(cc.transactor,
-		rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup,
-		witnessForLookup, augCountersBranch, augHashesBranch)
-	if err != nil {
-		smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
-		return err
+	for {
+		tx, err = cc.pool.VerifyClaim(cc.transactor,
+			rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup,
+			witnessForLookup, augCountersBranch, augHashesBranch)
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), VerifyClaimEventTopic,

@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
+	"math/rand"
 	"time"
 )
 
@@ -84,10 +85,19 @@ func (tw *TxWatcher) rebroadcast(oldTx, signedTx *types.Transaction) error {
 	if err := signedTx.EncodeRLP(buff); err != nil {
 		return err
 	}
-	hash, err := tw.node.Broadcast(buff.Bytes())
-	if err != nil {
-		smartpool.Output.Printf("Broadcast error: %s\n", err)
-		return err
+	var (
+		hash common.Hash
+		err  error
+	)
+	for {
+		hash, err = tw.node.Broadcast(buff.Bytes())
+		if err != nil {
+			waitTime := rand.Int()%10000 + 1000
+			smartpool.Output.Printf("Broadcast error: %s\n", err)
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		} else {
+			break
+		}
 	}
 	smartpool.Output.Printf(
 		"Rebroadcast tx: %s by tx: %s with gas price %d...\n",
@@ -145,7 +155,7 @@ func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
 	case <-timeout:
 		return nil, nil, errors.New("timeout error")
 	}
-	errCode, errInfo := tw.node.GetLog(tw.block, tw.event, tw.sender)
+	errCode, errInfo := tw.node.GetLog(tw.txs, tw.block, tw.event, tw.sender)
 	return errCode, errInfo, nil
 }
 

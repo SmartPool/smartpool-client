@@ -15,7 +15,7 @@ type RPCClient interface {
 	IsVerified(h common.Hash) bool
 	Syncing() bool
 	BlockNumber() (*big.Int, error)
-	GetLog(from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
+	GetLog(txs []*types.Transaction, from *big.Int, event *big.Int, sender *big.Int) (*big.Int, *big.Int)
 	SetEtherbase(etherbase common.Address) error
 	SetExtradata(extradata string) error
 	Broadcast(raw []byte) (common.Hash, error)
