@@ -13,8 +13,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/urfave/cli.v1"
+	"io/ioutil"
 	"math/big"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -121,19 +123,41 @@ func Run(c *cli.Context) error {
 	var gethContractClient *geth.GethContractClient
 	for {
 		if ok {
-			passphrase, _ := promptUserPassPhrase(
-				input.MinerAddress(),
-			)
-			gethContractClient, err = geth.NewGethContractClient(
-				common.HexToAddress(input.ContractAddress()), gethRPC,
-				common.HexToAddress(input.MinerAddress()),
-				input.RPCEndpoint(), input.KeystorePath(), passphrase,
-				uint64(gasprice),
-			)
-			if gethContractClient != nil {
-				break
+			if c.String("pass") != "" {
+				path := c.String("pass")
+				passbytes, err := ioutil.ReadFile(path)
+				if err != nil {
+					fmt.Printf("Couldn't read your passphrase file. Abort!\n")
+					return nil
+				}
+				passphrase := strings.TrimSpace(string(passbytes))
+				gethContractClient, err = geth.NewGethContractClient(
+					common.HexToAddress(input.ContractAddress()), gethRPC,
+					common.HexToAddress(input.MinerAddress()),
+					input.RPCEndpoint(), input.KeystorePath(), passphrase,
+					uint64(gasprice),
+				)
+				if gethContractClient != nil {
+					break
+				} else {
+					fmt.Printf("error: %s\n", err)
+					return nil
+				}
 			} else {
-				fmt.Printf("error: %s\n", err)
+				passphrase, _ := promptUserPassPhrase(
+					input.MinerAddress(),
+				)
+				gethContractClient, err = geth.NewGethContractClient(
+					common.HexToAddress(input.ContractAddress()), gethRPC,
+					common.HexToAddress(input.MinerAddress()),
+					input.RPCEndpoint(), input.KeystorePath(), passphrase,
+					uint64(gasprice),
+				)
+				if gethContractClient != nil {
+					break
+				} else {
+					fmt.Printf("error: %s\n", err)
+				}
 			}
 		} else {
 			if input.KeystorePath() == "" {
@@ -230,6 +254,11 @@ func BuildAppCommandLine() *cli.App {
 		cli.StringFlag{
 			Name:  "miner",
 			Usage: "The address that would be paid by SmartPool. This is often your address. (Default: First account in your keystore.)",
+		},
+		cli.StringFlag{
+			Name:  "pass",
+			Value: "",
+			Usage: "Path to passphrase file.",
 		},
 		cli.BoolFlag{
 			Name:  "no-hot-stop",

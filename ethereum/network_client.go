@@ -6,18 +6,50 @@ import (
 	"github.com/SmartPool/smartpool-client"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"math/rand"
 	"strings"
+	"sync"
+	"time"
 )
 
 type NetworkClient struct {
-	rpc      RPCClient
-	workpool *WorkPool
+	rpc        RPCClient
+	workpool   *WorkPool
+	cachedWork *Work
+	mu         sync.RWMutex
+	ticker     <-chan time.Time
+}
+
+func (nc *NetworkClient) fetchNewWork() {
+	nc.mu.Lock()
+	defer nc.mu.Unlock()
+	work := nc.rpc.GetWork()
+	nc.cachedWork = work
+	nc.workpool.AddWork(work)
+}
+
+func (nc *NetworkClient) fetchOnTick() {
+	for _ = range nc.ticker {
+		nc.fetchNewWork()
+	}
+}
+
+func (nc *NetworkClient) fetchFromCache() smartpool.Work {
+	nc.mu.RLock()
+	defer nc.mu.RUnlock()
+	return nc.cachedWork
 }
 
 func (nc *NetworkClient) GetWork() smartpool.Work {
-	work := nc.rpc.GetWork()
-	nc.workpool.AddWork(work)
-	return work
+	for {
+		work := nc.fetchFromCache()
+		if work != nil {
+			return work
+		} else {
+			waitTime := rand.Int()%100 + 100
+			time.Sleep(time.Duration(waitTime) * time.Millisecond)
+		}
+	}
 }
 
 func (nc *NetworkClient) SubmitHashrate(hashrate hexutil.Uint64, id common.Hash) bool {
@@ -80,7 +112,9 @@ func (nc *NetworkClient) Configure(etherbase common.Address, extradata string) e
 }
 
 func NewNetworkClient(rpc RPCClient, workpool *WorkPool) *NetworkClient {
-	return &NetworkClient{
-		rpc, workpool,
+	networkClient := &NetworkClient{
+		rpc, workpool, nil, sync.RWMutex{}, time.Tick(50 * time.Millisecond),
 	}
+	go networkClient.fetchOnTick()
+	return networkClient
 }
