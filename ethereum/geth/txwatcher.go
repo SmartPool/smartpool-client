@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+var (
+	GAS_INCREMENT       = 110
+	GAS_PRICE_LIMIT     = big.NewInt(60000000000)
+	WAIT_IN_MILLISECOND = 600000
+)
+
 // TxWatcher keeps track of pending transactions
 // and acknowledge corresponding channel when a transaction is
 // confirmed.
@@ -64,7 +70,7 @@ func (tw *TxWatcher) lastTx() *types.Transaction {
 func (tw *TxWatcher) newTx(oldTx *types.Transaction) (*types.Transaction, error) {
 	newGasPrice := new(big.Int).Set(oldTx.GasPrice())
 	// setting new gas price as 25% higher than old gas price
-	newGasPrice.Mul(newGasPrice, big.NewInt(125))
+	newGasPrice.Mul(newGasPrice, big.NewInt(int64(GAS_INCREMENT)))
 	newGasPrice.Div(newGasPrice, big.NewInt(100))
 	newTx := types.NewTransaction(
 		oldTx.Nonce(), *oldTx.To(), oldTx.Value(),
@@ -111,28 +117,48 @@ func (tw *TxWatcher) rebroadcast(oldTx, signedTx *types.Transaction) error {
 }
 
 func (tw *TxWatcher) WaitAndRetry() (*big.Int, *big.Int, error) {
-	errCode, errInfo, err := tw.Wait()
-	if err != nil {
-		oldTx := tw.lastTx()
-		signedTx, err := tw.newTx(oldTx)
+	var oldTx *types.Transaction
+	for {
+		oldTx = tw.lastTx()
+		errCode, errInfo, err := tw.Wait()
 		if err != nil {
-			return nil, nil, err
-		}
-		tw.txs = append(tw.txs, signedTx)
-		err = tw.rebroadcast(oldTx, signedTx)
-		if err != nil {
-			return nil, nil, err
-		}
-		errCode, errInfo, err = tw.Wait()
-		if err != nil {
-			err = tw.rebroadcastByPublicNode(signedTx)
-			if err != nil {
-				smartpool.Output.Printf("Rebroadcast by public node of tx: %s failed. Error: %s\n", signedTx.Hash().Hex(), err)
+			if oldTx.GasPrice().Cmp(GAS_PRICE_LIMIT) >= 0 {
+				break
 			}
+			signedTx, err := tw.newTx(oldTx)
+			if err == nil {
+				err = tw.rebroadcast(oldTx, signedTx)
+				if err == nil {
+					tw.txs = append(tw.txs, signedTx)
+				}
+			}
+		} else {
+			return errCode, errInfo, err
 		}
-		errCode, errInfo, err = tw.Wait()
 	}
-	return errCode, errInfo, err
+	return nil, nil, errors.New("Gave up on current pending txs")
+	// errCode, errInfo, err := tw.Wait()
+	// if err != nil {
+	// 	oldTx := tw.lastTx()
+	// 	signedTx, err := tw.newTx(oldTx)
+	// 	if err != nil {
+	// 		return nil, nil, err
+	// 	}
+	// 	tw.txs = append(tw.txs, signedTx)
+	// 	err = tw.rebroadcast(oldTx, signedTx)
+	// 	if err != nil {
+	// 		return nil, nil, err
+	// 	}
+	// 	errCode, errInfo, err = tw.Wait()
+	// 	// if err != nil {
+	// 	// 	err = tw.rebroadcastByPublicNode(signedTx)
+	// 	// 	if err != nil {
+	// 	// 		smartpool.Output.Printf("Rebroadcast by public node of tx: %s failed. Error: %s\n", signedTx.Hash().Hex(), err)
+	// 	// 	}
+	// 	// }
+	// 	// errCode, errInfo, err = tw.Wait()
+	// }
+	// return errCode, errInfo, err
 }
 
 func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
@@ -144,7 +170,7 @@ func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
 	timeout := make(chan bool, 1)
 	go tw.loop(timeout)
 	go func() {
-		time.Sleep(10 * time.Minute)
+		time.Sleep(time.Duration(WAIT_IN_MILLISECOND) * time.Millisecond)
 		// push 2 timeouts for the above loop and below select
 		timeout <- true
 		timeout <- true

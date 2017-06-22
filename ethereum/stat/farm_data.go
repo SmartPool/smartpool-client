@@ -221,6 +221,7 @@ func (fd *FarmData) AddClaim(status string, claim smartpool.Claim, t time.Time) 
 		fd.BeingValidatedShare -= claim.NumShares().Uint64()
 		fd.BadShare += claim.NumShares().Uint64()
 		curPeriodData.RejectedClaim++
+	} else if status == "error" {
 	}
 }
 

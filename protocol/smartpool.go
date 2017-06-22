@@ -240,6 +240,7 @@ func (sp *SmartPool) Submit() (bool, error) {
 	if subErr != nil {
 		smartpool.Output.Printf("Got error submitting claim to contract: %s\n", subErr)
 		sp.ClaimRepo.RemoveOpenClaim(claim)
+		sp.StatRecorder.RecordClaim("error", claim)
 		return false, subErr
 	}
 	sp.StatRecorder.RecordClaim("submitted", claim)

@@ -55,12 +55,14 @@ func (cc *GethContractClient) Register(paymentAddress common.Address) error {
 	if err != nil {
 		return err
 	}
-	tx, err := cc.pool.Register(cc.transactor, paymentAddress)
-	if err != nil {
-		return err
-	}
-	smartpool.Output.Printf("Registering address %s to SmartPool contract by tx: %s\n", paymentAddress.Hex(), tx.Hash().Hex())
-
+	tx := EnsureTx(
+		func() (*types.Transaction, error) {
+			return cc.pool.Register(cc.transactor, paymentAddress)
+		},
+		1000,
+		10000,
+		"Registering miner address to SmartPool contract",
+	)
 	errCode, errInfo, err := GetTxResult(tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), RegisterEventTopic,
 		cc.sender.Big())
 
@@ -99,17 +101,14 @@ func (cc *GethContractClient) ResetOpenClaims() error {
 		smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
 		return err
 	}
-	var tx *types.Transaction
-	for {
-		tx, err = cc.pool.DebugResetSubmissions(cc.transactor)
-		if err != nil {
-			smartpool.Output.Printf("Resetting submissions failed. Error: %s\n", err)
-			waitTime := rand.Int()%10000 + 1000
-			time.Sleep(time.Duration(waitTime) * time.Millisecond)
-		} else {
-			break
-		}
-	}
+	tx := EnsureTx(
+		func() (*types.Transaction, error) {
+			return cc.pool.DebugResetSubmissions(cc.transactor)
+		},
+		1000,
+		10000,
+		"Resetting submissions",
+	)
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), ResetOpenClaimsEventTopic,
 		cc.sender.Big())
@@ -123,6 +122,26 @@ func (cc *GethContractClient) ResetOpenClaims() error {
 	return nil
 }
 
+func (cc *GethContractClient) StoreClaimSeed() error {
+	blockNo, err := cc.node.BlockNumber()
+	if err != nil {
+		smartpool.Output.Printf("Storing claim failed. Error: %s\n", err)
+		return err
+	}
+	tx := EnsureTx(
+		func() (*types.Transaction, error) {
+			return cc.pool.StoreClaimSeed(cc.transactor, cc.sender)
+		},
+		1000,
+		10000,
+		"Storing claim seed",
+	)
+	_, _, err = GetTxResult(
+		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), ResetOpenClaimsEventTopic,
+		cc.sender.Big())
+	return err
+}
+
 func (cc *GethContractClient) GetClaimSeed() *big.Int {
 	var seed *big.Int
 	var err error
@@ -134,6 +153,7 @@ func (cc *GethContractClient) GetClaimSeed() *big.Int {
 			smartpool.Output.Printf("Getting claim seed failed. Error: %s\n", err)
 		} else {
 			if seed.Cmp(common.Big0) != 0 {
+				cc.StoreClaimSeed()
 				break
 			}
 		}
@@ -162,17 +182,15 @@ func (cc *GethContractClient) SubmitClaim(
 			break
 		}
 	}
-	for {
-		tx, err = cc.pool.SubmitClaim(cc.transactor,
-			numShares, difficulty, min, max, augMerkle, lastClaim)
-		if err != nil {
-			waitTime := rand.Int()%10000 + 1000
-			smartpool.Output.Printf("Submitting claim failed. Error: %s\n", err)
-			time.Sleep(time.Duration(waitTime) * time.Millisecond)
-		} else {
-			break
-		}
-	}
+	tx = EnsureTx(
+		func() (*types.Transaction, error) {
+			return cc.pool.SubmitClaim(cc.transactor,
+				numShares, difficulty, min, max, augMerkle, lastClaim)
+		},
+		1000,
+		10000,
+		"Submitting claim",
+	)
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), SubmitClaimEventTopic,
 		cc.sender.Big())
@@ -210,18 +228,16 @@ func (cc *GethContractClient) VerifyClaim(
 			break
 		}
 	}
-	for {
-		tx, err = cc.pool.VerifyClaim(cc.transactor,
-			rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup,
-			witnessForLookup, augCountersBranch, augHashesBranch)
-		if err != nil {
-			waitTime := rand.Int()%10000 + 1000
-			smartpool.Output.Printf("Verifying claim failed. Error: %s\n", err)
-			time.Sleep(time.Duration(waitTime) * time.Millisecond)
-		} else {
-			break
-		}
-	}
+	tx = EnsureTx(
+		func() (*types.Transaction, error) {
+			return cc.pool.VerifyClaim(cc.transactor,
+				rlpHeader, nonce, submissionIndex, shareIndex, dataSetLookup,
+				witnessForLookup, augCountersBranch, augHashesBranch)
+		},
+		1000,
+		10000,
+		"Verifying claim",
+	)
 	errCode, errInfo, err := GetTxResult(
 		tx, cc.transactor, cc.node, blockNo.Add(blockNo, common.Big1), VerifyClaimEventTopic,
 		cc.sender.Big())
