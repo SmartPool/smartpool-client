@@ -322,7 +322,7 @@
                         closetFlag = true;
                     }
                     $.each(val.rigs, function(rigName, rigVal) {
-                        var rigName = getRigName(rigName);
+                      //  var rigName = getRigName(rigName);
                         var check = false;
                         for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
                             if (rigName === vm.farm.worker.worker_list[i][0]) {
@@ -432,7 +432,7 @@
                     activeWorker = 0;
                     //calculate hashrate
                     $.each(val.rigs, function(rigName, rigVal) {
-                        var rigName = getRigName(rigName);
+                        //var rigName = getRigName(rigName);
                         var check = false;
                         for (var i = 0; i < vm.farm.worker.worker_list.length; i++) {
                             if (rigName === vm.farm.worker.worker_list[i][0]) {
@@ -556,6 +556,7 @@
                 ],
                 columnDefs: [{
                     "render": function(data, type, row) {
+                        var data = vm.getRigName(data);
                         if (row[6] === 'a') {
                             return '<a title="active worker" href="/stats/#!/rig/' + data + "/" + row[5] + '" rel="workerChart" class="btn btn-success btn-xs">' + data + '</a>';
                         } else {
