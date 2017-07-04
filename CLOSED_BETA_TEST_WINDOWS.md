@@ -46,7 +46,8 @@ At your smartpool-client folder, run
 smartpool.exe --keystore <keystore_dir> --gateway 0x09077D92F7a71Ae3C4EAc8dC9f35cE9aa5A06F7B --share-threshold 36000 --claim-threshold 2 --spcontract 0xfc668AE14b0F7702c04b105448fE733D96C558DF --gasprice 4
 ```
 
-You can figure out the meaning of these parameters in our client by running `./smartpool --help`. Two important parameters are `share-threshold` and `claim-threshold`. You can reduce these parameters to get your payment faster, but the average costs for transaction fees will be higer. SmartPool client binds its rpc server address at 0.0.0.0:1633 for the mining rigs to submit shares. Now you can just let the SmartPool client runs, do not close it.
+You can figure out the meaning of these parameters in our client by running `./smartpool --help`. Two important parameters are `share-threshold` and `claim-threshold`. You can reduce these parameters to get your payment faster, but the average costs for transaction fees will be higher. You can reduce these parameters to get your payment faster, but the average costs for transaction fees will be higher. The above setup `-share-threshold 36000 --claim-threshold 2` is for a miner of 20 GH/s to get paid every 4 hours (the average fees is ~0.6-1%). You can reduce either of the parameters to get paid faster (linearly) according to your hashrate.
+SmartPool client binds its rpc server address at 0.0.0.0:1633 for the mining rigs to submit shares. Now you can just let the SmartPool client runs, do not close it.
 
 ### Connect your rigs to SmartPool-client
 SmartPool-cient will serve work and accept shares at `0.0.0.0:1633/<rig_or_worker_name>/`. **The trailing `/` is a required**. `rig_or_worker_name` must be different to `farm`, `rig` and `status`. They are reserved for collecting and showing statistics of the farm and the rigs.
