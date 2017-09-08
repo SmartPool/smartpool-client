@@ -11,6 +11,7 @@ mustrun build/env.sh go get -v golang.org/x/crypto/ssh/terminal
 mustrun build/env.sh go get -v gopkg.in/urfave/cli.v1
 mustrun build/env.sh go get -v github.com/mitchellh/go-homedir
 mustrun build/env.sh go get -v golang.org/x/net/context
+mustrun build/env.sh go get -v github.com/bmizerany/pat
 echo "Compiling SmartPool client..."
 mustrun build/env.sh go build -ldflags -s -o kovan cmd/kovan/main.go
 echo "Done. You can run SmartPool by ./kovan --help"
