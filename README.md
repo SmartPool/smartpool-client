@@ -46,27 +46,7 @@ Where
 
 ## Kovan testnet
 
-[Smartpool](http://smartpool.io) is also [live on Kovan testnet](https://kovan.etherscan.io/address/0x0398ae5a974fe8179b6b0ab9baf4d5f366e932bf).
-
-### Parity client
-[Ethereum Parity client](https://github.com/paritytech/parity/releases) version 1.5.9 or higher.
-
-### ETH balance
-To run smartpool you must have a testnet Kovan account with least 0.5 Ether. You can get testnet Ethers from [faucets](https://github.com/kovan-testnet/faucet).
-
-### Installation
-1. `git clone https://github.com/SmartPool/smartpool-client.git`
-2. `cd smartpool-client`
-3. `./kovan_compile.sh`
-
-### Running
-1. Run Parity on Kovan testnet. `parity --chain kovan --jsonrpc-apis "web3,eth,net,parity,traces,rpc,parity_set"`
-2. Run smartpool client `./kovan --keystore keystore_path --miner account --spcontract 0x0398ae5a974FE8179B6B0ab9baF4d5f366E932Bf`.
-Where
-- `keystore_path` is a path to a directory that contains your account key. E.g., `$HOME/.local/share/io.parity.ethereum/keys/kovan/`.
-- `account` is the address of your account. E.g., `0x2ba80fe2811f8e0ea5eabf8e07697f7e9f5ae56c`
-3. Enter your key passphrase.
-4. Run `ethminer -F localhost:1633` or `ethminer -G -F localhost:1633` if you mine with your GPU.
+[Smartpool](http://smartpool.io) was [live on Kovan testnet](https://kovan.etherscan.io/address/0x0398ae5a974fe8179b6b0ab9baf4d5f366e932bf) altough since Kovan is PoA rather than PoW mining had to be faked.  Smartpool no longer runs on Kovan, Ropsten must be used instead.
 
 ## Support
 Contact us at [gitter](https://gitter.im/SmartPool/Lobby) for support.
