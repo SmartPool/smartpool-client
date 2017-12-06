@@ -20,7 +20,7 @@ The client is currently tested only on Mac OS and Ubuntu.
 [Ethereum Geth client](https://github.com/ethereum/go-ethereum) needs to be compiled from source.
 
 #### Ethminer
-We support CPU and GPU mining with [ethminer](https://github.com/ethereum/cpp-ethereum) version 1.2.9 or higher.
+We support CPU and GPU mining with [ethminer](https://github.com/ethereum-mining/ethminer) version 1.2.9 or higher.  Current versions do not do CPU mining so an older version is necessary to CPU mine on testnet.
 
 #### ETH balance
 To run smartpool you must have a Ropsten testnet account with least 0.5 Ether. You can get testnet Ethers from [metamask faucets](https://faucet.metamask.io/) or ping us on our [gitter channel](https://gitter.im/SmartPool/Lobby).
