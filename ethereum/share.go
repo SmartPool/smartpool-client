@@ -141,7 +141,7 @@ func (s *Share) buildDagTree() {
 		s.BlockHeader().HashNoNonce(),
 		s.Nonce(),
 	)
-	fmt.Print("indices: %v\n", indices)
+	fmt.Printf("indices: %v\n", indices)
 	s.dt = mtree.NewDagTree()
 	s.dt.RegisterIndex(indices...)
 	ethash.MakeDAG(s.NumberU64(), ethash.DefaultDir)
