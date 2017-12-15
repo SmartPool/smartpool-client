@@ -95,7 +95,7 @@ func NewEthashContractClient(
 		smartpool.Output.Printf("Failed to open key file: %s\n", err)
 		return nil, err
 	}
-	smartpool.Output.Printf("Unlocking account...")
+	smartpool.Output.Printf("Unlocking account...\n")
 	auth, err := bind.NewTransactor(keyio, account.PassPhrase())
 	if err != nil {
 		smartpool.Output.Printf("Failed to create authorized transactor: %s\n", err)

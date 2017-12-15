@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 type Log struct {
@@ -25,5 +26,8 @@ func (l *Log) Close() {
 
 func (l *Log) Printf(format string, a ...interface{}) (n int, err error) {
 	l.Logger.Printf(format, a...)
+	t := time.Now()
+	ts := t.Format(time.RFC3339)
+	fmt.Printf("%v ", ts)
 	return fmt.Printf(format, a...)
 }

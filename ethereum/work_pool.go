@@ -91,7 +91,7 @@ func (wp *WorkPool) RunCleaner() {
 func (wp *WorkPool) Persist(storage smartpool.PersistentStorage) error {
 	wp.mu.RLock()
 	defer wp.mu.RUnlock()
-	smartpool.Output.Printf("Saving workpool to disk...")
+	smartpool.Output.Printf("Saving workpool to disk...\n")
 	err := storage.Persist(&wp.works, WORKPOOL_FILE)
 	if err == nil {
 		smartpool.Output.Printf("Done.\n")

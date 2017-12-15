@@ -71,7 +71,7 @@ func (nc *NetworkClient) Configure(etherbase common.Address, extradata string) e
 		return err
 	}
 	if strings.HasPrefix(client, "Geth") {
-		smartpool.Output.Printf("Trying to set etherbase to SmartPool contract address: %s...", etherbase.Hex())
+		smartpool.Output.Printf("Trying to set etherbase to SmartPool contract address: %s...\n", etherbase.Hex())
 		err = nc.rpc.SetEtherbase(etherbase)
 		if err != nil {
 			smartpool.Output.Printf("Trying to set etherbase to SmartPool contract address failed: %s\n", err)
@@ -79,7 +79,7 @@ func (nc *NetworkClient) Configure(etherbase common.Address, extradata string) e
 			return err
 		}
 		smartpool.Output.Printf("Done.\n")
-		smartpool.Output.Printf("Trying to set extradata to SmartPool extradata convention: %s...", extradata)
+		smartpool.Output.Printf("Trying to set extradata to SmartPool extradata convention: %s...\n", extradata)
 		err = nc.rpc.SetExtradata(extradata)
 		if err != nil {
 			smartpool.Output.Printf("Trying to set extra data to SmartPool extradata convention failed: %s\n", err)
@@ -88,7 +88,7 @@ func (nc *NetworkClient) Configure(etherbase common.Address, extradata string) e
 		}
 		smartpool.Output.Printf("Done.\n")
 	} else if strings.HasPrefix(client, "Parity") {
-		smartpool.Output.Printf("Trying to set etherbase to SmartPool contract address: %s...", etherbase.Hex())
+		smartpool.Output.Printf("Trying to set etherbase to SmartPool contract address: %s...\n", etherbase.Hex())
 		err = nc.rpc.SetEtherbase(etherbase)
 		if err != nil {
 			smartpool.Output.Printf("Trying to set author to SmartPool contract address failed: %s\n", err)
@@ -96,7 +96,7 @@ func (nc *NetworkClient) Configure(etherbase common.Address, extradata string) e
 			return err
 		}
 		smartpool.Output.Printf("Done.\n")
-		smartpool.Output.Printf("Trying to set extradata to SmartPool extradata convention: %s...", extradata)
+		smartpool.Output.Printf("Trying to set extradata to SmartPool extradata convention: %s...\n", extradata)
 		err = nc.rpc.SetExtradata(extradata)
 		if err != nil {
 			smartpool.Output.Printf("Trying to set extra data to SmartPool extradata convention failed: %s\n", err)
