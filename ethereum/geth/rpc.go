@@ -183,7 +183,7 @@ Loop:
 	}
 	if theLog.BlockNumber == "" {
 		smartpool.Output.Printf(
-			"Log not found. Contract unexpectedly threw. Topic: %s, sender: %s, from: %s\n",
+			"Log not found. Contract unexpectedly threw. Topic: %v, sender: %s, from: %s\n",
 			len(result),
 			common.BigToHash(event).Hex(),
 			common.BigToHash(sender).Hex(),

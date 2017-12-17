@@ -53,7 +53,7 @@ func NewStatRecorder(storage smartpool.PersistentStorage) *StatRecorder {
 func (sr *StatRecorder) Persist(storage smartpool.PersistentStorage) error {
 	sr.mu.RLock()
 	defer sr.mu.RUnlock()
-	smartpool.Output.Printf("Saving stats to disk...")
+	smartpool.Output.Printf("Saving stats to disk...\n")
 	err := storage.Persist(sr, STATRECORDER_FILE)
 	if err == nil {
 		smartpool.Output.Printf("Done.\n")

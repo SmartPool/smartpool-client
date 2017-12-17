@@ -239,7 +239,7 @@ func (cr *TimestampClaimRepo) NoActiveShares() uint64 {
 }
 
 func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error {
-	smartpool.Output.Printf("Saving active shares to disk...")
+	smartpool.Output.Printf("Saving active shares to disk...\n")
 	cr.mu.RLock()
 	defer cr.mu.RUnlock()
 	gobShares := map[string]gobShare{}
@@ -268,14 +268,14 @@ func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error
 	}
 	cr.claimMu.RLock()
 	defer cr.claimMu.RUnlock()
-	smartpool.Output.Printf("Saving active claims to disk...")
+	smartpool.Output.Printf("Saving active claims to disk...\n")
 	if err := cr.persistActiveClaims(storage); err != nil {
 		smartpool.Output.Printf("Failed. (%s)\n", err.Error())
 		return err
 	} else {
 		smartpool.Output.Printf("Done.\n")
 	}
-	smartpool.Output.Printf("Saving open claims to disk...")
+	smartpool.Output.Printf("Saving open claims to disk...\n")
 	if err := cr.persistOpenClaims(storage); err != nil {
 		smartpool.Output.Printf("Failed. (%s)\n", err.Error())
 		return err

@@ -166,7 +166,7 @@ func (tw *TxWatcher) Wait() (*big.Int, *big.Int, error) {
 	for _, tx := range tw.txs {
 		smartpool.Output.Printf("%s, ", tx.Hash().Hex())
 	}
-	smartpool.Output.Printf("] to be mined...")
+	smartpool.Output.Printf("] to be mined...\n")
 	timeout := make(chan bool, 1)
 	go tw.loop(timeout)
 	go func() {
