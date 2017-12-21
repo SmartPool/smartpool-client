@@ -246,7 +246,7 @@ func (cr *TimestampClaimRepo) Persist(storage smartpool.PersistentStorage) error
 	var shareID string
 	for _, s := range cr.activeShares {
 		shareID = fmt.Sprintf(
-			"%s-%s",
+			"%s-%v",
 			s.BlockHeader().Hash().Hex(),
 			s.Nonce())
 		gobShares[shareID] = gobShare{
@@ -322,7 +322,7 @@ func (cr *TimestampClaimRepo) AddShare(s smartpool.Share) error {
 	defer cr.mu.Unlock()
 	share := s.(*Share)
 	shareID := fmt.Sprintf(
-		"%s-%s",
+		"%s-%v",
 		share.BlockHeader().Hash().Hex(),
 		share.Nonce())
 	if share.BlockHeader().Coinbase.Hex() != cr.coinbase {
@@ -370,7 +370,7 @@ func (cr *TimestampClaimRepo) getCurrentClaim(threshold int) smartpool.Claim {
 			c.AddShare(s)
 		} else {
 			shareID := fmt.Sprintf(
-				"%s-%s",
+				"%s-%v",
 				s.BlockHeader().Hash().Hex(),
 				s.Nonce())
 			newActiveShares[shareID] = s

@@ -88,7 +88,7 @@ func (g *GethRPC) GetBlockHeader(number int) *types.Header {
 	header := types.Header{}
 	err := g.client.Call(&header, "eth_getBlockByNumber", number, false)
 	if err != nil {
-		smartpool.Output.Printf("Couldn't get latest block:", err)
+		smartpool.Output.Printf("Couldn't get latest block: %v", err)
 		return nil
 	}
 	return &header
@@ -183,7 +183,7 @@ Loop:
 	}
 	if theLog.BlockNumber == "" {
 		smartpool.Output.Printf(
-			"Log not found. Contract unexpectedly threw. Topic: %v, sender: %s, from: %s\n",
+			"Log not found. Contract unexpectedly threw. Topic: %v, sender: %s, from: %s %v\n",
 			len(result),
 			common.BigToHash(event).Hex(),
 			common.BigToHash(sender).Hex(),
@@ -220,7 +220,7 @@ func (g *GethRPC) Syncing() bool {
 	result := ""
 	g.client.Call(&result, "net_peerCount")
 	peerCount := common.HexToHash(result).Big().Uint64()
-	fmt.Printf("peerCount: %d\n", peerCount)
+	smartpool.Output.Printf("peerCount: %d\n", peerCount)
 	return peerCount == uint64(0)
 }
 
